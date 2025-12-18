@@ -31,7 +31,7 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
+        <Router basename="/petmatch">
           <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Layout>
               <Routes>
