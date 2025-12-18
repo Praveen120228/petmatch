@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getLikes, toggleLike, createChat, getAllPets, getMatches, toggleMatch, getCollections, createCollection, addToCollection, removeFromCollection, deleteCollection } from '../utils/storage';
+import { getLikes, toggleLike, getMatches, toggleMatch, getCollections, createCollection, addToCollection, removeFromCollection, deleteCollection } from '../utils/storage';
+import { chatService } from '../lib/chatService';
+import { petService } from '../lib/petService';
+import { supabase } from '../lib/supabase';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash } from '@phosphor-icons/react';
@@ -12,16 +15,44 @@ const PetProfile = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { showToast } = useToast();
-    const pet = getAllPets().find(p => p.id === Number(id));
 
-    // UI State
-    const [_, setTick] = useState(0);
+    const [pet, setPet] = useState<any | null>(null);
+    const [loading, setLoading] = useState(true);
+    // const [tick, setTick] = useState(0);
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
+
+    useEffect(() => {
+        const loadPet = async () => {
+            setLoading(true);
+            const p = await petService.getPet(Number(id));
+            setPet(p);
+            setLoading(false);
+        };
+        loadPet();
+
+        // Subscribe to updates for this pet
+        const channel = supabase
+            .channel(`pet_${id}`)
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'pets', filter: `id=eq.${id}` },
+                (payload) => {
+                    setPet((current: any) => ({ ...current, ...payload.new }));
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [id]);
 
     const isLiked = user ? getLikes(user.id).includes(Number(id)) : false;
     const isMatched = user ? getMatches(user.id).includes(Number(id)) : false;
     const collections = user ? getCollections(user.id) : [];
+
+    if (loading) return <div style={{ padding: '4rem', textAlign: 'center' }}>Loading...</div>;
 
     if (!pet) {
         return (
@@ -40,7 +71,7 @@ const PetProfile = () => {
             return;
         }
         toggleLike(user.id, pet.id);
-        setTick(t => t + 1);
+        // setTick(t => t + 1);
     };
 
     const handleShare = () => {
@@ -56,16 +87,31 @@ const PetProfile = () => {
         toggleMatch(user.id, pet.id);
         const isNowMatched = !isMatched; // toggleMatch returns 'is now un-matched' boolean? No, it returns !isMatched.
         if (isNowMatched) showToast("It's a Match!", 'success');
-        setTick(t => t + 1);
+        // setTick(t => t + 1);
     };
 
-    const handleMessage = () => {
+    const handleMessage = async () => {
         if (!user) {
             showToast("Please login", "error");
             return;
         }
-        const chatId = createChat(user.id, pet.owner, pet.name, pet.image);
-        navigate(`/messages/${chatId}`);
+        try {
+            // Need data: pet owner ID.
+            // Currently pet.owner is a Name string in mock data.
+            // We need `pet.ownerId`.
+            if (!pet.ownerId && !pet.owner_id) {
+                showToast("Cannot message this pet owner (missing ID)", "error");
+                return;
+            }
+            // Mapped or raw supabase pet?
+            const ownerId = pet.ownerId || pet.owner_id;
+
+            const chatId = await chatService.createConversation(user.id, ownerId, pet.id);
+            navigate(`/messages/${chatId}`);
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to start chat", "error");
+        }
     };
 
     const handleToggleCollection = (collectionId: string, isAlreadyIn: boolean) => {
@@ -77,7 +123,7 @@ const PetProfile = () => {
             addToCollection(user.id, collectionId, pet.id);
             showToast(`Added ${pet.name} to collection!`, 'success');
         }
-        setTick(t => t + 1); // Force re-render to update UI
+        // setTick(t => t + 1); // Force re-render to update UI
     };
 
     const handleCreateCollection = () => {
@@ -87,7 +133,7 @@ const PetProfile = () => {
         showToast(`Created "${newCollectionName}" and added ${pet.name}!`, 'success');
         setShowCollectionModal(false);
         setNewCollectionName('');
-        setTick(t => t + 1);
+        // setTick(t => t + 1);
     };
 
     return (
@@ -364,7 +410,7 @@ const PetProfile = () => {
                                                     e.stopPropagation();
                                                     if (user && confirm(`Are you sure you want to delete collection "${col.name}"?`)) {
                                                         deleteCollection(user.id, col.id);
-                                                        setTick(t => t + 1);
+                                                        // setTick(t => t + 1);
                                                     }
                                                 }}
                                                 style={{

@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getChats, createChat, getAllPets } from '../utils/storage';
+import { chatService } from '../lib/chatService';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { CalendarBlank, MagnifyingGlass, Plus, ChatCircleDots } from '@phosphor-icons/react';
 import Card from '../components/Card';
@@ -8,39 +9,85 @@ import Card from '../components/Card';
 const Messages = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const chats = user ? getChats(user.id) : [];
+    const [chats, setChats] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user) return;
+        const loadChats = async () => {
+            setLoading(true);
+            try {
+                const data = await chatService.getConversations(user.id);
+                setChats(data || []);
+            } catch (err) {
+                console.error("Failed to load chats", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadChats();
+
+        // Subscribe to conversation updates
+        const channel = supabase
+            .channel(`conversations_${user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'conversations',
+                    filter: `participant_a=eq.${user.id}`
+                },
+                () => loadChats()
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'conversations',
+                    filter: `participant_b=eq.${user.id}`
+                },
+                () => loadChats()
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user]);
 
     // --- Search Logic ---
     // 1. Existing Chats matching search
     const filteredChats = useMemo(() => {
+        if (!chats) return [];
         if (!searchQuery) return chats;
-        return chats.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }, [chats, searchQuery]);
+
+        // Need to filter by the OTHER user's name.
+        // The chat object has joined profile data.
+        return chats.filter(c => {
+            const isA = c.participant_a === user?.id;
+            const otherUser = isA ? c.participant_b_profile : c.participant_a_profile;
+            const name = otherUser?.name || 'Unknown';
+            return name.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+    }, [chats, searchQuery, user]);
 
     // 2. Discover New Users matching search
-    const discoveredUsers = useMemo(() => {
-        if (!searchQuery) return [];
-        const existingChatNames = new Set(chats.map(c => c.name));
-        const allPets = getAllPets();
-        const matches = allPets.filter(pet =>
-            pet.owner.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !existingChatNames.has(pet.owner) &&
-            pet.owner !== user?.name // Don't show self
-        );
-        const uniqueOwners = new Map();
-        matches.forEach(pet => {
-            if (!uniqueOwners.has(pet.owner)) {
-                uniqueOwners.set(pet.owner, pet);
-            }
-        });
-        return Array.from(uniqueOwners.values());
-    }, [searchQuery, chats, user]);
+    // TODO: Migrate to Supabase search
+    const discoveredUsers: any[] = [];
 
-    const handleStartChat = (pet: any) => {
+    const handleStartChat = async () => {
         if (!user) return;
-        const chatId = createChat(user.id, pet.owner, pet.name, pet.image);
-        navigate(`/messages/${chatId}`);
+        try {
+            // Need owner ID. Local mock pets stores 'owner' name. 
+            // We need real IDs.
+            // For now, disabling mock discovery.
+            console.warn("Starting chat from mock discovery not supported yet via Supabase");
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (
@@ -95,7 +142,7 @@ const Messages = () => {
             <div style={{ paddingBottom: '4rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
                 {/* Case 0: Empty State */}
-                {!searchQuery && chats.length === 0 && (
+                {!loading && filteredChats.length === 0 && (
                     <Card style={{ padding: '4rem 2rem', textAlign: 'center', background: 'white', border: '1px dashed var(--gray-300)' }}>
                         <div style={{ width: '80px', height: '80px', background: 'var(--gray-50)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
                             <CalendarBlank size={40} weight="duotone" color="var(--gray-400)" />
@@ -115,7 +162,7 @@ const Messages = () => {
                                     key={pet.owner}
                                     interactive
                                     padding="md"
-                                    onClick={() => handleStartChat(pet)}
+                                    onClick={() => handleStartChat()}
                                     style={{ display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--gray-100)' }}
                                 >
                                     <div style={{ position: 'relative' }}>

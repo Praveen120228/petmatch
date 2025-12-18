@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CaretLeft, PaperPlaneRight, DotsThreeVertical } from '@phosphor-icons/react';
-import { getChats, getMessages, addMessage, type Message, type Chat } from '../utils/storage';
+import { chatService } from '../lib/chatService';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 
@@ -12,16 +13,53 @@ const ChatRoom = () => {
     const chatId = Number(id);
     const bottomRef = useRef<HTMLDivElement>(null);
 
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [chatInfo, setChatInfo] = useState<Chat | null>(null);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [chatInfo, setChatInfo] = useState<any | null>(null);
     const [inputText, setInputText] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!chatId || !user) return;
-        setMessages(getMessages(user.id, chatId));
-        const chats = getChats(user.id);
-        const chat = chats.find(c => c.id === chatId);
-        if (chat) setChatInfo(chat);
+
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                // 1. Fetch Chat Info
+                const chat = await chatService.getConversation(chatId);
+                setChatInfo(chat);
+
+                // 2. Fetch Messages
+                const msgs = await chatService.getMessages(chatId);
+                setMessages(msgs || []);
+            } catch (err) {
+                console.error("Failed to load chat", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+
+        // 3. Subscribe to Realtime Messages
+        const channel = supabase
+            .channel(`chat_${chatId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `conversation_id=eq.${chatId}`
+                },
+                (payload) => {
+                    setMessages((prev) => [...prev, payload.new]);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [chatId, user]);
 
     // Scroll to bottom
@@ -32,26 +70,38 @@ const ChatRoom = () => {
     useEffect(() => {
         scrollToBottom('auto');
     }, [chatInfo]);
-    // Scroll on mount/chat switch immediately, messages update smooth
 
     useEffect(() => {
         scrollToBottom();
     }, [messages.length]);
 
-    const handleSend = (e: React.FormEvent) => {
+    const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!inputText.trim() || !user) return;
 
-        const newMsg = addMessage(user.id, chatId, inputText, 'me');
-        setMessages(prev => [...prev, newMsg]);
-        setInputText('');
+        try {
+            const textIdx = inputText;
+            setInputText(''); // Optimistic clear
+            await chatService.sendMessage(chatId, user.id, textIdx);
+            // New message will come via subscription
+        } catch (err) {
+            console.error("Failed to send", err);
+            // Optionally restore text on error
+        }
     };
 
-    if (!chatInfo) return (
+    if (loading || !chatInfo) return (
         <div style={{ height: 'calc(100vh - 80px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--gray-500)' }}>Loading chat...</span>
         </div>
     );
+
+    // Determine "Other" User for display
+    const isParticipantA = chatInfo.participant_a === user?.id;
+    const otherUser = isParticipantA ? chatInfo.participant_b_profile : chatInfo.participant_a_profile;
+    const otherUserName = otherUser?.name || 'Unknown User';
+    const otherUserAvatar = otherUser?.avatar_url || `https://ui-avatars.com/api/?name=${otherUserName}&background=random`;
+    const petName = chatInfo.pet?.name || 'Pet';
 
     return (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', background: 'white' }}>
@@ -82,11 +132,11 @@ const ChatRoom = () => {
                     onClick={() => navigate(`/messages/${chatId}/info`)}
                 >
                     <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--gray-100)', overflow: 'hidden' }}>
-                        <img src={chatInfo.avatar} alt={chatInfo.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={otherUserAvatar} alt={otherUserName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                     <div>
-                        <h2 style={{ fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.2 }}>{chatInfo.name}</h2>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--gray-500)' }}>Owner of {chatInfo.petName}</p>
+                        <h2 style={{ fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.2 }}>{otherUserName}</h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--gray-500)' }}>Re: {petName}</p>
                     </div>
                 </div>
 
@@ -105,47 +155,38 @@ const ChatRoom = () => {
                 gap: '1.25rem',
                 background: 'var(--gray-50)'
             }}>
-                <div style={{ textAlign: 'center', marginBottom: '1rem', opacity: 0.6 }}>
-                    <span style={{ fontSize: '0.8rem', background: 'var(--gray-200)', padding: '0.25rem 0.75rem', borderRadius: '100px', color: 'var(--gray-600)' }}>Today</span>
-                </div>
-
-                {messages.map((msg) => (
-                    <div
-                        key={msg.id}
-                        style={{
-                            alignSelf: msg.sender === 'me' ? 'flex-end' : 'flex-start',
-                            maxWidth: '75%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: msg.sender === 'me' ? 'flex-end' : 'flex-start'
-                        }}
-                    >
+                {messages.map((msg) => {
+                    const isMe = msg.sender_id === user?.id;
+                    return (
                         <div
+                            key={msg.id}
                             style={{
-                                padding: '1rem 1.25rem',
-                                background: msg.sender === 'me'
-                                    ? 'linear-gradient(135deg, var(--primary-600), var(--primary-500))'
-                                    : 'white',
-                                color: msg.sender === 'me' ? 'white' : 'var(--gray-800)',
-                                borderRadius: msg.sender === 'me' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                                boxShadow: msg.sender === 'me' ? 'var(--shadow-colored)' : 'var(--shadow-sm)',
-                                border: msg.sender === 'me' ? 'none' : '1px solid var(--gray-200)',
-                                fontSize: '1rem',
-                                lineHeight: 1.5
+                                alignSelf: isMe ? 'flex-end' : 'flex-start',
+                                maxWidth: '75%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: isMe ? 'flex-end' : 'flex-start'
                             }}
                         >
-                            {msg.text}
+                            <div
+                                style={{
+                                    padding: '1rem 1.25rem',
+                                    background: isMe
+                                        ? 'linear-gradient(135deg, var(--primary-600), var(--primary-500))'
+                                        : 'white',
+                                    color: isMe ? 'white' : 'var(--gray-800)',
+                                    borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                                    boxShadow: isMe ? 'var(--shadow-colored)' : 'var(--shadow-sm)',
+                                    border: isMe ? 'none' : '1px solid var(--gray-200)',
+                                    fontSize: '1rem',
+                                    lineHeight: 1.5
+                                }}
+                            >
+                                {msg.text}
+                            </div>
                         </div>
-                        <span style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--gray-400)',
-                            marginTop: '0.5rem',
-                            padding: '0 0.5rem'
-                        }}>
-                            {msg.time}
-                        </span>
-                    </div>
-                ))}
+                    );
+                })}
                 <div ref={bottomRef} />
             </div>
 

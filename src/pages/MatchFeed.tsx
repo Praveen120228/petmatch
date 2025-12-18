@@ -3,59 +3,79 @@ import { Link } from 'react-router-dom';
 import { Heart, MagnifyingGlass, PawPrint, Faders } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { getLikes, toggleLike, getAllPets } from '../utils/storage';
-import { getRecommendedPets } from '../utils/recommendations';
+import { getLikes, toggleLike } from '../utils/storage';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-
+import { petService } from '../lib/petService';
 import { PET_TYPES } from '../data/breeds';
-
-// Helper to get unique breeds for a type
-const getBreedsByType = (type: string | 'all') => {
-    const allPets = getAllPets();
-    const pets = type === 'all' ? allPets : allPets.filter(p => p.type === type);
-    return [...new Set(pets.map(p => p.breed))];
-};
 
 const AGES = ['1 yr', '2 yrs', '3 yrs', '4 yrs', '5 yrs'];
 
 const MatchFeed = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
+
+    // State
+    const [allPets, setAllPets] = useState<any[]>([]);
+    // const [loading, setLoading] = useState(true); // unused
+
+    // const [tick, setTick] = useState(0); // unused
+    // const [currentPetIndex, setCurrentPetIndex] = useState(0); // unused
     const [hoveredId, setHoveredId] = useState<number | null>(null);
-    const [showFilters, setShowFilters] = useState(false); // Mobile toggle
+    // const [direction, setDirection] = useState<'left' | 'right' | null>(null); // unused
+
+    // Filter Controls
+    const [showFilters, setShowFilters] = useState(false);
+    // const [filterType, setFilterType] = useState('All'); // unused
+    // const [maxDistance, setMaxDistance] = useState(50); // unused
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedType, setSelectedType] = useState<string>('all'); // Allow any string for dynamic types
-    const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]); // Multi select
-    const [selectedAges, setSelectedAges] = useState<string[]>([]); // Multi select
+    const [selectedType, setSelectedType] = useState<string>('all');
+    const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
+    const [selectedAges, setSelectedAges] = useState<string[]>([]);
 
-    // Combine Mock + Local Pets (Sorted by Recommendation)
-    const pets = useMemo(() => {
-        return user ? getRecommendedPets(user.id) : getAllPets();
-    }, [user, user?.id]); // Re-run if user changes
-
-    // Reset breeds when type changes
+    // 1. Fetch Pets
     useEffect(() => {
-        setSelectedBreeds([]);
-    }, [selectedType]);
+        const loadPets = async () => {
+            // setLoading(true); // unused
+            const pets = await petService.getAllPets();
+            setAllPets(pets);
+            // setLoading(false); // unused
+        };
+        loadPets();
+    }, []);
 
-    // Derived Filter Options
-    const availableBreeds = useMemo(() => getBreedsByType(selectedType), [selectedType, pets]); // Added pets dependency
+    // 44. Derived Filter Options
+    const availableBreeds = useMemo(() => {
+        const petsToConsider = selectedType === 'all' ? allPets : allPets.filter(p => p.type === selectedType);
+        return [...new Set(petsToConsider.map(p => p.breed))];
+    }, [selectedType, allPets]);
 
-    // Filter Logic
+    // 47. Filter Logic
     const filteredPets = useMemo(() => {
-        return pets.filter(pet => {
+        // use 'pets' (the combined list) or 'allPets' (fetched)?
+        // Previous code combined mock + local in 'pets' memo.
+        // But we are now fetching allPets via service which returns mixed.
+        // So just use allPets.
+
+        return allPets.filter(pet => {
+            // Search
             const matchesSearch = pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 pet.breed.toLowerCase().includes(searchQuery.toLowerCase());
+
+            // Type
             const matchesType = selectedType === 'all' || pet.type === selectedType;
+
+            // Breed
             const matchesBreed = selectedBreeds.length === 0 || selectedBreeds.includes(pet.breed);
+
+            // Age
             const matchesAge = selectedAges.length === 0 || selectedAges.includes(pet.age);
 
             return matchesSearch && matchesType && matchesBreed && matchesAge;
         });
-    }, [searchQuery, selectedType, selectedBreeds, selectedAges, pets]);
+    }, [searchQuery, selectedType, selectedBreeds, selectedAges, allPets]);
 
     // Handlers
     const toggleBreed = (breed: string) => {
