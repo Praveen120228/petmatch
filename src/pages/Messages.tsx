@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +7,7 @@ import { CalendarBlank, MagnifyingGlass, Plus, ChatCircleDots } from '@phosphor-
 import Card from '../components/Card';
 
 const Messages = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const { user } = useAuth();
     const [chats, setChats] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
