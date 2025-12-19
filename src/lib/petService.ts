@@ -46,9 +46,18 @@ export const petService = {
         const { data, error } = await supabase
             .from('pets')
             .insert({
-                ...pet,
-                likes: 0,
-                distance: '1m' // constant for now
+                name: pet.name,
+                breed: pet.breed,
+                type: (pet as any).type, // safely access if type definition is lagging
+                age: pet.age,
+                gender: pet.gender,
+                image: pet.image,
+                images: pet.images,
+                bio: pet.bio,
+                traits: pet.traits,
+                owner_id: pet.owner_id,
+                distance: '1m',
+                likes: 0
             })
             .select()
             .single();

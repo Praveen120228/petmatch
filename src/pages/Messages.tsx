@@ -64,15 +64,18 @@ const Messages = () => {
         if (!chats) return [];
         if (!searchQuery) return chats;
 
-        // Need to filter by the OTHER user's name.
-        // The chat object has joined profile data.
         return chats.filter(c => {
-            const isA = c.participant_a === user?.id;
-            const otherUser = isA ? c.participant_b_profile : c.participant_a_profile;
-            const name = otherUser?.name || 'Unknown';
+            const name = c.other_user?.name || 'Unknown';
             return name.toLowerCase().includes(searchQuery.toLowerCase());
         });
-    }, [chats, searchQuery, user]);
+    }, [chats, searchQuery]);
+
+    // Helper for time
+    const formatTime = (isoString?: string) => {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
 
     // 2. Discover New Users matching search
     // TODO: Migrate to Supabase search
@@ -190,49 +193,49 @@ const Messages = () => {
                     <section>
                         {searchQuery && <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em' }}>Recent Chats</h3>}
                         <div style={{ display: 'grid', gap: '1rem' }}>
-                            {filteredChats.map(chat => (
-                                <Link key={chat.id} to={`/messages/${chat.id}`} style={{ textDecoration: 'none' }}>
-                                    <Card
-                                        hover
-                                        padding="md"
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '1.25rem',
-                                            background: chat.unread ? 'var(--primary-50)' : 'white',
-                                            border: chat.unread ? '1px solid var(--primary-200)' : '1px solid var(--gray-100)'
-                                        }}
-                                    >
-                                        <div style={{ position: 'relative' }}>
-                                            <img
-                                                src={chat.avatar}
-                                                alt={chat.name}
-                                                style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover' }}
-                                            />
-                                            {chat.unread > 0 && (
-                                                <span style={{ position: 'absolute', top: 0, right: 0, width: '16px', height: '16px', background: 'var(--error)', borderRadius: '50%', border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}></span>
-                                            )}
-                                        </div>
-
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                                                <h3 style={{ fontSize: '1.1rem', fontWeight: chat.unread ? 800 : 700, color: 'var(--gray-900)' }}>{chat.name}</h3>
-                                                <span style={{ fontSize: '0.85rem', color: chat.unread ? 'var(--primary-600)' : 'var(--gray-500)', fontWeight: chat.unread ? 600 : 400 }}>{chat.time}</span>
+                            {filteredChats.map(chat => {
+                                const name = chat.other_user?.name || 'Unknown';
+                                const avatar = chat.other_user?.avatar_url || `https://ui-avatars.com/api/?name=${name}&background=random`;
+                                return (
+                                    <Link key={chat.id} to={`/messages/${chat.id}`} style={{ textDecoration: 'none' }}>
+                                        <Card
+                                            hover
+                                            padding="md"
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '1.25rem',
+                                                background: 'white',
+                                                border: '1px solid var(--gray-100)'
+                                            }}
+                                        >
+                                            <div style={{ position: 'relative' }}>
+                                                <img
+                                                    src={avatar}
+                                                    alt={name}
+                                                    style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover' }}
+                                                />
                                             </div>
-                                            <p style={{
-                                                fontSize: '1rem',
-                                                color: chat.unread ? 'var(--gray-900)' : 'var(--gray-500)',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                fontWeight: chat.unread ? 600 : 400
-                                            }}>
-                                                {chat.lastMessage}
-                                            </p>
-                                        </div>
-                                    </Card>
-                                </Link>
-                            ))}
+
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                                                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--gray-900)' }}>{name}</h3>
+                                                    <span style={{ fontSize: '0.85rem', color: 'var(--gray-500)' }}>{formatTime(chat.last_message_time)}</span>
+                                                </div>
+                                                <p style={{
+                                                    fontSize: '1rem',
+                                                    color: 'var(--gray-500)',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                }}>
+                                                    {chat.last_message || 'No messages yet'}
+                                                </p>
+                                            </div>
+                                        </Card>
+                                    </Link>
+                                )
+                            })}
                         </div>
                     </section>
                 )}
