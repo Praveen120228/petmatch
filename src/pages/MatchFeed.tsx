@@ -21,7 +21,7 @@ const MatchFeed = () => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    const [error, setError] = useState('');
+
 
     const [hoveredId, setHoveredId] = useState<number | null>(null);
 
@@ -44,12 +44,12 @@ const MatchFeed = () => {
     const loadPets = async (reset = false) => {
         if (!user) return;
         setLoading(true);
-        setError('');
+
 
         const currentPage = reset ? 1 : page;
 
         try {
-            const { data, count } = await petService.getPetsPaginated(
+            const { data } = await petService.getPetsPaginated(
                 user.id,
                 currentPage,
                 20,
@@ -79,7 +79,7 @@ const MatchFeed = () => {
 
         } catch (err) {
             console.error(err);
-            setError("Failed to load pets");
+            showToast("Failed to load pets", "error");
         } finally {
             setLoading(false);
         }
