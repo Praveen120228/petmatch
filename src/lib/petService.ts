@@ -15,6 +15,53 @@ export const petService = {
         return data as Pet[];
     },
 
+    async getPetsPaginated(
+        currentUserId: string,
+        page: number = 1,
+        limit: number = 20,
+        filters?: {
+            type?: string;
+            breeds?: string[];
+            ages?: string[];
+            search?: string;
+        }
+    ): Promise<{ data: Pet[]; count: number }> {
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        let query = supabase
+            .from('pets')
+            .select('id, name, image, breed, age, type, distance, owner_id', { count: 'exact' })
+            .neq('owner_id', currentUserId)
+            .range(from, to);
+
+        if (filters?.type && filters.type !== 'all') {
+            query = query.eq('type', filters.type);
+        }
+
+        if (filters?.breeds && filters.breeds.length > 0) {
+            query = query.in('breed', filters.breeds);
+        }
+
+        if (filters?.ages && filters.ages.length > 0) {
+            query = query.in('age', filters.ages);
+        }
+
+        if (filters?.search) {
+            // "search" matches name OR breed. 
+            // supabase .or() syntax: 'name.ilike.%query%,breed.ilike.%query%'
+            query = query.or(`name.ilike.%${filters.search}%,breed.ilike.%${filters.search}%`);
+        }
+
+        const { data, error, count } = await query;
+
+        if (error) {
+            console.error('Error fetching paginated pets:', error);
+            return { data: [], count: 0 };
+        }
+        return { data: data as unknown as Pet[], count: count || 0 };
+    },
+
     async getUserPets(userId: string): Promise<Pet[]> {
         const { data, error } = await supabase
             .from('pets')

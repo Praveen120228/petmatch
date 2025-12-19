@@ -5,27 +5,20 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, X, Trash, CaretLeft } from '@phosphor-icons/react';
 
-// Actually allow me to remove MOCK_PETS if it is truly unused. But wait, I see "MOCK_PETS.slice" later in the file?
-// Linter said "MOCK_PETS is declared but never read" at line 7... 
-// Ah, because in my previous edit I might have commented out usage?
-// Let's look at Step 333 (original file). It used MOCK_PETS.
-// Step 335 (my edit). I replaced lines 77-111. 
-// "const myMatches = ... : MOCK_PETS.slice(0, 3);" was REPLACED with ": []".
-// So MOCK_PETS is indeed unused now.
-// I will remove it.
 import { featureService } from '../lib/featureService';
 import type { Collection } from '../lib/featureService';
 import { Folder, CaretRight, Camera } from '@phosphor-icons/react';
 import { processImage } from '../utils/imageHandler';
 
 import { petService } from '../lib/petService';
+import { userService } from '../lib/userService';
 
 const Profile = () => {
     const { user, logout, updateUser } = useAuth();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>(); // 'id' contains the username for public profile
     const [searchParams, setSearchParams] = useSearchParams();
-    // const [_, setTick] = useState(0); // Removed unused setTick
+
 
     // Public vs Private Mode Logic
     const isPublic = !!id; // If ID exists, it's public
@@ -53,27 +46,9 @@ const Profile = () => {
         }
     };
 
-    // Read extended profile from localStorage (ONLY for private)
-    const profileKey = user ? `petmatch_profile_${user.id} ` : null;
-    const savedProfile = (!isPublic && profileKey) ? localStorage.getItem(profileKey) : null;
-    const privateProfileData = savedProfile ? JSON.parse(savedProfile) : { pets: [] };
 
-    // Initialize form with saved data on load
-    useEffect(() => {
-        if (!isPublic && user) {
-            setEditForm({
-                name: user.name,
-                image: user.image || '',
-                location: privateProfileData.location || 'New York, NY',
-                bio: privateProfileData.bio || 'Pet lover and outdoor enthusiast.',
-            });
-        }
-    }, [user?.id, isPublic]);
 
-    // If public, 'user' is the profile being viewed (mocked). If private, it's the auth user.
-    const profileUser = isPublic
-        ? { name: id, location: 'San Francisco, CA', bio: `Just another pet lover named ${id}.`, image: undefined }
-        : { ...user, location: privateProfileData.location || 'New York, NY', bio: privateProfileData.bio || 'Pet lover...', image: user?.image };
+    // Filter Logic...
 
     // Tabs State (Derived from URL)
     const activeTab = searchParams.get('tab') || 'pets';
@@ -83,6 +58,8 @@ const Profile = () => {
 
     // Derived Data
     // Data State
+    // Data State
+    const [profileData, setProfileData] = useState<any>(null); // Real profile data from DB
     const [pets, setPets] = useState<any[]>([]);
     const [likedPets, setLikedPets] = useState<any[]>([]);
     const [matchedPets, setMatchedPets] = useState<any[]>([]);
@@ -92,13 +69,18 @@ const Profile = () => {
     useEffect(() => {
         const loadData = async () => {
             if (!isPublic && user) {
-                const [userPets, userCols] = await Promise.all([
+                // Private View: Load own data
+                const [userPets, userCols, userProfile] = await Promise.all([
                     petService.getUserPets(user.id),
-                    featureService.getCollections(user.id)
+                    featureService.getCollections(user.id),
+                    userService.getProfile(user.id)
                 ]);
+
                 setPets(userPets || []);
                 setCollections(userCols);
+                setProfileData(userProfile);
 
+                // Load likes/matches
                 const [likeIds, matchIds] = await Promise.all([
                     featureService.getLikes(user.id),
                     featureService.getMatches(user.id)
@@ -118,9 +100,26 @@ const Profile = () => {
                     setCollectionPets([]);
                 }
 
+                // Initialize form
+                if (userProfile) {
+                    setEditForm({
+                        name: userProfile.name || '',
+                        location: userProfile.location || '',
+                        bio: userProfile.bio || '',
+                        image: userProfile.avatar_url || ''
+                    });
+                }
+
             } else if (isPublic && id) {
-                const all = await petService.getAllPets('PUBLIC_VIEW');
-                setPets((all as any[]).filter(p => p.owner_id === id || p.owner === id));
+                // Public View: Load other user's data
+                // 'id' is the profile ID (UUID)
+                const [targetProfile, targetPets] = await Promise.all([
+                    userService.getProfile(id),
+                    petService.getUserPets(id)
+                ]);
+
+                setProfileData(targetProfile);
+                setPets(targetPets || []);
                 setLikedPets([]);
                 setMatchedPets([]);
                 setCollectionPets([]);
@@ -134,35 +133,48 @@ const Profile = () => {
     const myLikes = likedPets;
     const userPets = pets;
 
+    // Derived Data
+    // Use fetched profile data if available, otherwise fall back to auth user (private) or simple placeholder (public)
+    const profileUser = profileData || (
+        !isPublic && user ? {
+            name: user.name,
+            image: user.image,
+            location: 'Update your location',
+            bio: 'Tell us about yourself...'
+        } : {
+            name: 'Loading...',
+            location: '...',
+            bio: '...',
+            image: undefined
+        }
+    );
+
     const handleAddPet = () => {
         navigate('/onboarding?step=2');
     };
 
-    const handleSaveProfile = () => {
-        // 1. Update Core User (Name, Image)
-        if (user) {
+    const handleSaveProfile = async () => {
+        if (!user) return;
+
+        try {
+            // Update DB
+            await userService.updateProfile(user.id, {
+                name: editForm.name,
+                avatar_url: editForm.image, // Ensure mapping matches DB column 'avatar_url'
+                location: editForm.location,
+                bio: editForm.bio
+            });
+
+            // Update Auth Context (for app-wide name/image)
             updateUser({ name: editForm.name, image: editForm.image });
-        }
 
-        // 2. Update Extended Profile (Location, Bio) - Merge with existing pets
-        const updatedProfile = {
-            ...privateProfileData,
-            location: editForm.location,
-            bio: editForm.bio
-        };
-        if (profileKey) {
-            localStorage.setItem(profileKey, JSON.stringify(updatedProfile));
+            // Force reload to refresh data
+            setIsEditing(false);
+            window.location.reload();
+        } catch (err) {
+            console.error("Failed to save profile", err);
+            alert("Failed to save profile changes.");
         }
-
-        setIsEditing(false);
-        // Force reload or just rely on react state updates? 
-        // AuthContext update triggers re-render of 'user'. 
-        // LocalStorage update might not trigger re-render of 'privateProfileData' unless we track it in state.
-        // For simplicity, we'll reload window or use a state for profileData. 
-        // Let's us window.location.reload() for a hard sync or update a local version.
-        // For simplicity, we'll reload window or update a local version. 
-        // Let's use window.location.reload() for a hard sync or update a local version.
-        window.location.reload();
     };
 
     return (

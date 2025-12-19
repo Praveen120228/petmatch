@@ -16,19 +16,17 @@ const MatchFeed = () => {
     const { showToast } = useToast();
 
     // State
-    const [allPets, setAllPets] = useState<any[]>([]);
+    const [pets, setPets] = useState<any[]>([]);
     const [likes, setLikes] = useState<number[]>([]);
-    // const [loading, setLoading] = useState(true); // unused
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [error, setError] = useState('');
 
-    // const [tick, setTick] = useState(0); // unused
-    // const [currentPetIndex, setCurrentPetIndex] = useState(0); // unused
     const [hoveredId, setHoveredId] = useState<number | null>(null);
-    // const [direction, setDirection] = useState<'left' | 'right' | null>(null); // unused
 
     // Filter Controls
     const [showFilters, setShowFilters] = useState(false);
-    // const [filterType, setFilterType] = useState('All'); // unused
-    // const [maxDistance, setMaxDistance] = useState(50); // unused
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState('');
@@ -36,52 +34,77 @@ const MatchFeed = () => {
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
     const [selectedAges, setSelectedAges] = useState<string[]>([]);
 
-    // 1. Fetch Pets & Likes
+    // Load Likes (Once)
     useEffect(() => {
-        const loadData = async () => {
-            if (!user) return;
-            // setLoading(true); 
-            const [pets, userLikes] = await Promise.all([
-                petService.getAllPets(user.id),
-                featureService.getLikes(user.id)
-            ]);
-            setAllPets(pets);
-            setLikes(userLikes);
-            // setLoading(false);
-        };
-        loadData();
+        if (!user) return;
+        featureService.getLikes(user.id).then(setLikes);
     }, [user]);
 
-    // 44. Derived Filter Options
+    // Load Pets (Paginated)
+    const loadPets = async (reset = false) => {
+        if (!user) return;
+        setLoading(true);
+        setError('');
+
+        const currentPage = reset ? 1 : page;
+
+        try {
+            const { data, count } = await petService.getPetsPaginated(
+                user.id,
+                currentPage,
+                20,
+                {
+                    type: selectedType,
+                    breeds: selectedBreeds,
+                    ages: selectedAges,
+                    search: searchQuery
+                }
+            );
+
+            if (reset) {
+                setPets(data);
+                setPage(2); // Next page will be 2
+            } else {
+                setPets(prev => {
+                    // Deduplicate just in case
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const newPets = data.filter(p => !existingIds.has(p.id));
+                    return [...prev, ...newPets];
+                });
+                setPage(prev => prev + 1);
+            }
+
+            // If we got fewer than requested or hit total count, no more
+            setHasMore(data.length === 20);
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load pets");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Trigger load when filters change
+    useEffect(() => {
+        // Debounce search slightly if typing fast, but for now simple effect
+        const timer = setTimeout(() => {
+            loadPets(true);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [user, selectedType, selectedBreeds, selectedAges, searchQuery]);
+
+    // Derived Filter Options (Breeds)
+    // Note: Ideally fetching available breeds from server would be better than just from loaded pets
+    // But for now, we leave as is or simplify. 
+    // If we only show breeds from loaded pets, the filter list shrinks.
+    // Let's assume for now we don't strictly enforce "available" breeds validation in UI or we use static if possible.
+    // The current UI derives from 'allPets' (which is now 'pets'). 
+    // This means you can only filter by breeds you see. This is a common pattern in infinite scroll with client-side derived facets.
     const availableBreeds = useMemo(() => {
-        const petsToConsider = selectedType === 'all' ? allPets : allPets.filter(p => p.type === selectedType);
-        return [...new Set(petsToConsider.map(p => p.breed))];
-    }, [selectedType, allPets]);
-
-    // 47. Filter Logic
-    const filteredPets = useMemo(() => {
-        // use 'pets' (the combined list) or 'allPets' (fetched)?
-        // Previous code combined mock + local in 'pets' memo.
-        // But we are now fetching allPets via service which returns mixed.
-        // So just use allPets.
-
-        return allPets.filter(pet => {
-            // Search
-            const matchesSearch = pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                pet.breed.toLowerCase().includes(searchQuery.toLowerCase());
-
-            // Type
-            const matchesType = selectedType === 'all' || pet.type === selectedType;
-
-            // Breed
-            const matchesBreed = selectedBreeds.length === 0 || selectedBreeds.includes(pet.breed);
-
-            // Age
-            const matchesAge = selectedAges.length === 0 || selectedAges.includes(pet.age);
-
-            return matchesSearch && matchesType && matchesBreed && matchesAge;
-        });
-    }, [searchQuery, selectedType, selectedBreeds, selectedAges, allPets]);
+        // We can just show breeds from ALL currently loaded pets
+        return [...new Set(pets.map(p => p.breed))];
+    }, [pets]);
 
     // Handlers
     const toggleBreed = (breed: string) => {
@@ -289,88 +312,127 @@ const MatchFeed = () => {
                 <main style={{ flex: 1, padding: '2rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                            {filteredPets.length} <span style={{ fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets nearby</span>
+                            {pets.length} <span style={{ fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets visible</span>
                         </h1>
                     </div>
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                        gap: '2rem'
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                        gap: '2rem',
+                        paddingBottom: '2rem'
                     }}>
-                        {filteredPets.length > 0 ? (
-                            filteredPets.map(pet => (
-                                <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)}>
-                                    <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                        {pets.length > 0 ? (
+                            <>
+                                {pets.map(pet => (
+                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)}>
                                         <Card
                                             padding="0"
                                             style={{
-                                                aspectRatio: '4/5',
                                                 borderRadius: '20px',
-                                                border: 'none',
-                                                boxShadow: 'var(--shadow-md)',
+                                                border: '1px solid var(--gray-200)',
+                                                boxShadow: hoveredId === pet.id ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
+                                                transition: 'all 0.3s ease',
+                                                transform: hoveredId === pet.id ? 'translateY(-4px)' : 'none',
+                                                overflow: 'hidden',
+                                                background: 'white'
                                             }}
                                         >
-                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
-                                                <img
-                                                    src={pet.image}
-                                                    alt={pet.name}
-                                                    loading="lazy"
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hoveredId === pet.id ? 'scale(1.05)' : 'scale(1)' }}
-                                                />
-                                            </Link>
+                                            {/* Image Container */}
+                                            <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', background: 'var(--gray-100)' }}>
+                                                <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                                    <img
+                                                        src={pet.image}
+                                                        alt={pet.name}
+                                                        loading="lazy"
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover',
+                                                            transition: 'transform 0.5s ease',
+                                                            transform: hoveredId === pet.id ? 'scale(1.05)' : 'scale(1)'
+                                                        }}
+                                                    />
+                                                </Link>
 
-                                            {/* Gradient Overlay */}
-                                            <div style={{
-                                                position: 'absolute',
-                                                inset: 0,
-                                                background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%)',
-                                                pointerEvents: 'none'
-                                            }} />
+                                                {/* Like Button (Top Right) */}
+                                                <Button
+                                                    onClick={(e) => handleLike(e, pet)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '12px',
+                                                        right: '12px',
+                                                        background: 'rgba(255, 255, 255, 0.9)',
+                                                        backdropFilter: 'blur(4px)',
+                                                        borderRadius: '50%',
+                                                        width: '40px',
+                                                        height: '40px',
+                                                        padding: 0,
+                                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                        zIndex: 10,
+                                                        border: 'none',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    <Heart
+                                                        weight="fill"
+                                                        color={likes.includes(pet.id) ? 'var(--secondary-500)' : 'var(--gray-300)'}
+                                                        size={22}
+                                                    />
+                                                </Button>
+                                            </div>
 
-                                            {/* Like Button Overlay */}
-                                            <Button
-                                                onClick={(e) => handleLike(e, pet)}
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '12px',
-                                                    right: '12px',
-                                                    background: 'white',
-                                                    borderRadius: '50%',
-                                                    width: '40px',
-                                                    height: '40px',
-                                                    padding: 0,
-                                                    boxShadow: 'var(--shadow-md)',
-                                                    zIndex: 10
-                                                }}
-                                            >
-                                                <Heart weight="fill" color={likes.includes(pet.id) ? 'var(--secondary-500)' : 'var(--gray-300)'} size={20} />
-                                            </Button>
+                                            {/* Content (Below Image) */}
+                                            <div style={{ padding: '1.25rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
+                                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
+                                                    {pet.distance && (
+                                                        <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '3px', background: 'var(--gray-50)', padding: '2px 6px', borderRadius: '6px' }}>
+                                                            {pet.distance}
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                            {/* Content Overlay */}
-                                            <div style={{
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                left: 0,
-                                                right: 0,
-                                                padding: '1.5rem',
-                                                color: 'white'
-                                            }}>
-                                                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{pet.name}</h3>
-                                                <p style={{ fontSize: '0.95rem', opacity: 0.9, fontWeight: 500 }}>{pet.breed}, {pet.age}</p>
+                                                <p style={{ fontSize: '0.95rem', color: 'var(--gray-600)', marginBottom: '0.75rem', fontWeight: 500 }}>
+                                                    {pet.breed} • {pet.age}
+                                                </p>
+
+                                                <Link to={`/pet/${pet.id}`}>
+                                                    <Button variant="outline" style={{ width: '100%', justifyContent: 'center', fontSize: '0.9rem', padding: '0.5rem' }}>
+                                                        View Data
+                                                    </Button>
+                                                </Link>
                                             </div>
                                         </Card>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                            </>
                         ) : (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 2rem', color: 'var(--gray-400)' }}>
-                                <div style={{ background: 'var(--gray-100)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                                    <PawPrint size={40} weight="duotone" />
+                            !loading && (
+                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 2rem', color: 'var(--gray-400)' }}>
+                                    <div style={{ background: 'var(--gray-100)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                        <PawPrint size={40} weight="duotone" />
+                                    </div>
+                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
+                                    <p style={{ fontSize: '1.1rem' }}>Try adjusting your search or filters to see more results.</p>
+                                    <Button variant="outline" onClick={clearFilters} style={{ marginTop: '2rem' }}>Clear All Filters</Button>
                                 </div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
-                                <p style={{ fontSize: '1.1rem' }}>Try adjusting your search or filters to see more results.</p>
-                                <Button variant="outline" onClick={clearFilters} style={{ marginTop: '2rem' }}>Clear All Filters</Button>
+                            )
+                        )}
+
+                        {/* Load More Trigger */}
+                        {pets.length > 0 && hasMore && (
+                            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '2rem 0' }}>
+                                <Button
+                                    onClick={() => loadPets(false)}
+                                    disabled={loading}
+                                    style={{ minWidth: '150px' }}
+                                >
+                                    {loading ? 'Loading...' : 'Load More'}
+                                </Button>
                             </div>
                         )}
                     </div>

@@ -62,18 +62,24 @@ export const chatService = {
         };
     },
 
-    async getMessages(conversationId: number): Promise<Message[]> {
+    async getMessages(conversationId: number, limit = 50): Promise<Message[]> {
         const { data, error } = await supabase
             .from('messages')
             .select('*')
             .eq('conversation_id', conversationId)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: false }) // Get newest first
+            .limit(limit);
 
         if (error) {
             console.error('Error fetching messages:', error);
             return [];
         }
-        return data as Message[];
+        // Reverse to show oldest first in UI as usual for chat, or handle in UI. 
+        // Typically chat needs oldest at top usually? 
+        // If we order by created_at ascending (oldest first), limit will give us the OLDEST 50. 
+        // We want the NEWEST 50. 
+        // So order desc, limit, then reverse.
+        return (data as Message[]).reverse();
     },
 
     async sendMessage(conversationId: number, senderId: string, text: string) {
