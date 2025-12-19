@@ -90,7 +90,8 @@ const Profile = () => {
                 // Determine if we can fetch by owner name or need to fetch all
                 // For now fetch all and filter client side for legacy compatibility
                 const all = await petService.getAllPets('PUBLIC_VIEW');
-                setPets((all as any[]).filter(p => p.owner === id));
+                // Filter by owner_id (UUID) or legacy owner (name string)
+                setPets((all as any[]).filter(p => p.owner_id === id || p.owner === id));
             }
         };
         fetchPets();

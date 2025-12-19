@@ -300,7 +300,7 @@ const PetProfile = () => {
                     </Card>
 
                     {/* Owner Info - Link to Public Profile */}
-                    <Link to={`/user/${pet.owner}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link to={`/user/${pet.owner_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                         <Card style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'border-color 0.2s' }}>
                             <div style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6' }}>
                                 <img src={`https://ui-avatars.com/api/?name=${pet.owner}&background=random`} alt={pet.owner} style={{ width: '100%', height: '100%' }} />
