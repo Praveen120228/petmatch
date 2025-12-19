@@ -319,51 +319,59 @@ const Profile = () => {
             </div >
 
             {/* Tabs & Content */}
-            < div style={{ maxWidth: '1000px', margin: '2rem auto', padding: '0 2rem' }}>
+            < div style={{ maxWidth: '1000px', margin: '0.5rem auto 2rem', padding: '0 2rem' }}>
 
-                {/* Tab Navigation */}
-                < div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', borderBottom: '1px solid #e5e7eb', overflowX: 'auto' }}>
-                    {
-                        ['pets', 'matches', 'likes', 'collections'].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setSearchParams({ tab })}
-                                style={{
-                                    padding: '0.75rem 0',
-                                    background: 'none',
-                                    border: 'none',
-                                    borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
-                                    color: activeTab === tab ? '#111827' : '#9ca3af',
-                                    fontSize: '1rem',
-                                    fontWeight: activeTab === tab ? 600 : 500,
-                                    cursor: 'pointer',
-                                    textTransform: 'capitalize',
-                                    transition: 'color 0.2s',
-                                    whiteSpace: 'nowrap'
-                                }}
-                            >
-                                {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
-                                <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
-                                    {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
-                                </span>
-                            </button>
-                        ))
-                    }
-                </div >
+                {/* Tab Navigation & Action - Integrated Row */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                    marginBottom: '1.5rem',
+                    borderBottom: '1px solid #e5e7eb'
+                }}>
+                    < div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px' }}>
+                        {
+                            ['pets', 'matches', 'likes', 'collections'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setSearchParams({ tab })}
+                                    style={{
+                                        padding: '0.75rem 0',
+                                        background: 'none',
+                                        border: 'none',
+                                        borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
+                                        color: activeTab === tab ? '#111827' : '#9ca3af',
+                                        fontSize: '1rem',
+                                        fontWeight: activeTab === tab ? 600 : 500,
+                                        cursor: 'pointer',
+                                        textTransform: 'capitalize',
+                                        transition: 'color 0.2s',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
+                                    <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
+                                        {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
+                                    </span>
+                                </button>
+                            ))
+                        }
+                    </ div>
 
-                {/* Tab Content */}
-                < div style={{ minHeight: '300px' }}>
-
-                    {/* Add Pet Button (Only on Private Pets tab) */}
+                    {/* Add Pet Button (Inline) */}
                     {
                         !isPublic && activeTab === 'pets' && (
-                            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+                            <div style={{ marginBottom: '0.5rem' }}>
                                 <Button onClick={handleAddPet} size="sm">
                                     <Plus weight="bold" /> Add New Pet
                                 </Button>
                             </div>
                         )
                     }
+                </div>
+
+                {/* Tab Content */}
+                < div style={{ minHeight: '300px' }}>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
 
