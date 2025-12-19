@@ -307,7 +307,7 @@ const PetProfile = () => {
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Owned by</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{pet.owner}</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{pet.owner_profile?.name || pet.owner || 'Unknown'}</span>
                             </div>
                         </Card>
                     </Link>

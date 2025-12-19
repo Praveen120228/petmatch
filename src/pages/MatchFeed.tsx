@@ -38,13 +38,14 @@ const MatchFeed = () => {
     // 1. Fetch Pets
     useEffect(() => {
         const loadPets = async () => {
+            if (!user) return;
             // setLoading(true); // unused
-            const pets = await petService.getAllPets();
+            const pets = await petService.getAllPets(user.id);
             setAllPets(pets);
             // setLoading(false); // unused
         };
         loadPets();
-    }, []);
+    }, [user]);
 
     // 44. Derived Filter Options
     const availableBreeds = useMemo(() => {

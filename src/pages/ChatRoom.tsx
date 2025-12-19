@@ -25,7 +25,7 @@ const ChatRoom = () => {
             setLoading(true);
             try {
                 // 1. Fetch Chat Info
-                const chat = await chatService.getConversation(chatId);
+                const chat = await chatService.getConversation(chatId, user.id);
                 setChatInfo(chat);
 
                 // 2. Fetch Messages
@@ -97,8 +97,7 @@ const ChatRoom = () => {
     );
 
     // Determine "Other" User for display
-    const isParticipantA = chatInfo.participant_a === user?.id;
-    const otherUser = isParticipantA ? chatInfo.participant_b_profile : chatInfo.participant_a_profile;
+    const otherUser = chatInfo.other_user;
     const otherUserName = otherUser?.name || 'Unknown User';
     const otherUserAvatar = otherUser?.avatar_url || `https://ui-avatars.com/api/?name=${otherUserName}&background=random`;
     const petName = chatInfo.pet?.name || 'Pet';

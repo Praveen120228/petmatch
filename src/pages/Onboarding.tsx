@@ -5,8 +5,8 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import SearchableSelect from '../components/SearchableSelect';
 import { User, PawPrint, Camera } from '@phosphor-icons/react';
-import { addUserPet } from '../utils/storage';
 import { useAuth } from '../context/AuthContext';
+import { petService } from '../lib/petService';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import { processImage } from '../utils/imageHandler';
 
@@ -29,32 +29,9 @@ const Onboarding = () => {
         // If we already initialized to step 2 via URL, we can skip this check logic
         if (step === 2) return;
 
-        if (user) {
-            const savedProfile = localStorage.getItem(`petmatch_profile_${user.id}`);
-
-            // 1. Check explicit profile data
-            if (savedProfile) {
-                const data = JSON.parse(savedProfile);
-                setLocation(data.location || '');
-                setBio(data.bio || '');
-                setStep(2); // Skip to Add Pet
-                return;
-            }
-
-            // 2. Check if user already has pets (Legacy support)
-            // If they have pets, assume they don't need to do "About You" again
-            const allPets = localStorage.getItem('petmatch_all_pets');
-            if (allPets) {
-                const pets = JSON.parse(allPets);
-                const hasPets = pets.some((p: any) => p.ownerId === user.id);
-                if (hasPets) {
-                    setStep(2);
-                }
-            }
-        }
+        // Skip profile check for now as we are migrating
     }, [user, step]);
 
-    // Pet details
     // Pet details
     const [petName, setPetName] = useState('');
     const [petType, setPetType] = useState('dog');
@@ -89,36 +66,34 @@ const Onboarding = () => {
         }, 300);
     };
 
-    const handleFinish = () => {
+    const handleFinish = async () => {
         if (!user) return alert("Please login first");
 
-        // 1. Create Pet
-        const newPet = {
-            id: Date.now(),
-            name: petName,
-            breed,
-            age: age + ' yrs',
-            gender,
-            type: petType,
-            image: images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80', // Fallback
-            images: images,
-            distance: '1m',
-            owner: user.name,
-            ownerId: user.id, // Important for scoping
-            bio: bio || 'No bio yet.',
-            traits: ['Friendly', 'New']
-        };
+        try {
+            // 1. Create Pet
+            const newPetPayload = {
+                name: petName,
+                breed,
+                age: age + ' yrs',
+                gender,
+                type: petType,
+                image: images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80',
+                images: images,
+                owner_id: user.id,
+                bio: bio || 'No bio yet.',
+                traits: ['Friendly', 'New']
+            };
 
-        addUserPet(newPet, user.id);
+            await petService.createPet(newPetPayload);
 
-        // 2. Save Profile Extra Details (Location, Bio)
-        const profileData = {
-            location,
-            bio
-        };
-        localStorage.setItem(`petmatch_profile_${user.id}`, JSON.stringify(profileData));
+            // 2. Save Profile Extra Details (Optional / Future schema update)
+            // await updateUser({ ... }); 
 
-        navigate('/profile');
+            navigate('/profile');
+        } catch (error) {
+            console.error("Error creating pet:", error);
+            alert("Failed to create pet. Please try again.");
+        }
     };
 
     const renderStep1 = () => (

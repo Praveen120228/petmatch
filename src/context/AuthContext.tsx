@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 
 interface User {
     id: string;
@@ -10,85 +11,145 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
-    login: (email: string) => boolean;
-    signup: (name: string, email: string) => boolean;
-    updateUser: (data: Partial<User>) => void;
-    logout: () => void;
+    login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    updateUser: (data: Partial<User>) => Promise<void>;
+    logout: () => Promise<void>;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    // Current Session
-    const [user, setUser] = useState<User | null>(() => {
-        const savedUser = localStorage.getItem('petmatch_user');
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    // Helper: Validates login against 'petmatch_users' DB
-    const login = (email: string) => {
-        const usersFn = localStorage.getItem('petmatch_users');
-        const users: User[] = usersFn ? JSON.parse(usersFn) : [];
+    // Initialize Auth State & Listen for Changes
+    useEffect(() => {
+        // 1. Get initial session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+                fetchProfile(session.user.id, session.user.email!);
+            } else {
+                setLoading(false);
+            }
+        });
 
-        const foundUser = users.find(u => u.email === email);
+        // 2. Listen for changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (session?.user) {
+                await fetchProfile(session.user.id, session.user.email!);
+            } else {
+                setUser(null);
+                setLoading(false);
+            }
+        });
 
-        if (foundUser) {
-            setUser(foundUser);
-            localStorage.setItem('petmatch_user', JSON.stringify(foundUser));
-            return true;
-        } else {
-            alert('User not found. Please sign up first.');
-            return false;
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const fetchProfile = async (userId: string, email: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                console.error('Error fetching profile:', error);
+                // If profile missing but user exists (rare sync issue), try basic fallback
+                setUser({ id: userId, name: email.split('@')[0], email: email });
+            } else if (data) {
+                setUser({
+                    id: data.id,
+                    name: data.name || email.split('@')[0],
+                    email: data.email || email,
+                    image: data.avatar_url
+                });
+            }
+        } catch (error) {
+            console.error('Profile fetch unexpected error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Helper: Registers new user
-    const signup = (name: string, email: string) => {
-        const usersFn = localStorage.getItem('petmatch_users');
-        const users: User[] = usersFn ? JSON.parse(usersFn) : [];
-
-        if (users.find(u => u.email === email)) {
-            alert('Email already exists. Please login.');
-            return false;
-        }
-
-        const newUser: User = {
-            id: Date.now().toString(),
-            name,
+    const login = async (email: string, password: string) => {
+        const { error } = await supabase.auth.signInWithPassword({
             email,
-            image: ''
-        };
+            password
+        });
 
-        const updatedUsers = [...users, newUser];
-        localStorage.setItem('petmatch_users', JSON.stringify(updatedUsers));
-
-        // Auto-login
-        setUser(newUser);
-        localStorage.setItem('petmatch_user', JSON.stringify(newUser));
-        return true;
+        if (error) {
+            return { success: false, error: error.message };
+        }
+        return { success: true };
     };
 
-    const updateUser = (data: Partial<User>) => {
+    const signup = async (name: string, email: string, password: string) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { name } // Passed to metadata, can be used by triggers
+            }
+        });
+
+        if (error) return { success: false, error: error.message };
+
+        if (data.user) {
+            // Manually insert profile to ensure it exists immediately
+            const { error: profileError } = await supabase.from('profiles').insert({
+                id: data.user.id,
+                email: email,
+                name: name,
+                avatar_url: ''
+            });
+
+            if (profileError) {
+                console.warn('Profile creation warning:', profileError.message);
+            }
+
+            // Set local state immediately for responsiveness
+            setUser({
+                id: data.user.id,
+                name,
+                email,
+                image: ''
+            });
+
+            return { success: true };
+        }
+
+        return { success: false, error: 'Signup failed unexpected' };
+    };
+
+    const updateUser = async (data: Partial<User>) => {
         if (!user) return;
-        const updatedUser = { ...user, ...data };
-        setUser(updatedUser);
-        localStorage.setItem('petmatch_user', JSON.stringify(updatedUser)); // Update Session
 
-        // Also update Main DB
-        const usersFn = localStorage.getItem('petmatch_users');
-        const users: User[] = usersFn ? JSON.parse(usersFn) : [];
-        const updatedList = users.map(u => u.id === user.id ? updatedUser : u);
-        localStorage.setItem('petmatch_users', JSON.stringify(updatedList));
+        const updates: any = {};
+        if (data.name) updates.name = data.name;
+        if (data.image) updates.avatar_url = data.image;
+
+        const { error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', user.id);
+
+        if (error) throw error;
+
+        setUser(prev => prev ? { ...prev, ...data } : null);
     };
 
-    const logout = () => {
+    const logout = async () => {
+        await supabase.auth.signOut();
         setUser(null);
-        localStorage.removeItem('petmatch_user');
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, signup, logout, updateUser }}>
-            {children}
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, signup, logout, updateUser, loading }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
 };

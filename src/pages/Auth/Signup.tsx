@@ -13,11 +13,13 @@ const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const success = signup(name, email);
+        const { success, error } = await signup(name, email, password);
         if (success) {
             navigate('/onboarding');
+        } else {
+            alert(error || 'Signup failed');
         }
     };
 

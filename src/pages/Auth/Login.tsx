@@ -12,11 +12,13 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const success = login(email);
+        const { success, error } = await login(email, password);
         if (success) {
             navigate('/match');
+        } else {
+            alert(error || 'Login failed');
         }
     };
 

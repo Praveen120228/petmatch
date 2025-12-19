@@ -1,64 +1,55 @@
-import { supabase } from './supabase';
-import { MOCK_PETS } from '../data/mockPets';
+import { supabase } from '../lib/supabase';
+import type { Pet } from '../types';
 
 export const petService = {
-    // Get all pets (Supabase + Mocks)
-    async getAllPets() {
-        const { data: realPets, error } = await supabase
+    async getAllPets(currentUserId: string): Promise<Pet[]> {
+        const { data, error } = await supabase
             .from('pets')
             .select('*')
-            .order('created_at', { ascending: false });
+            .neq('owner_id', currentUserId);
 
         if (error) {
             console.error('Error fetching pets:', error);
-            return MOCK_PETS;
+            return [];
         }
-
-        // Transform real pets to match UI expectation if needed
-        // The UI expects fields like 'distance' which our SQL has.
-        // We mix them.
-        return [...realPets, ...MOCK_PETS];
+        return data as Pet[];
     },
 
-    // Get single pet
-    async getPet(id: number) {
-        // Check if it's a mock pet (mock IDs are usually small integers, but let's assume we can try DB first)
-        const { data } = await supabase
+    async getUserPets(userId: string): Promise<Pet[]> {
+        const { data, error } = await supabase
             .from('pets')
             .select('*')
-            .eq('id', id)
-            .maybeSingle();
+            .eq('owner_id', userId);
 
-        if (data) return data;
-
-        // Fallback to mock
-        return MOCK_PETS.find(p => p.id === id);
+        if (error) {
+            console.error('Error fetching user pets:', error);
+            return [];
+        }
+        return data as Pet[];
     },
 
-    // Create Pet
-    async createPet(petData: any, ownerId: string) {
+    async getPet(id: number): Promise<Pet | null> {
+        const { data, error } = await supabase
+            .from('pets')
+            .select(`
+                *,
+                owner_profile:profiles!owner_id(name)
+            `)
+            .eq('id', id)
+            .single();
+
+        if (error) return null;
+        return data as Pet;
+    },
+
+    async createPet(pet: Omit<Pet, 'id' | 'likes' | 'distance'>) {
         const { data, error } = await supabase
             .from('pets')
             .insert({
-                ...petData,
-                owner_id: ownerId,
-                // Default fields
-                distance: '1m',
-                likes: 0
+                ...pet,
+                likes: 0,
+                distance: '1m' // constant for now
             })
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
-    },
-
-    // Update Pet
-    async updatePet(id: number, updates: any) {
-        const { data, error } = await supabase
-            .from('pets')
-            .update(updates)
-            .eq('id', id)
             .select()
             .single();
 

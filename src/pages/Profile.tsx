@@ -10,6 +10,8 @@ import type { Collection } from '../utils/storage';
 import { Folder, CaretRight, Camera } from '@phosphor-icons/react';
 import { processImage } from '../utils/imageHandler';
 
+import { petService } from '../lib/petService';
+
 const Profile = () => {
     const { user, logout, updateUser } = useAuth();
     const navigate = useNavigate();
@@ -76,20 +78,36 @@ const Profile = () => {
     const matches = (user && !isPublic) ? getMatches(user.id) : [];
     const collections = (user && !isPublic) ? getCollections(user.id) : [];
 
+    // Async Pets State
+    const [pets, setPets] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchPets = async () => {
+            if (!isPublic && user) {
+                const data = await petService.getUserPets(user.id);
+                setPets(data || []);
+            } else if (isPublic && id) {
+                // Determine if we can fetch by owner name or need to fetch all
+                // For now fetch all and filter client side for legacy compatibility
+                const all = await petService.getAllPets('PUBLIC_VIEW');
+                setPets((all as any[]).filter(p => p.owner === id));
+            }
+        };
+        fetchPets();
+    }, [user, isPublic, id]);
+
+
     // Filter pets based on tab
-    const allPets = getAllPets();
-    const userPets = isPublic
-        ? allPets.filter(p => p.owner === id) // Public: Filter by owner string
-        : (user ? allPets.filter(p => p.ownerId === user.id) : []); // Private: Filter by ownerId
+    const userPets = pets; // Now uses state
 
     const myMatches = (!isPublic && user)
-        ? allPets.filter(p => matches.includes(p.id))
-        : MOCK_PETS.slice(0, 3); // Fallback for public demo
+        ? getAllPets().filter(p => matches.includes(p.id)) // Keep using sync for matches logic to avoid breakage for now
+        : MOCK_PETS.slice(0, 3);
 
     // Use real likes for the Likes tab
     const myLikes = (!isPublic && user)
-        ? allPets.filter(p => likes.includes(p.id)) // Use getAllPets to include local
-        : MOCK_PETS.slice(2, 5); // Fallback mock for public or if empty demo
+        ? getAllPets().filter(p => likes.includes(p.id))
+        : MOCK_PETS.slice(2, 5);
 
     const handleAddPet = () => {
         navigate('/onboarding?step=2');
