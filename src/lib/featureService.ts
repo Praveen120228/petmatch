@@ -32,16 +32,18 @@ export const featureService = {
 
         if (data) {
             // Unlike
-            await supabase
+            const { error } = await supabase
                 .from('likes')
                 .delete()
                 .match({ user_id: userId, pet_id: petId });
+            if (error) throw error;
             return false;
         } else {
             // Like
-            await supabase
+            const { error } = await supabase
                 .from('likes')
                 .insert({ user_id: userId, pet_id: petId });
+            if (error) throw error;
             return true;
         }
     },
@@ -68,10 +70,12 @@ export const featureService = {
             .maybeSingle();
 
         if (data) {
-            await supabase.from('matches').delete().match({ user_id: userId, pet_id: petId });
+            const { error } = await supabase.from('matches').delete().match({ user_id: userId, pet_id: petId });
+            if (error) throw error;
             return false;
         } else {
-            await supabase.from('matches').insert({ user_id: userId, pet_id: petId });
+            const { error } = await supabase.from('matches').insert({ user_id: userId, pet_id: petId });
+            if (error) throw error;
             return true;
         }
     },
@@ -102,7 +106,7 @@ export const featureService = {
         }));
     },
 
-    async createCollection(userId: string, name: string): Promise<Collection | null> {
+    async createCollection(userId: string, name: string): Promise<Collection> {
         const { data, error } = await supabase
             .from('collections')
             .insert({ user_id: userId, name })
@@ -111,7 +115,7 @@ export const featureService = {
 
         if (error) {
             console.error('Error creating collection:', error);
-            return null;
+            throw error;
         }
         return { ...data, items: [] };
     },
@@ -126,7 +130,10 @@ export const featureService = {
             .from('collection_items')
             .insert({ collection_id: collectionId, pet_id: petId });
 
-        if (error) console.error('Error adding to collection:', error);
+        if (error) {
+            console.error('Error adding to collection:', error);
+            throw error;
+        }
     },
 
     async removeFromCollection(collectionId: number, petId: number) {
@@ -135,6 +142,9 @@ export const featureService = {
             .delete()
             .match({ collection_id: collectionId, pet_id: petId });
 
-        if (error) console.error('Error removing from collection:', error);
+        if (error) {
+            console.error('Error removing from collection:', error);
+            throw error;
+        }
     }
 };

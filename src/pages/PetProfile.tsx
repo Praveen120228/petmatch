@@ -149,6 +149,9 @@ const PetProfile = () => {
     const handleToggleCollection = async (collectionId: number, isAlreadyIn: boolean) => {
         if (!user || !pet) return;
 
+        // Snapshot for revert
+        const prevCollections = collections;
+
         // Optimistic update
         setCollections(prev => prev.map(c => {
             if (c.id === collectionId) {
@@ -169,7 +172,8 @@ const PetProfile = () => {
                 showToast(`Added ${pet.name} to collection!`, 'success');
             }
         } catch (err) {
-            // Revert would be complex, just log for now
+            // Revert state
+            setCollections(prevCollections);
             console.error(err);
             showToast("Failed to update collection", "error");
         }
