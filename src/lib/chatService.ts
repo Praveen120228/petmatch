@@ -102,6 +102,14 @@ export const chatService = {
         return data;
     },
 
+    async deleteConversation(conversationId: number) {
+        const { error } = await supabase.from('conversations').delete().eq('id', conversationId);
+        if (error) {
+            console.error('Error deleting conversation:', error);
+            throw error;
+        }
+    },
+
     // Start a chat with a user (if not exists)
     async createConversation(myId: string, otherId: string, petId?: number) {
         // Check if exists

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getLikes, toggleLike, getMatches, toggleMatch, getCollections, createCollection, addToCollection, removeFromCollection, deleteCollection } from '../utils/storage';
+import { featureService } from '../lib/featureService';
+import type { Collection } from '../lib/featureService';
 import { chatService } from '../lib/chatService';
 import { petService } from '../lib/petService';
 import { supabase } from '../lib/supabase';
@@ -18,18 +19,39 @@ const PetProfile = () => {
 
     const [pet, setPet] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
-    // const [tick, setTick] = useState(0);
+
+    // Feature State
+    const [isLiked, setIsLiked] = useState(false);
+    const [isMatched, setIsMatched] = useState(false);
+    const [collections, setCollections] = useState<Collection[]>([]);
+
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
 
     useEffect(() => {
-        const loadPet = async () => {
+        const loadData = async () => {
             setLoading(true);
-            const p = await petService.getPet(Number(id));
+            const petId = Number(id);
+
+            // 1. Fetch Pet
+            const p = await petService.getPet(petId);
             setPet(p);
+
+            // 2. Fetch User Relations (if logged in)
+            if (user) {
+                const [likes, matches, cols] = await Promise.all([
+                    featureService.getLikes(user.id),
+                    featureService.getMatches(user.id),
+                    featureService.getCollections(user.id)
+                ]);
+                setIsLiked(likes.includes(petId));
+                setIsMatched(matches.includes(petId));
+                setCollections(cols);
+            }
+
             setLoading(false);
         };
-        loadPet();
+        loadData();
 
         // Subscribe to updates for this pet
         const channel = supabase
@@ -46,11 +68,7 @@ const PetProfile = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [id]);
-
-    const isLiked = user ? getLikes(user.id).includes(Number(id)) : false;
-    const isMatched = user ? getMatches(user.id).includes(Number(id)) : false;
-    const collections = user ? getCollections(user.id) : [];
+    }, [id, user]);
 
     if (loading) return <div style={{ padding: '4rem', textAlign: 'center' }}>Loading...</div>;
 
@@ -65,13 +83,22 @@ const PetProfile = () => {
         );
     }
 
-    const handleLike = () => {
-        if (!user) {
+    const handleLike = async () => {
+        if (!user || !pet) {
             showToast("Please login", "error");
             return;
         }
-        toggleLike(user.id, pet.id);
-        // setTick(t => t + 1);
+
+        // Optimistic
+        const previousState = isLiked;
+        setIsLiked(!isLiked);
+
+        try {
+            await featureService.toggleLike(user.id, pet.id);
+        } catch (err) {
+            setIsLiked(previousState);
+            showToast("Failed to update like", "error");
+        }
     };
 
     const handleShare = () => {
@@ -79,15 +106,23 @@ const PetProfile = () => {
         showToast('Link copied to clipboard!', 'success');
     };
 
-    const handleMatch = () => {
-        if (!user) {
+    const handleMatch = async () => {
+        if (!user || !pet) {
             showToast("Please login", "error");
             return;
         }
-        toggleMatch(user.id, pet.id);
-        const isNowMatched = !isMatched; // toggleMatch returns 'is now un-matched' boolean? No, it returns !isMatched.
-        if (isNowMatched) showToast("It's a Match!", 'success');
-        // setTick(t => t + 1);
+
+        // Optimistic
+        const previousState = isMatched;
+        setIsMatched(!isMatched);
+
+        try {
+            const isNowMatched = await featureService.toggleMatch(user.id, pet.id);
+            if (isNowMatched) showToast("It's a Match!", 'success');
+        } catch (err) {
+            setIsMatched(previousState);
+            showToast("Failed to update match", "error");
+        }
     };
 
     const handleMessage = async () => {
@@ -97,13 +132,10 @@ const PetProfile = () => {
         }
         try {
             // Need data: pet owner ID.
-            // Currently pet.owner is a Name string in mock data.
-            // We need `pet.ownerId`.
             if (!pet.ownerId && !pet.owner_id) {
                 showToast("Cannot message this pet owner (missing ID)", "error");
                 return;
             }
-            // Mapped or raw supabase pet?
             const ownerId = pet.ownerId || pet.owner_id;
 
             const chatId = await chatService.createConversation(user.id, ownerId, pet.id);
@@ -114,26 +146,53 @@ const PetProfile = () => {
         }
     };
 
-    const handleToggleCollection = (collectionId: string, isAlreadyIn: boolean) => {
-        if (!user) return;
-        if (isAlreadyIn) {
-            removeFromCollection(user.id, collectionId, pet.id);
-            showToast(`Removed ${pet.name} from collection.`, 'info');
-        } else {
-            addToCollection(user.id, collectionId, pet.id);
-            showToast(`Added ${pet.name} to collection!`, 'success');
+    const handleToggleCollection = async (collectionId: number, isAlreadyIn: boolean) => {
+        if (!user || !pet) return;
+
+        // Optimistic update
+        setCollections(prev => prev.map(c => {
+            if (c.id === collectionId) {
+                const newItems = isAlreadyIn
+                    ? c.items?.filter(id => id !== pet.id)
+                    : [...(c.items || []), pet.id];
+                return { ...c, items: newItems };
+            }
+            return c;
+        }));
+
+        try {
+            if (isAlreadyIn) {
+                await featureService.removeFromCollection(collectionId, pet.id);
+                showToast(`Removed ${pet.name} from collection.`, 'info');
+            } else {
+                await featureService.addToCollection(collectionId, pet.id);
+                showToast(`Added ${pet.name} to collection!`, 'success');
+            }
+        } catch (err) {
+            // Revert would be complex, just log for now
+            console.error(err);
+            showToast("Failed to update collection", "error");
         }
-        // setTick(t => t + 1); // Force re-render to update UI
     };
 
-    const handleCreateCollection = () => {
-        if (!newCollectionName.trim() || !user) return;
-        const newCol = createCollection(user.id, newCollectionName);
-        addToCollection(user.id, newCol.id, pet.id);
-        showToast(`Created "${newCollectionName}" and added ${pet.name}!`, 'success');
-        setShowCollectionModal(false);
-        setNewCollectionName('');
-        // setTick(t => t + 1);
+    const handleCreateCollection = async () => {
+        if (!newCollectionName.trim() || !user || !pet) return;
+
+        try {
+            const newCol = await featureService.createCollection(user.id, newCollectionName);
+            if (newCol) {
+                await featureService.addToCollection(newCol.id, pet.id);
+                newCol.items = [pet.id];
+
+                setCollections(prev => [...prev, newCol]);
+                showToast(`Created "${newCollectionName}" and added ${pet.name}!`, 'success');
+                setShowCollectionModal(false);
+                setNewCollectionName('');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to create collection", "error");
+        }
     };
 
     return (
@@ -358,7 +417,7 @@ const PetProfile = () => {
                             {/* List */}
                             <div style={{ maxHeight: '350px', overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 {collections.length > 0 ? collections.map(col => {
-                                    const isAdded = col.petIds.includes(pet.id);
+                                    const isAdded = col.items?.includes(pet.id) || false;
                                     return (
                                         <div
                                             key={col.id}
@@ -395,7 +454,7 @@ const PetProfile = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                                         <span style={{ fontWeight: 700, color: isAdded ? '#166534' : '#1f2937', fontSize: '1rem' }}>{col.name}</span>
-                                                        <span style={{ fontSize: '0.8rem', color: isAdded ? '#166534' : '#9ca3af' }}>{col.petIds.length} pets</span>
+                                                        <span style={{ fontSize: '0.8rem', color: isAdded ? '#166534' : '#9ca3af' }}>{col.items?.length || 0} pets</span>
                                                     </div>
                                                 </div>
                                                 {isAdded && (
@@ -406,11 +465,11 @@ const PetProfile = () => {
                                             </button>
 
                                             <button
-                                                onClick={(e) => {
+                                                onClick={async (e) => {
                                                     e.stopPropagation();
                                                     if (user && confirm(`Are you sure you want to delete collection "${col.name}"?`)) {
-                                                        deleteCollection(user.id, col.id);
-                                                        // setTick(t => t + 1);
+                                                        await featureService.deleteCollection(col.id);
+                                                        setCollections(prev => prev.filter(c => c.id !== col.id));
                                                     }
                                                 }}
                                                 style={{

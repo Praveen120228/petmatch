@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Heart, MagnifyingGlass, PawPrint, Faders } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { getLikes, toggleLike } from '../utils/storage';
+import { featureService } from '../lib/featureService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
@@ -17,6 +17,7 @@ const MatchFeed = () => {
 
     // State
     const [allPets, setAllPets] = useState<any[]>([]);
+    const [likes, setLikes] = useState<number[]>([]);
     // const [loading, setLoading] = useState(true); // unused
 
     // const [tick, setTick] = useState(0); // unused
@@ -35,16 +36,20 @@ const MatchFeed = () => {
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
     const [selectedAges, setSelectedAges] = useState<string[]>([]);
 
-    // 1. Fetch Pets
+    // 1. Fetch Pets & Likes
     useEffect(() => {
-        const loadPets = async () => {
+        const loadData = async () => {
             if (!user) return;
-            // setLoading(true); // unused
-            const pets = await petService.getAllPets(user.id);
+            // setLoading(true); 
+            const [pets, userLikes] = await Promise.all([
+                petService.getAllPets(user.id),
+                featureService.getLikes(user.id)
+            ]);
             setAllPets(pets);
-            // setLoading(false); // unused
+            setLikes(userLikes);
+            // setLoading(false);
         };
-        loadPets();
+        loadData();
     }, [user]);
 
     // 44. Derived Filter Options
@@ -99,7 +104,7 @@ const MatchFeed = () => {
         showToast('Filters cleared', 'info');
     };
 
-    const handleLike = (e: React.MouseEvent, pet: any) => {
+    const handleLike = async (e: React.MouseEvent, pet: any) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -108,23 +113,25 @@ const MatchFeed = () => {
             return;
         }
 
-        const isLiked = toggleLike(user.id, pet.id);
-        // Force re-render logic is tricky with localstorage direct read, 
-        // ideally state should listen to storage or be lifted, 
-        // but for now simple state tick or relying on parent re-render
-        // toggleLike returns *new* state inverse.
+        // Optimistic UI update
+        const alreadyLiked = likes.includes(pet.id);
+        const newLikes = alreadyLiked
+            ? likes.filter(id => id !== pet.id)
+            : [...likes, pet.id];
 
-        if (!isLiked) { // was just liked
-            showToast(`You liked ${pet.name}!`, 'success');
-        } else {
-            // unliked
+        setLikes(newLikes); // Update UI immediately
+
+        try {
+            const isLiked = await featureService.toggleLike(user.id, pet.id);
+            if (isLiked) {
+                showToast(`You liked ${pet.name}!`, 'success');
+            }
+        } catch (err) {
+            console.error(err);
+            // Revert on error
+            setLikes(likes);
+            showToast("Failed to update like", "error");
         }
-        setHoveredId(null); // Simple hack to trigger UI update via parent re-render if needed, though weak
-        // In real app, 'pets' or 'likes' should be stateful. 
-        // Assuming getAllPets reads freshly on each render? No it's a const call derived.
-        // We need a forceUpdate to reflect like change immediately if 'pets' doesn't change.
-        // Actually toggleLike updates localStorage. We need to trigger a re-read.
-        // For this demo, let's just show toast. The UI heart color updates on re-render.
     };
 
     return (
@@ -337,7 +344,7 @@ const MatchFeed = () => {
                                                     zIndex: 10
                                                 }}
                                             >
-                                                <Heart weight="fill" color={user && getLikes(user.id).includes(pet.id) ? 'var(--secondary-500)' : 'var(--gray-300)'} size={20} />
+                                                <Heart weight="fill" color={likes.includes(pet.id) ? 'var(--secondary-500)' : 'var(--gray-300)'} size={20} />
                                             </Button>
 
                                             {/* Content Overlay */}

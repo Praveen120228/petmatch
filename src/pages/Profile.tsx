@@ -4,9 +4,17 @@ import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom'
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, X, Trash, CaretLeft } from '@phosphor-icons/react';
-import { MOCK_PETS } from '../data/mockPets';
-import { getLikes, getMatches, getAllPets, getCollections, deleteCollection, removeFromCollection } from '../utils/storage';
-import type { Collection } from '../utils/storage';
+
+// Actually allow me to remove MOCK_PETS if it is truly unused. But wait, I see "MOCK_PETS.slice" later in the file?
+// Linter said "MOCK_PETS is declared but never read" at line 7... 
+// Ah, because in my previous edit I might have commented out usage?
+// Let's look at Step 333 (original file). It used MOCK_PETS.
+// Step 335 (my edit). I replaced lines 77-111. 
+// "const myMatches = ... : MOCK_PETS.slice(0, 3);" was REPLACED with ": []".
+// So MOCK_PETS is indeed unused now.
+// I will remove it.
+import { featureService } from '../lib/featureService';
+import type { Collection } from '../lib/featureService';
 import { Folder, CaretRight, Camera } from '@phosphor-icons/react';
 import { processImage } from '../utils/imageHandler';
 
@@ -17,7 +25,7 @@ const Profile = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>(); // 'id' contains the username for public profile
     const [searchParams, setSearchParams] = useSearchParams();
-    const [_, setTick] = useState(0);
+    // const [_, setTick] = useState(0); // Removed unused setTick
 
     // Public vs Private Mode Logic
     const isPublic = !!id; // If ID exists, it's public
@@ -74,41 +82,53 @@ const Profile = () => {
     const expandedCollectionId = searchParams.get('collectionId');
 
     // Derived Data
-    const likes = (user && !isPublic) ? getLikes(user.id) : [];
-    const matches = (user && !isPublic) ? getMatches(user.id) : [];
-    const collections = (user && !isPublic) ? getCollections(user.id) : [];
+    const [likes, setLikes] = useState<number[]>([]);
+    const [matches, setMatches] = useState<number[]>([]);
+    const [collections, setCollections] = useState<Collection[]>([]);
 
     // Async Pets State
     const [pets, setPets] = useState<any[]>([]);
+    const [allPetsRegistry, setAllPetsRegistry] = useState<any[]>([]); // For looking up matched/liked pets
 
     useEffect(() => {
-        const fetchPets = async () => {
+        const loadData = async () => {
+            // 1. Load User's Own Pets & Relations
             if (!isPublic && user) {
-                const data = await petService.getUserPets(user.id);
-                setPets(data || []);
+                const [userPets, userLikes, userMatches, userCols] = await Promise.all([
+                    petService.getUserPets(user.id),
+                    featureService.getLikes(user.id),
+                    featureService.getMatches(user.id),
+                    featureService.getCollections(user.id)
+                ]);
+                setPets(userPets || []);
+                setLikes(userLikes);
+                setMatches(userMatches);
+                setCollections(userCols);
+
+                // We also need ALL pets to look up details for likes/matches
+                // This might be heavy, in real app we'd fetch by IDs
+                const registry = await petService.getAllPets('ALL');
+                setAllPetsRegistry(registry);
+
             } else if (isPublic && id) {
-                // Determine if we can fetch by owner name or need to fetch all
-                // For now fetch all and filter client side for legacy compatibility
+                // Public view: Load that user's pets
                 const all = await petService.getAllPets('PUBLIC_VIEW');
-                // Filter by owner_id (UUID) or legacy owner (name string)
                 setPets((all as any[]).filter(p => p.owner_id === id || p.owner === id));
             }
         };
-        fetchPets();
+        loadData();
     }, [user, isPublic, id]);
 
-
     // Filter pets based on tab
-    const userPets = pets; // Now uses state
+    const userPets = pets;
 
     const myMatches = (!isPublic && user)
-        ? getAllPets().filter(p => matches.includes(p.id)) // Keep using sync for matches logic to avoid breakage for now
-        : MOCK_PETS.slice(0, 3);
+        ? allPetsRegistry.filter(p => matches.includes(p.id))
+        : [];
 
-    // Use real likes for the Likes tab
     const myLikes = (!isPublic && user)
-        ? getAllPets().filter(p => likes.includes(p.id))
-        : MOCK_PETS.slice(2, 5);
+        ? allPetsRegistry.filter(p => likes.includes(p.id))
+        : [];
 
     const handleAddPet = () => {
         navigate('/onboarding?step=2');
@@ -420,7 +440,7 @@ const Profile = () => {
                                                 <div>
                                                     <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937' }}>{col.name}</h3>
                                                     <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                                                        {col.petIds.length} {col.petIds.length === 1 ? 'pet' : 'pets'}
+                                                        {col.items?.length || 0} {(col.items?.length || 0) === 1 ? 'pet' : 'pets'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -440,7 +460,7 @@ const Profile = () => {
 
                         {/* Collection Details Modal */}
                         {expandedCollectionId && (() => {
-                            const selectedCol = collections.find(c => c.id === expandedCollectionId);
+                            const selectedCol = collections.find(c => c.id === Number(expandedCollectionId));
                             if (!selectedCol) return null;
                             return (
                                 <div style={{
@@ -505,10 +525,10 @@ const Profile = () => {
 
                                             {/* Right: Options (Delete) */}
                                             <Button
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     if (confirm(`Are you sure you want to delete collection "${selectedCol.name}"?`)) {
-                                                        deleteCollection(user!.id, selectedCol.id);
-                                                        setTick(t => t + 1);
+                                                        await featureService.deleteCollection(selectedCol.id);
+                                                        setCollections(prev => prev.filter(c => c.id !== selectedCol.id));
                                                         setSearchParams({ tab: 'collections' });
                                                     }
                                                 }}
@@ -525,9 +545,9 @@ const Profile = () => {
                                             padding: '2rem',
                                             background: '#f9fafb'
                                         }}>
-                                            {selectedCol.petIds.length > 0 ? (
+                                            {selectedCol.items && selectedCol.items.length > 0 ? (
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-                                                    {getAllPets().filter(p => selectedCol.petIds.includes(p.id)).map((pet: any) => (
+                                                    {allPetsRegistry.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
                                                         <div key={pet.id} style={{
                                                             display: 'flex',
                                                             flexDirection: 'column',
@@ -555,11 +575,17 @@ const Profile = () => {
                                                                     {pet.type ? pet.type.charAt(0).toUpperCase() + pet.type.slice(1) : 'Pet'}
                                                                 </div>
                                                                 <button
-                                                                    onClick={(e) => {
+                                                                    onClick={async (e) => {
                                                                         e.stopPropagation();
                                                                         if (confirm(`Remove ${pet.name} from this collection?`)) {
-                                                                            removeFromCollection(user!.id, selectedCol.id, pet.id);
-                                                                            setTick(t => t + 1);
+                                                                            await featureService.removeFromCollection(selectedCol.id, pet.id);
+                                                                            // Update state
+                                                                            setCollections(prev => prev.map(c => {
+                                                                                if (c.id === selectedCol.id) {
+                                                                                    return { ...c, items: c.items?.filter(id => id !== pet.id) };
+                                                                                }
+                                                                                return c;
+                                                                            }));
                                                                         }
                                                                     }}
                                                                     style={{
