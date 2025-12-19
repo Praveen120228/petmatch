@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -31,7 +31,7 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router basename="/petmatch">
+        <Router>
           <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Layout>
               <Routes>
