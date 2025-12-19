@@ -42,6 +42,20 @@ export const petService = {
         return data as Pet;
     },
 
+    async getPetsByIds(ids: number[]): Promise<Pet[]> {
+        if (!ids.length) return [];
+        const { data, error } = await supabase
+            .from('pets')
+            .select('*')
+            .in('id', ids);
+
+        if (error) {
+            console.error('Error fetching pets by IDs:', error);
+            return [];
+        }
+        return data as Pet[];
+    },
+
     async createPet(pet: Omit<Pet, 'id' | 'likes' | 'distance'>) {
         const { data, error } = await supabase
             .from('pets')

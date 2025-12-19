@@ -82,53 +82,57 @@ const Profile = () => {
     const expandedCollectionId = searchParams.get('collectionId');
 
     // Derived Data
-    const [likes, setLikes] = useState<number[]>([]);
-    const [matches, setMatches] = useState<number[]>([]);
-    const [collections, setCollections] = useState<Collection[]>([]);
-
-    // Async Pets State
+    // Data State
     const [pets, setPets] = useState<any[]>([]);
-    const [allPetsRegistry, setAllPetsRegistry] = useState<any[]>([]); // For looking up matched/liked pets
+    const [likedPets, setLikedPets] = useState<any[]>([]);
+    const [matchedPets, setMatchedPets] = useState<any[]>([]);
+    const [collectionPets, setCollectionPets] = useState<any[]>([]);
+    const [collections, setCollections] = useState<Collection[]>([]);
 
     useEffect(() => {
         const loadData = async () => {
-            // 1. Load User's Own Pets & Relations
             if (!isPublic && user) {
-                const [userPets, userLikes, userMatches, userCols] = await Promise.all([
+                const [userPets, userCols] = await Promise.all([
                     petService.getUserPets(user.id),
-                    featureService.getLikes(user.id),
-                    featureService.getMatches(user.id),
                     featureService.getCollections(user.id)
                 ]);
                 setPets(userPets || []);
-                setLikes(userLikes);
-                setMatches(userMatches);
                 setCollections(userCols);
 
-                // We also need ALL pets to look up details for likes/matches
-                // This might be heavy, in real app we'd fetch by IDs
-                const registry = await petService.getAllPets('ALL');
-                setAllPetsRegistry(registry);
+                const [likeIds, matchIds] = await Promise.all([
+                    featureService.getLikes(user.id),
+                    featureService.getMatches(user.id)
+                ]);
+
+                const colItemIds = userCols.flatMap(c => c.items || []);
+                const uniqueIds = [...new Set([...likeIds, ...matchIds, ...colItemIds])];
+
+                if (uniqueIds.length > 0) {
+                    const details = await petService.getPetsByIds(uniqueIds);
+                    setLikedPets(details.filter(p => likeIds.includes(p.id)));
+                    setMatchedPets(details.filter(p => matchIds.includes(p.id)));
+                    setCollectionPets(details.filter(p => colItemIds.includes(p.id)));
+                } else {
+                    setLikedPets([]);
+                    setMatchedPets([]);
+                    setCollectionPets([]);
+                }
 
             } else if (isPublic && id) {
-                // Public view: Load that user's pets
                 const all = await petService.getAllPets('PUBLIC_VIEW');
                 setPets((all as any[]).filter(p => p.owner_id === id || p.owner === id));
+                setLikedPets([]);
+                setMatchedPets([]);
+                setCollectionPets([]);
             }
         };
         loadData();
     }, [user, isPublic, id]);
 
-    // Filter pets based on tab
+    // Derived for rendering
+    const myMatches = matchedPets;
+    const myLikes = likedPets;
     const userPets = pets;
-
-    const myMatches = (!isPublic && user)
-        ? allPetsRegistry.filter(p => matches.includes(p.id))
-        : [];
-
-    const myLikes = (!isPublic && user)
-        ? allPetsRegistry.filter(p => likes.includes(p.id))
-        : [];
 
     const handleAddPet = () => {
         navigate('/onboarding?step=2');
@@ -547,7 +551,7 @@ const Profile = () => {
                                         }}>
                                             {selectedCol.items && selectedCol.items.length > 0 ? (
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-                                                    {allPetsRegistry.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
+                                                    {collectionPets.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
                                                         <div key={pet.id} style={{
                                                             display: 'flex',
                                                             flexDirection: 'column',
