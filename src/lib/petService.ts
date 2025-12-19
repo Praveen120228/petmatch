@@ -53,7 +53,10 @@ export const petService = {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error("Pet Creation Error:", error);
+            throw error;
+        }
         return data;
     }
 };

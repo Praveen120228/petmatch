@@ -57,9 +57,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .single();
 
             if (error) {
-                console.error('Error fetching profile:', error);
-                // If profile missing but user exists (rare sync issue), try basic fallback
-                setUser({ id: userId, name: email.split('@')[0], email: email });
+                console.log('Profile missing or error, attempting creation...', error);
+                // Attempt to Create Profile (Lazy init for old users or race conditions)
+                const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: userId,
+                        email: email,
+                        name: email.split('@')[0],
+                        avatar_url: ''
+                    })
+                    .select()
+                    .single();
+
+                if (createError) {
+                    console.error('Failed to auto-create profile:', createError);
+                    // Fallback to local state only
+                    setUser({ id: userId, name: email.split('@')[0], email: email });
+                } else {
+                    setUser({
+                        id: newProfile.id,
+                        name: newProfile.name,
+                        email: newProfile.email,
+                        image: newProfile.avatar_url
+                    });
+                }
             } else if (data) {
                 setUser({
                     id: data.id,
