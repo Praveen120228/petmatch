@@ -12,7 +12,7 @@ interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-    signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
     updateUser: (data: Partial<User>) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
@@ -121,6 +121,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (error) return { success: false, error: error.message };
 
         if (data.user) {
+            // Check if email confirmation is required (session will be null)
+            if (!data.session) {
+                return { success: true, confirmationRequired: true };
+            }
+
             // Manually insert profile to ensure it exists immediately
             const { error: profileError } = await supabase.from('profiles').insert({
                 id: data.user.id,

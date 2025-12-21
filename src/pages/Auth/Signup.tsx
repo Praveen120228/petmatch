@@ -15,9 +15,15 @@ const Signup = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const { success, error } = await signup(name, email, password);
+        const { success, error, confirmationRequired } = await signup(name, email, password);
+
         if (success) {
-            navigate('/onboarding');
+            if (confirmationRequired) {
+                alert('Please check your email to confirm your account before logging in.');
+                navigate('/login');
+            } else {
+                navigate('/onboarding');
+            }
         } else {
             alert(error || 'Signup failed');
         }
