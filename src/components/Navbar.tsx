@@ -61,13 +61,12 @@ const Navbar = () => {
                     <PawPrint weight="fill" color="currentColor" /> PetMatch
                 </Link>
             ) : (
-                <a
-                    href="/"
-                    onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
+                <Link
+                    to="/"
                     style={{ ...logoStyle, textDecoration: 'none', cursor: 'pointer' }}
                 >
                     <PawPrint weight="fill" color="currentColor" /> PetMatch
-                </a>
+                </Link>
             )}
 
             <div style={linkContainerStyle}>
