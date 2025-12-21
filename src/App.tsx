@@ -12,6 +12,10 @@ import Profile from './pages/Profile';
 import ChatRoom from './pages/ChatRoom';
 import ChatSettings from './pages/ChatSettings';
 import LandingPage from './pages/LandingPage';
+import About from './pages/About';
+import Safety from './pages/Safety';
+import Guidelines from './pages/Guidelines';
+import Support from './pages/Support';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -39,6 +43,10 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/safety" element={<Safety />} />
+                <Route path="/guidelines" element={<Guidelines />} />
+                <Route path="/support" element={<Support />} />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>

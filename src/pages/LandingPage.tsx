@@ -167,10 +167,10 @@ const LandingPage = () => {
                     <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>PetMatch</span>
                 </div>
                 <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '2rem', fontSize: '0.9rem', color: 'var(--gray-600)' }}>
-                    <Link to="#" style={{ textDecoration: 'none', fontWeight: 500 }}>About</Link>
-                    <Link to="#" style={{ textDecoration: 'none', fontWeight: 500 }}>Safety</Link>
-                    <Link to="#" style={{ textDecoration: 'none', fontWeight: 500 }}>Guidelines</Link>
-                    <Link to="#" style={{ textDecoration: 'none', fontWeight: 500 }}>Support</Link>
+                    <Link to="/about" style={{ textDecoration: 'none', fontWeight: 500 }}>About</Link>
+                    <Link to="/safety" style={{ textDecoration: 'none', fontWeight: 500 }}>Safety</Link>
+                    <Link to="/guidelines" style={{ textDecoration: 'none', fontWeight: 500 }}>Guidelines</Link>
+                    <Link to="/support" style={{ textDecoration: 'none', fontWeight: 500 }}>Support</Link>
                 </div>
                 <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} PetMatch. All rights reserved.</p>
             </footer>
