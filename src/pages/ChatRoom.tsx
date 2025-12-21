@@ -107,12 +107,12 @@ const ChatRoom = () => {
 
             {/* Header */}
             <div style={{
-                padding: '1rem 1.5rem',
+                padding: '0.75rem 1rem', // Reduced padding for mobile
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.75rem',
                 borderBottom: '1px solid var(--gray-200)',
-                background: 'rgba(255,255,255,0.8)',
+                background: 'rgba(255,255,255,0.9)',
                 backdropFilter: 'blur(10px)',
                 position: 'sticky',
                 top: 0,
@@ -127,15 +127,15 @@ const ChatRoom = () => {
                 </Button>
 
                 <div
-                    style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, cursor: 'pointer', overflow: 'hidden' }}
                     onClick={() => navigate(`/messages/${chatId}/info`)}
                 >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--gray-100)', overflow: 'hidden' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gray-100)', overflow: 'hidden', flexShrink: 0 }}>
                         <img src={otherUserAvatar} alt={otherUserName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-                    <div>
-                        <h2 style={{ fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.2 }}>{otherUserName}</h2>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--gray-500)' }}>Re: {petName}</p>
+                    <div style={{ minWidth: 0 }}>
+                        <h2 style={{ fontSize: '1rem', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{otherUserName}</h2>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Re: {petName}</p>
                     </div>
                 </div>
 
@@ -193,11 +193,11 @@ const ChatRoom = () => {
             <form
                 onSubmit={handleSend}
                 style={{
-                    padding: '1.5rem',
+                    padding: '1rem', // Reduced padding
                     background: 'white',
                     borderTop: '1px solid var(--gray-200)',
                     display: 'flex',
-                    gap: '1rem',
+                    gap: '0.5rem',
                     alignItems: 'center'
                 }}
             >

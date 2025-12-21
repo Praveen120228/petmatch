@@ -185,17 +185,18 @@ const Profile = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
 
                     {/* User Info */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                         <div
                             onClick={!isPublic ? () => setIsEditing(true) : undefined}
                             style={{
-                                width: '100px',
-                                height: '100px',
+                                width: '80px', // Smaller on mobile check might be better but this is safe
+                                height: '80px',
                                 borderRadius: '50%',
                                 background: '#f3f4f6',
                                 overflow: 'hidden',
                                 position: 'relative',
                                 cursor: !isPublic ? 'pointer' : 'default',
+                                flexShrink: 0
                             }}
                             onMouseEnter={(e) => { if (!isPublic) e.currentTarget.style.opacity = '0.9'; }}
                             onMouseLeave={(e) => { if (!isPublic) e.currentTarget.style.opacity = '1'; }}
@@ -211,19 +212,19 @@ const Profile = () => {
                                         onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                                         onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
                                     >
-                                        <PencilSimple color="white" weight="bold" size={24} />
+                                        <PencilSimple color="white" weight="bold" size={20} />
                                     </div>
                                 )
                             }
                         </div >
 
                         <div>
-                            <h1 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.2, color: '#111827' }}>{profileUser.name}</h1>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.95rem' }}>
-                                <MapPin weight="fill" color="#9ca3af" />
+                            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2, color: '#111827' }}>{profileUser.name}</h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.875rem' }}>
+                                <MapPin weight="fill" color="#9ca3af" size={16} />
                                 <span>{(profileUser as any).location}</span>
                             </div>
-                            <p style={{ marginTop: '0.75rem', color: '#4b5563', maxWidth: '400px', lineHeight: 1.5 }}>{(profileUser as any).bio}</p>
+                            <p style={{ marginTop: '0.5rem', color: '#4b5563', maxWidth: '400px', lineHeight: 1.4, fontSize: '0.9rem' }}>{(profileUser as any).bio}</p>
                         </div>
                     </div >
 
@@ -373,7 +374,7 @@ const Profile = () => {
                 {/* Tab Content */}
                 < div style={{ minHeight: '300px' }}>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
 
                         {activeTab === 'pets' && (
                             userPets.length > 0 ? (

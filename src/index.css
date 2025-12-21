@@ -176,3 +176,34 @@ h6 {
     transform: translateY(0);
   }
 }
+
+/* --- Mobile Responsiveness Utilities --- */
+@media (max-width: 768px) {
+  :root {
+    --space-8: 1.5rem;
+    /* Reduce large spacing on mobile */
+    --space-12: 2rem;
+  }
+
+  h1 {
+    font-size: 2rem !important;
+    /* Cap huge headings */
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-on-mobile {
+    display: none !important;
+  }
+}
+
+/* Ensure inputs don't zoom on iOS */
+input,
+textarea,
+select {
+  font-size: 16px !important;
+}

@@ -30,15 +30,16 @@ const Input: React.FC<InputProps> = ({
     };
 
     const inputStyle: React.CSSProperties = {
-        padding: '0.75rem 1rem',
+        padding: '0.875rem 1rem', // Larger touch target
         borderRadius: 'var(--radius-md)',
         border: error ? '1px solid red' : '1px solid #e5e7eb',
         background: '#ffffff',
         color: 'var(--color-text-primary)',
-        fontSize: '1rem',
+        fontSize: '16px', // Prevent iOS zoom
         outline: 'none',
         transition: 'border-color 0.2s',
         width: '100%',
+        minHeight: '48px', // Minimum touch target size
     };
 
     return (

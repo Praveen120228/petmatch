@@ -161,7 +161,7 @@ const MatchFeed = () => {
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', display: 'flex', flexDirection: 'column' }}>
 
             {/* Top Search Bar (Global) */}
-            <div style={{ background: 'var(--color-bg-card)', borderBottom: '1px solid var(--color-border)', padding: '1rem 2rem', position: 'sticky', top: 73, zIndex: 30 }}>
+            <div style={{ background: 'var(--color-bg-card)', borderBottom: '1px solid var(--color-border)', padding: '1rem', position: 'sticky', top: 72, zIndex: 30 }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '1rem', alignItems: 'center' }}>
 
                     {/* Toggle Sidebar Button */}
@@ -169,10 +169,10 @@ const MatchFeed = () => {
                         variant={showFilters ? 'secondary' : 'ghost'}
                         size="md"
                         onClick={() => setShowFilters(!showFilters)}
-                        style={{ border: '1px solid var(--color-border)', minWidth: '110px', justifyContent: 'center' }}
+                        style={{ border: '1px solid var(--color-border)', minWidth: '100px', justifyContent: 'center' }}
                     >
                         <Faders size={20} weight={showFilters ? 'fill' : 'regular'} />
-                        Filters
+                        <span className="hide-on-mobile">Filters</span>
                     </Button>
 
                     {/* Search Input */}
@@ -183,7 +183,7 @@ const MatchFeed = () => {
                         />
                         <input
                             type="text"
-                            placeholder="Search by name, breed, or trait..."
+                            placeholder="Search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{
@@ -191,7 +191,7 @@ const MatchFeed = () => {
                                 padding: '0.75rem 1rem 0.75rem 2.75rem',
                                 borderRadius: 'var(--radius-full)',
                                 border: '1px solid var(--color-border)',
-                                fontSize: '0.95rem',
+                                fontSize: '16px', // Mobile friendly
                                 outline: 'none',
                                 background: 'var(--color-bg-subtle)',
                                 color: 'var(--color-text-primary)',
@@ -214,30 +214,34 @@ const MatchFeed = () => {
 
             <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1, position: 'relative' }}>
 
-                {/* Sidebar Filters */}
+                {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
-                    width: showFilters ? '300px' : '0px',
-                    opacity: showFilters ? 1 : 0,
-                    marginRight: showFilters ? '0' : '-1px', // Hide border artifact
+                    position: window.innerWidth <= 768 ? 'fixed' : 'sticky',
+                    top: window.innerWidth <= 768 ? '72px' : '145px', // Below nav
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 40,
                     background: 'var(--color-bg-card)',
+                    width: window.innerWidth <= 768 ? '100%' : (showFilters ? '300px' : '0px'),
+                    opacity: showFilters ? 1 : 0,
+                    pointerEvents: showFilters ? 'auto' : 'none',
                     borderRight: '1px solid var(--color-border)',
-                    height: 'calc(100vh - 145px)', // Fixed height for scrolling
-                    position: 'sticky',
-                    top: '145px', // Below filter bar (73+72)
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
+                    height: window.innerWidth <= 768 ? 'calc(100vh - 72px)' : 'calc(100vh - 145px)',
+                    overflowY: 'auto',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}>
-                    <div style={{ width: '300px', flexShrink: 0 }}> {/* Fixed width container */}
+                    <div style={{ width: window.innerWidth <= 768 ? '100%' : '300px', flexShrink: 0 }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Filters</h2>
                             {(selectedType !== 'all' || selectedBreeds.length > 0 || selectedAges.length > 0) && (
-                                <button onClick={clearFilters} style={{ fontSize: '0.875rem', color: 'var(--primary-600)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>CLEAR ALL</button>
+                                <button onClick={clearFilters} style={{ fontSize: '0.875rem', color: 'var(--primary-600)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>CLEAR</button>
                             )}
                         </div>
 
-                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', height: '100%', overflowY: 'auto' }}>
+                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             {/* Categories */}
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Pet Type</h3>
@@ -305,21 +309,27 @@ const MatchFeed = () => {
                                 )}
                             </div>
                         </div>
+                        {/* Mobile Apply Button */}
+                        {window.innerWidth <= 768 && (
+                            <div style={{ padding: '1rem', borderTop: '1px solid var(--color-border)', marginTop: 'auto' }}>
+                                <Button fullWidth onClick={() => setShowFilters(false)} variant="primary">View {pets.length} Results</Button>
+                            </div>
+                        )}
                     </div>
                 </aside>
 
                 {/* Main Content Grid */}
-                <main style={{ flex: 1, padding: '2rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <main style={{ flex: 1, padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                            {pets.length} <span style={{ fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets visible</span>
+                            {pets.length} <span style={{ fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets</span>
                         </h1>
                     </div>
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: '2rem',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', // Smaller min-width for mobile (2 col likely)
+                        gap: '1rem',
                         paddingBottom: '2rem'
                     }}>
                         {pets.length > 0 ? (
@@ -329,7 +339,7 @@ const MatchFeed = () => {
                                         <Card
                                             padding="0"
                                             style={{
-                                                borderRadius: '20px',
+                                                borderRadius: '16px',
                                                 border: '1px solid var(--gray-200)',
                                                 boxShadow: hoveredId === pet.id ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
                                                 transition: 'all 0.3s ease',
@@ -339,7 +349,7 @@ const MatchFeed = () => {
                                             }}
                                         >
                                             {/* Image Container */}
-                                            <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', background: 'var(--gray-100)' }}>
+                                            <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden', background: 'var(--gray-100)' }}>
                                                 <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                                     <img
                                                         src={pet.image}
@@ -360,15 +370,15 @@ const MatchFeed = () => {
                                                     onClick={(e) => handleLike(e, pet)}
                                                     style={{
                                                         position: 'absolute',
-                                                        top: '12px',
-                                                        right: '12px',
+                                                        top: '8px',
+                                                        right: '8px',
                                                         background: 'rgba(255, 255, 255, 0.9)',
                                                         backdropFilter: 'blur(4px)',
                                                         borderRadius: '50%',
-                                                        width: '40px',
-                                                        height: '40px',
+                                                        width: '32px',
+                                                        height: '32px',
                                                         padding: 0,
-                                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                                         zIndex: 10,
                                                         border: 'none',
                                                         display: 'flex',
@@ -380,31 +390,25 @@ const MatchFeed = () => {
                                                     <Heart
                                                         weight="fill"
                                                         color={likes.includes(pet.id) ? 'var(--secondary-500)' : 'var(--gray-300)'}
-                                                        size={22}
+                                                        size={18}
                                                     />
                                                 </Button>
                                             </div>
 
                                             {/* Content (Below Image) */}
-                                            <div style={{ padding: '1.25rem' }}>
+                                            <div style={{ padding: '0.75rem' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
+                                                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
                                                     {pet.distance && (
-                                                        <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '3px', background: 'var(--gray-50)', padding: '2px 6px', borderRadius: '6px' }}>
+                                                        <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px' }}>
                                                             {pet.distance}
                                                         </span>
                                                     )}
                                                 </div>
 
-                                                <p style={{ fontSize: '0.95rem', color: 'var(--gray-600)', marginBottom: '0.75rem', fontWeight: 500 }}>
+                                                <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', marginBottom: '0.75rem', fontWeight: 500 }}>
                                                     {pet.breed} • {pet.age}
                                                 </p>
-
-                                                <Link to={`/pet/${pet.id}`}>
-                                                    <Button variant="outline" style={{ width: '100%', justifyContent: 'center', fontSize: '0.9rem', padding: '0.5rem' }}>
-                                                        View Data
-                                                    </Button>
-                                                </Link>
                                             </div>
                                         </Card>
                                     </div>
@@ -412,13 +416,13 @@ const MatchFeed = () => {
                             </>
                         ) : (
                             !loading && (
-                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 2rem', color: 'var(--gray-400)' }}>
-                                    <div style={{ background: 'var(--gray-100)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                                        <PawPrint size={40} weight="duotone" />
+                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
+                                    <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                        <PawPrint size={32} weight="duotone" />
                                     </div>
-                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
-                                    <p style={{ fontSize: '1.1rem' }}>Try adjusting your search or filters to see more results.</p>
-                                    <Button variant="outline" onClick={clearFilters} style={{ marginTop: '2rem' }}>Clear All Filters</Button>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
+                                    <p style={{ fontSize: '1rem' }}>Try adjusting your search or filters.</p>
+                                    <Button variant="outline" onClick={clearFilters} style={{ marginTop: '1.5rem' }}>Clear Filters</Button>
                                 </div>
                             )
                         )}

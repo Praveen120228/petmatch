@@ -232,7 +232,7 @@ const Onboarding = () => {
             </div>
 
             {/* Grid Layout for Inputs */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '2rem', alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.5rem', marginBottom: '2rem', alignItems: 'start' }}>
                 <Input
                     label="Pet Name"
                     placeholder="e.g. Buddy"
@@ -325,11 +325,11 @@ const Onboarding = () => {
             </style>
             <Card style={{
                 width: '100%',
-                maxWidth: '900px', // Spacious Desktop Width
+                maxWidth: '900px',
                 opacity: isAnimating ? 0 : 1,
                 transform: isAnimating ? 'scale(0.95)' : 'scale(1)',
                 transition: 'all 0.3s ease',
-                padding: '3rem'
+                padding: '2rem 1rem' // Reduced padding for mobile by default, increased by style prop or media query if possible. Here using safer moderate padding.
             }}>
                 {step === 1 ? renderStep1() : renderStep2()}
             </Card>
