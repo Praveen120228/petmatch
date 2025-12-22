@@ -28,65 +28,63 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         let mounted = true;
 
-        // Safety Timeout: If Supabase takes too long (e.g. cold start), 
-        // we unblock the UI immediately so the user isn't stuck on a white screen.
-        const timer = setTimeout(() => {
-            if (mounted && loading) {
-                console.log('Auth: Session check taking longer than 3s, unblocking UI...');
-                setLoading(false);
-            }
-        }, 3000); // 3 seconds max wait
-
         // 1. Get initial session
-        console.log("Auth: Application mounted, fetching session...");
-        try {
-            supabase.auth.getSession().then(({ data: { session } }) => {
+        const initSession = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
                 if (!mounted) return;
-                console.log("Auth: Session fetch completed", session ? "User found" : "No session");
+
+                if (error) {
+                    console.error("Auth: Session validation error:", error);
+                }
 
                 if (session?.user) {
-                    // OPTIMIZATION: Set basic user state immediately to unblock UI
-                    // This makes the app load instantly while profile data fetches in background
+                    console.log("Auth: Session restored for", session.user.email);
                     setUser({
                         id: session.user.id,
                         email: session.user.email!,
-                        name: session.user.email!.split('@')[0], // Temporary name
-                        image: '' // Temporary image
+                        name: session.user.email!.split('@')[0],
+                        image: ''
                     });
-                    setLoading(false); // <--- UNBLOCK UI HERE
-
                     // Fetch full profile in background
                     fetchProfile(session.user.id, session.user.email!);
                 } else {
-                    setLoading(false);
+                    console.log("Auth: No active session found.");
+                    setUser(null);
                 }
-            }).catch((err) => {
-                console.error('Session fetch error:', err);
-                // Note: We removed localStorage.clear() here to prevent wiping session on network glitches
+            } catch (error) {
+                console.error("Auth: Initialization error:", error);
+            } finally {
                 if (mounted) setLoading(false);
-            });
-        } catch (e) {
-            console.error("Critical Auth Error:", e);
-            // Note: We removed localStorage.clear() here to prevent wiping session on network glitches
-            setLoading(false);
-        }
+            }
+        };
+
+        initSession();
 
         // 2. Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!mounted) return;
+            console.log(`Auth: Event occurred "${event}"`);
 
             if (session?.user) {
-                // If we don't have a user yet, set basic info immediately
-                setUser(prev => prev || {
-                    id: session.user.id,
-                    email: session.user.email!,
-                    name: session.user.email!.split('@')[0],
-                    image: ''
+                // If user was previously null or different, update state
+                setUser(prev => {
+                    // Avoid unnecessary re-renders if ID matches
+                    if (prev?.id === session.user.id) return prev;
+
+                    return {
+                        id: session.user.id,
+                        email: session.user.email!,
+                        name: session.user.email!.split('@')[0],
+                        image: ''
+                    };
                 });
 
-                // Background update
-                await fetchProfile(session.user.id, session.user.email!);
-            } else {
+                // Always fetch profile on sign-in (could optimize to only if id changed)
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                    fetchProfile(session.user.id, session.user.email!);
+                }
+            } else if (event === 'SIGNED_OUT') {
                 setUser(null);
                 setLoading(false);
             }
@@ -94,7 +92,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         return () => {
             mounted = false;
-            clearTimeout(timer);
             subscription.unsubscribe();
         };
     }, []);
