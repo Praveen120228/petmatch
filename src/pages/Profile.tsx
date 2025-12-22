@@ -322,15 +322,35 @@ const Profile = () => {
             {/* Tabs & Content */}
             < div style={{ maxWidth: '1000px', margin: '0.5rem auto 2rem', padding: '0 2rem' }}>
 
+                {/* Responsive Styles */}
+                <style>
+                    {`
+                        @media (max-width: 768px) {
+                            .mobile-fab {
+                                position: fixed !important;
+                                bottom: 2rem !important;
+                                right: 1.5rem !important;
+                                z-index: 50 !important;
+                                border-radius: 9999px !important;
+                                padding: 1rem !important;
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+                                margin: 0 !important;
+                            }
+                            .mobile-fab span { display: none; } /* Hide text on mobile */
+                        }
+                    `}
+                </style>
+
                 {/* Tab Navigation & Action - Integrated Row */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'flex-end',
                     marginBottom: '1.5rem',
-                    borderBottom: '1px solid #e5e7eb'
+                    borderBottom: '1px solid #e5e7eb',
+                    overflowX: 'auto'
                 }}>
-                    < div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px' }}>
+                    <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px', paddingRight: '1rem', flex: 1 }}>
                         {
                             ['pets', 'matches', 'likes', 'collections'].map((tab) => (
                                 <button
@@ -347,7 +367,8 @@ const Profile = () => {
                                         cursor: 'pointer',
                                         textTransform: 'capitalize',
                                         transition: 'color 0.2s',
-                                        whiteSpace: 'nowrap'
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0
                                     }}
                                 >
                                     {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
@@ -357,14 +378,14 @@ const Profile = () => {
                                 </button>
                             ))
                         }
-                    </ div>
+                    </div>
 
-                    {/* Add Pet Button (Inline) */}
+                    {/* Add Pet Button */}
                     {
                         !isPublic && activeTab === 'pets' && (
-                            <div style={{ marginBottom: '0.5rem' }}>
-                                <Button onClick={handleAddPet} size="sm">
-                                    <Plus weight="bold" /> Add New Pet
+                            <div className="mobile-fab" style={{ marginBottom: '0.5rem' }}>
+                                <Button onClick={handleAddPet} size="sm" variant="primary" style={{ borderRadius: 'var(--radius-full)' }}>
+                                    <Plus weight="bold" size={20} /> <span style={{ marginLeft: '0.5rem' }}>Add New Pet</span>
                                 </Button>
                             </div>
                         )
