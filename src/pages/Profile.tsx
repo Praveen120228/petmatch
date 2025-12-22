@@ -410,6 +410,48 @@ const Profile = () => {
                                             ) : (
                                                 <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             )}
+
+                                            {/* Delete Button (Only for owner) */}
+                                            {!isPublic && pet.id && (
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        if (confirm(`Are you sure you want to delete ${pet.name}?`)) {
+                                                            try {
+                                                                await petService.deletePet(pet.id);
+                                                                setPets(prev => prev.filter(p => p.id !== pet.id));
+                                                            } catch (err) {
+                                                                alert("Failed to delete pet. Ensure all dependencies are cleared (try running migration fixes if not done).");
+                                                                console.error(err);
+                                                            }
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '8px',
+                                                        right: '8px',
+                                                        background: 'rgba(255,255,255,0.9)',
+                                                        width: '32px',
+                                                        height: '32px',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        color: '#ef4444',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                        zIndex: 10,
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                    title="Delete Pet"
+                                                    onMouseEnter={e => e.currentTarget.style.background = '#fee2e2'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
+                                                >
+                                                    <Trash size={16} weight="bold" />
+                                                </button>
+                                            )}
                                         </div>
                                         <div style={{ paddingTop: '1rem' }}>
                                             <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.name}</h3>

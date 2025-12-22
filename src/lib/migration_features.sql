@@ -1,7 +1,7 @@
 -- 1. LIKES
 create table public.likes (
   user_id uuid references public.profiles(id) not null,
-  pet_id bigint references public.pets(id) not null,
+  pet_id bigint references public.pets(id) on delete cascade not null,
   created_at timestamp with time zone default timezone('utc'::text, now()),
   primary key (user_id, pet_id)
 );
@@ -13,7 +13,7 @@ create policy "Users can delete their own likes." on public.likes for delete usi
 -- 2. MATCHES
 create table public.matches (
   user_id uuid references public.profiles(id) not null,
-  pet_id bigint references public.pets(id) not null,
+  pet_id bigint references public.pets(id) on delete cascade not null,
   created_at timestamp with time zone default timezone('utc'::text, now()),
   primary key (user_id, pet_id)
 );
@@ -37,7 +37,7 @@ create policy "Users can delete their own collections." on public.collections fo
 -- 4. COLLECTION ITEMS
 create table public.collection_items (
   collection_id bigint references public.collections(id) on delete cascade not null,
-  pet_id bigint references public.pets(id) not null,
+  pet_id bigint references public.pets(id) on delete cascade not null,
   added_at timestamp with time zone default timezone('utc'::text, now()),
   primary key (collection_id, pet_id)
 );

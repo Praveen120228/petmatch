@@ -128,5 +128,18 @@ export const petService = {
             throw error;
         }
         return data;
+    },
+
+    async deletePet(id: number) {
+        const { error } = await supabase
+            .from('pets')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting pet:', error);
+            throw error;
+        }
+        return true;
     }
 };
