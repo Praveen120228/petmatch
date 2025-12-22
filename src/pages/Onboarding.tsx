@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { User, MapPin } from '@phosphor-icons/react';
+import { User, MapPin, Camera, Crop } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../lib/userService';
+import ImageCropper from '../components/ImageCropper';
 
 const Onboarding = () => {
     const navigate = useNavigate();
@@ -14,8 +15,30 @@ const Onboarding = () => {
     const [username, setUsername] = useState('');
     const [location, setLocation] = useState('');
     const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
+    const [image, setImage] = useState<string | null>(null);
+    const [croppingImage, setCroppingImage] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+                setImage(reader.result as string);
+                // setCroppingImage(reader.result as string); // Skip auto-crop
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+    };
+
+    const handleCropComplete = (croppedBase64: string) => {
+        setImage(croppedBase64);
+        setCroppingImage(null);
+    };
 
     const handleGetLocation = () => {
         if (!navigator.geolocation) return alert("Geolocation is not supported by your browser");
@@ -77,7 +100,7 @@ const Onboarding = () => {
                 location: location,
                 latitude: coords?.lat,
                 longitude: coords?.lng,
-                // Ensure bio is initialized if null? Not strictly needed if optional.
+                avatar_url: image || undefined
             });
 
             // Redirect to Profile (where they can add pets)
@@ -105,9 +128,86 @@ const Onboarding = () => {
                 textAlign: 'center'
             }}>
                 <div style={{ marginBottom: '2rem' }}>
-                    <User size={48} color="var(--color-primary)" weight="duotone" style={{ marginBottom: '1rem' }} />
                     <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>Welcome!</h2>
                     <p style={{ color: 'var(--color-text-secondary)' }}>Let's get your profile set up. You can add your pets later.</p>
+                </div>
+
+                {/* Avatar Upload */}
+                <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+                    <div
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                            width: '120px',
+                            height: '120px',
+                            borderRadius: '50%',
+                            background: image ? `url(${image}) center/cover no-repeat` : '#f3f4f6',
+                            border: '4px solid white',
+                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            position: 'relative'
+                        }}
+                    >
+                        {!image && <User size={48} weight="duotone" color="#9ca3af" />}
+
+                        {/* Camera / Upload Button */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '0',
+                            right: '0',
+                            background: 'var(--primary-600)',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '2px solid white',
+                            zIndex: 10
+                        }}>
+                            <Camera size={18} weight="bold" />
+                        </div>
+
+                        {/* Optional Crop Button (Only if image exists) */}
+                        {image && (
+                            <div
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setCroppingImage(image);
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '0',
+                                    left: '0',
+                                    background: 'white',
+                                    color: 'var(--gray-700)',
+                                    borderRadius: '50%',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid var(--gray-200)',
+                                    zIndex: 10,
+                                    cursor: 'pointer'
+                                }}
+                                title="Crop Image"
+                            >
+                                <Crop size={18} weight="bold" />
+                            </div>
+                        )}
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileSelect}
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                        />
+                    </div>
                 </div>
 
                 <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
@@ -171,6 +271,14 @@ const Onboarding = () => {
                     Complete Setup
                 </Button>
             </Card>
+            {croppingImage && (
+                <ImageCropper
+                    imageSrc={croppingImage}
+                    onCropComplete={handleCropComplete}
+                    onCancel={() => setCroppingImage(null)}
+                    aspectRatio={1}
+                />
+            )}
         </div>
     );
 };

@@ -3,13 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, X, Trash, CaretLeft } from '@phosphor-icons/react';
+import { User, MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Dog, PawPrint, SlidersHorizontal, Trash, CaretLeft, Camera, X, Check, Crop, Folder, CaretRight } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
 import type { Collection } from '../lib/featureService';
-import { Folder, CaretRight, Camera } from '@phosphor-icons/react';
-
 
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
@@ -49,7 +47,8 @@ const Profile = () => {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = () => {
-                setCropImage(reader.result as string);
+                setEditForm(prev => ({ ...prev, image: reader.result as string }));
+                // setCropImage(reader.result as string); // Skip auto-crop
             };
             reader.readAsDataURL(file);
             e.target.value = '';
@@ -62,7 +61,8 @@ const Profile = () => {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = () => {
-                setCropImage(reader.result as string);
+                setEditingPet((prev: any) => ({ ...prev, image: reader.result as string }));
+                // setCropImage(reader.result as string); // Skip auto-crop
             };
             reader.readAsDataURL(file);
             e.target.value = '';
@@ -467,8 +467,29 @@ const Profile = () => {
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Profile Photo</label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6' }}>
-                                                    <img src={editForm.image || `https://ui-avatars.com/api/?name=${editForm.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                                                    <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6' }}>
+                                                        <img src={editForm.image || `https://ui-avatars.com/api/?name=${editForm.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    </div>
+                                                    {editForm.image && (
+                                                        <div
+                                                            onClick={() => {
+                                                                setCropTarget('user');
+                                                                setCropImage(editForm.image);
+                                                            }}
+                                                            style={{
+                                                                position: 'absolute', bottom: -5, right: -5,
+                                                                background: 'white', color: '#374151',
+                                                                borderRadius: '50%', width: '24px', height: '24px',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                cursor: 'pointer', border: '1px solid #e5e7eb',
+                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                                            }}
+                                                            title="Crop Photo"
+                                                        >
+                                                            <Crop size={14} weight="bold" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <Button variant="outline" onClick={() => fileInputRef.current?.click()} size="sm">
                                                     <Camera size={18} /> Change Photo
@@ -513,8 +534,29 @@ const Profile = () => {
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Pet Photo</label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '60px', height: '60px', borderRadius: '16px', overflow: 'hidden', background: '#f3f4f6' }}>
-                                                    <img src={editingPet.image || `https://ui-avatars.com/api/?name=${editingPet.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                                                    <div style={{ width: '100%', height: '100%', borderRadius: '16px', overflow: 'hidden', background: '#f3f4f6' }}>
+                                                        <img src={editingPet.image || `https://ui-avatars.com/api/?name=${editingPet.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    </div>
+                                                    {editingPet.image && (
+                                                        <div
+                                                            onClick={() => {
+                                                                setCropTarget('pet');
+                                                                setCropImage(editingPet.image);
+                                                            }}
+                                                            style={{
+                                                                position: 'absolute', bottom: -5, right: -5,
+                                                                background: 'white', color: '#374151',
+                                                                borderRadius: '50%', width: '24px', height: '24px',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                cursor: 'pointer', border: '1px solid #e5e7eb',
+                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                                            }}
+                                                            title="Crop Photo"
+                                                        >
+                                                            <Crop size={14} weight="bold" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <Button variant="outline" onClick={() => petFileInputRef.current?.click()} size="sm">
                                                     <Camera size={18} /> Change Photo
