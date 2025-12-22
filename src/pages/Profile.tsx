@@ -600,7 +600,7 @@ const Profile = () => {
                                                 </button>
                                             )}
                                         </div>
-                                        <div style={{ paddingTop: '1rem' }}>
+                                        <div style={{ padding: '1rem' }}>
                                             <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.name}</h3>
                                             <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>{pet.breed}, {pet.age} yrs</p>
                                         </div>
