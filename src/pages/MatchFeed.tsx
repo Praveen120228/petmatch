@@ -408,7 +408,13 @@ const MatchFeed = () => {
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
                                                     <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
                                                     <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px' }}>
-                                                        {pet.owner_profile?.show_location === false ? 'Location Hidden' : (getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || pet.owner_profile?.location || 'Unknown')}
+                                                        {pet.owner_profile?.username ? (
+                                                            <>
+                                                                @{pet.owner_profile.username} • {pet.owner_profile?.show_location === false ? 'Hidden' : getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || 'Unknown'}
+                                                            </>
+                                                        ) : (
+                                                            pet.owner_profile?.show_location === false ? 'Location Hidden' : (getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || pet.owner_profile?.location || 'Unknown')
+                                                        )}
                                                     </span>
                                                 </div>
 

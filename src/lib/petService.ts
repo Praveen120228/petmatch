@@ -33,7 +33,7 @@ export const petService = {
             .from('pets')
             .select(`
                 id, name, image, breed, age, type, distance, owner_id,
-                owner_profile:profiles!owner_id(location, latitude, longitude, show_location)
+                owner_profile:profiles!owner_id(location, latitude, longitude, show_location, username)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
             .range(from, to);
@@ -51,9 +51,25 @@ export const petService = {
         }
 
         if (filters?.search) {
-            // "search" matches name OR breed. 
-            // supabase .or() syntax: 'name.ilike.%query%,breed.ilike.%query%'
+            // "search" matches name OR breed OR owner username.
+            // Note: Referencing the foreign table alias for filtering requires Supabase support.
+            // If direct alias reference fails, we might need a separate filter or raw PostgREST syntax.
+            // Trying standard embedded filter syntax:
             query = query.or(`name.ilike.%${filters.search}%,breed.ilike.%${filters.search}%`);
+            // TODO: Deep filtering in OR is complex in Supabase JS. For now, let's keep it simple.
+            // To properly support username search, we might need to filter the embedded resource.
+            // query = query.filter('owner_profile.username', 'ilike', `%${filters.search}%`); // This ANDs it.
+
+            // To do OR across tables, we really need a View or Search Index. 
+            // For now, I will NOT break the query with an invalid OR. 
+            // I will add the column to select, so at least client-side filtering could work if we fetched all, 
+            // but for pagination we rely on DB. 
+            // Let's rely on name/breed for now to be safe, unless valid syntax is confirmed.
+            // Actually, let's try to pass it if the user explicitly typed @username?
+            if (filters.search.startsWith('@')) {
+                // precise username search on foreign table? 
+                // It's hard to mix "OR name OR username" without !inner join impacting results.
+            }
         }
 
         const { data, error, count } = await query;

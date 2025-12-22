@@ -16,6 +16,7 @@ export interface Pet {
         name: string;
         location: string;
         avatar_url?: string;
+        username?: string;
     };
 }
 
@@ -29,6 +30,7 @@ export interface Chat {
     other_user?: { // Enriched property for UI
         name: string;
         avatar_url: string;
+        username?: string;
     };
 }
 
