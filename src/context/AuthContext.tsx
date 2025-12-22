@@ -39,30 +39,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // 1. Get initial session
         console.log("Auth: Application mounted, fetching session...");
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!mounted) return;
-            console.log("Auth: Session fetch completed", session ? "User found" : "No session");
+        try {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (!mounted) return;
+                console.log("Auth: Session fetch completed", session ? "User found" : "No session");
 
-            if (session?.user) {
-                // OPTIMIZATION: Set basic user state immediately to unblock UI
-                // This makes the app load instantly while profile data fetches in background
-                setUser({
-                    id: session.user.id,
-                    email: session.user.email!,
-                    name: session.user.email!.split('@')[0], // Temporary name
-                    image: '' // Temporary image
-                });
-                setLoading(false); // <--- UNBLOCK UI HERE
+                if (session?.user) {
+                    // OPTIMIZATION: Set basic user state immediately to unblock UI
+                    // This makes the app load instantly while profile data fetches in background
+                    setUser({
+                        id: session.user.id,
+                        email: session.user.email!,
+                        name: session.user.email!.split('@')[0], // Temporary name
+                        image: '' // Temporary image
+                    });
+                    setLoading(false); // <--- UNBLOCK UI HERE
 
-                // Fetch full profile in background
-                fetchProfile(session.user.id, session.user.email!);
-            } else {
-                setLoading(false);
-            }
-        }).catch((err) => {
-            console.error('Session fetch error:', err);
-            if (mounted) setLoading(false);
-        });
+                    // Fetch full profile in background
+                    fetchProfile(session.user.id, session.user.email!);
+                } else {
+                    setLoading(false);
+                }
+            }).catch((err) => {
+                console.error('Session fetch error:', err);
+                // If session fetch fails (e.g. corrupt storage), clear it and reset
+                localStorage.clear();
+                if (mounted) setLoading(false);
+            });
+        } catch (e) {
+            console.error("Critical Auth Error:", e);
+            localStorage.clear();
+            setLoading(false);
+        }
 
         // 2. Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -219,6 +227,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const logout = async () => {
         await supabase.auth.signOut();
+        // Force clear local storage to prevent stale tokens from freezing the app on next login
+        localStorage.clear();
         setUser(null);
     };
 
