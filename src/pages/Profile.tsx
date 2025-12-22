@@ -68,66 +68,83 @@ const Profile = () => {
     const [collections, setCollections] = useState<Collection[]>([]);
 
     useEffect(() => {
+        let isMounted = true;
+
         const loadData = async () => {
-            if (!isPublic && user) {
-                // Private View: Load own data
-                const [userPets, userCols, userProfile] = await Promise.all([
-                    petService.getUserPets(user.id),
-                    featureService.getCollections(user.id),
-                    userService.getProfile(user.id)
-                ]);
+            try {
+                if (!isPublic && user) {
+                    // Private View: Load own data
+                    const [userPets, userCols, userProfile] = await Promise.all([
+                        petService.getUserPets(user.id),
+                        featureService.getCollections(user.id),
+                        userService.getProfile(user.id)
+                    ]);
 
-                setPets(userPets || []);
-                setCollections(userCols);
-                setProfileData(userProfile);
+                    if (isMounted) {
+                        setPets(userPets || []);
+                        setCollections(userCols || []);
 
-                // Load likes/matches
-                const [likeIds, matchIds] = await Promise.all([
-                    featureService.getLikes(user.id),
-                    featureService.getMatches(user.id)
-                ]);
+                        // Only update if we got a valid profile, otherwise keep existing/fallback safely
+                        if (userProfile) {
+                            setProfileData(userProfile);
 
-                const colItemIds = userCols.flatMap(c => c.items || []);
-                const uniqueIds = [...new Set([...likeIds, ...matchIds, ...colItemIds])];
+                            // Initialize form with fresh data
+                            setEditForm({
+                                name: userProfile.name || '',
+                                location: userProfile.location || '',
+                                bio: userProfile.bio || '',
+                                image: userProfile.avatar_url || ''
+                            });
+                        }
+                    }
 
-                if (uniqueIds.length > 0) {
-                    const details = await petService.getPetsByIds(uniqueIds);
-                    setLikedPets(details.filter(p => likeIds.includes(p.id)));
-                    setMatchedPets(details.filter(p => matchIds.includes(p.id)));
-                    setCollectionPets(details.filter(p => colItemIds.includes(p.id)));
-                } else {
-                    setLikedPets([]);
-                    setMatchedPets([]);
-                    setCollectionPets([]);
+                    // Load likes/matches
+                    const [likeIds, matchIds] = await Promise.all([
+                        featureService.getLikes(user.id),
+                        featureService.getMatches(user.id)
+                    ]);
+
+                    if (isMounted && userCols) {
+                        const colItemIds = userCols.flatMap(c => c.items || []);
+                        const uniqueIds = [...new Set([...likeIds, ...matchIds, ...colItemIds])];
+
+                        if (uniqueIds.length > 0) {
+                            const details = await petService.getPetsByIds(uniqueIds);
+                            setLikedPets(details.filter(p => likeIds.includes(p.id)));
+                            setMatchedPets(details.filter(p => matchIds.includes(p.id)));
+                            setCollectionPets(details.filter(p => colItemIds.includes(p.id)));
+                        } else {
+                            setLikedPets([]);
+                            setMatchedPets([]);
+                            setCollectionPets([]);
+                        }
+                    }
+
+                } else if (isPublic && id) {
+                    // Public View: Load other user's data
+                    const [targetProfile, targetPets] = await Promise.all([
+                        userService.getProfile(id),
+                        petService.getUserPets(id)
+                    ]);
+
+                    if (isMounted) {
+                        setProfileData(targetProfile);
+                        setPets(targetPets || []);
+                        setLikedPets([]);
+                        setMatchedPets([]);
+                        setCollectionPets([]);
+                    }
                 }
-
-                // Initialize form
-                if (userProfile) {
-                    setEditForm({
-                        name: userProfile.name || '',
-                        location: userProfile.location || '',
-                        bio: userProfile.bio || '',
-                        image: userProfile.avatar_url || ''
-                    });
-                }
-
-            } else if (isPublic && id) {
-                // Public View: Load other user's data
-                // 'id' is the profile ID (UUID)
-                const [targetProfile, targetPets] = await Promise.all([
-                    userService.getProfile(id),
-                    petService.getUserPets(id)
-                ]);
-
-                setProfileData(targetProfile);
-                setPets(targetPets || []);
-                setLikedPets([]);
-                setMatchedPets([]);
-                setCollectionPets([]);
+            } catch (err) {
+                console.error("Profile load error:", err);
+                // Do not reset profileData to null here to prevent flashing fallback
             }
         };
+
         loadData();
-    }, [user, isPublic, id]);
+
+        return () => { isMounted = false; };
+    }, [user?.id, isPublic, id]); // Only depend on ID, not the whole user object to prevent spurious refetches
 
     // Derived for rendering
     const myMatches = matchedPets;
