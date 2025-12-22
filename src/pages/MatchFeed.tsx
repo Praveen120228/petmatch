@@ -336,14 +336,14 @@ const MatchFeed = () => {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', // Smaller min-width for mobile (2 col likely)
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', // Optimized for 3:4 card (240px width)
                         gap: '1rem',
                         paddingBottom: '2rem'
                     }}>
                         {pets.length > 0 ? (
                             <>
                                 {pets.map(pet => (
-                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px' }}>
+                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
                                         <Card
                                             padding="0"
                                             style={{
