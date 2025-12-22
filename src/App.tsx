@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import Onboarding from './pages/Onboarding';
+import AddPet from './pages/AddPet';
 import MatchFeed from './pages/MatchFeed';
 import PetProfile from './pages/PetProfile';
 import Messages, { MessagesPlaceholder } from './pages/Messages';
@@ -53,6 +54,7 @@ function App() {
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>
                     <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/add-pet" element={<AddPet />} />
                     <Route path="/match" element={<MatchFeed />} />
                     <Route path="/pet/:id" element={<PetProfile />} />
                     <Route path="/messages" element={<Messages />}>

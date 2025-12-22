@@ -263,7 +263,7 @@ const Profile = () => {
     );
 
     const handleAddPet = () => {
-        navigate('/onboarding?step=2');
+        navigate('/add-pet');
     };
 
     const handleSaveProfile = async () => {
