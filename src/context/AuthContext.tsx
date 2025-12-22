@@ -37,8 +37,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }, 15000); // 15 seconds max wait (Supabase cold start can take time)
 
         // 1. Get initial session
+        console.log("Auth: Application mounted, fetching session...");
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!mounted) return;
+            console.log("Auth: Session fetch completed", session ? "User found" : "No session");
+
             if (session?.user) {
                 // Determine if we need to fetch profile (check if already have it or wait)
                 fetchProfile(session.user.id, session.user.email!);
@@ -72,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const fetchProfile = async (userId: string, email: string) => {
+        console.log("Auth: Fetching profile from DB...");
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -80,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .single();
 
             if (error) {
-                console.log('Profile missing or error, attempting creation...', error);
+                console.log('Auth: Profile missing or error, attempting creation...', error);
                 // Attempt to Create Profile (Lazy init for old users or race conditions)
                 const { data: newProfile, error: createError } = await supabase
                     .from('profiles')
@@ -98,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     // Fallback to local state only
                     setUser({ id: userId, name: email.split('@')[0], email: email });
                 } else {
+                    console.log("Auth: Profile auto-created");
                     setUser({
                         id: newProfile.id,
                         name: newProfile.name,
@@ -106,6 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     });
                 }
             } else if (data) {
+                console.log("Auth: Profile loaded from DB");
                 setUser({
                     id: data.id,
                     name: data.name || email.split('@')[0],
@@ -116,6 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.error('Profile fetch unexpected error:', error);
         } finally {
+            console.log("Auth: Loading state cleared");
             setLoading(false);
         }
     };
