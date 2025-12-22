@@ -153,7 +153,10 @@ const Profile = () => {
 
     // Derived Data
     // Use fetched profile data if available, otherwise fall back to auth user (private) or simple placeholder (public)
-    const profileUser = profileData || (
+    const profileUser = profileData ? {
+        ...profileData,
+        image: profileData.avatar_url || profileData.image // Handle DB field (avatar_url) vs App usage (image)
+    } : (
         !isPublic && user ? {
             name: user.name,
             image: user.image,
