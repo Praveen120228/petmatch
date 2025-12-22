@@ -26,21 +26,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Initialize Auth State & Listen for Changes
     useEffect(() => {
+        let mounted = true;
+
+        // Safety Timeout to prevent infinite loading
+        const timer = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn('Auth loading timed out, forcing render');
+                setLoading(false);
+            }
+        }, 8000); // 8 seconds max wait
+
         // 1. Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!mounted) return;
             if (session?.user) {
+                // Determine if we need to fetch profile (check if already have it or wait)
                 fetchProfile(session.user.id, session.user.email!);
             } else {
                 setLoading(false);
             }
         }).catch((err) => {
             console.error('Session fetch error:', err);
-            setLoading(false);
+            if (mounted) setLoading(false);
         });
 
         // 2. Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (!mounted) return;
+
             if (session?.user) {
+                // Only fetch if we don't have the user or it's a different user
+                // But for now, safest is to fetch to ensure freshness, but fetchProfile handles loading state
                 await fetchProfile(session.user.id, session.user.email!);
             } else {
                 setUser(null);
@@ -48,7 +64,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            clearTimeout(timer);
+            subscription.unsubscribe();
+        };
     }, []);
 
     const fetchProfile = async (userId: string, email: string) => {
