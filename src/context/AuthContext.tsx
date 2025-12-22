@@ -31,10 +31,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Safety Timeout to prevent infinite loading
         const timer = setTimeout(() => {
             if (mounted && loading) {
-                console.warn('Auth loading timed out, forcing render');
+                console.warn('Auth loading timed out (15s), forcing render. Check network or Supabase status.');
                 setLoading(false);
             }
-        }, 8000); // 8 seconds max wait
+        }, 15000); // 15 seconds max wait (Supabase cold start can take time)
 
         // 1. Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
