@@ -4,7 +4,7 @@ import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../lib/userService';
-import { CalendarBlank, MagnifyingGlass, ChatCircleDots, UserPlus, CaretRight } from '@phosphor-icons/react';
+import { CalendarBlank, MagnifyingGlass, ChatCircleDots, UserPlus } from '@phosphor-icons/react';
 import Card from './Card';
 
 interface ChatListProps {
@@ -19,7 +19,6 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [discoveredUsers, setDiscoveredUsers] = useState<any[]>([]);
-    const [searchingUsers, setSearchingUsers] = useState(false);
 
     useEffect(() => {
         if (!user) return;
@@ -87,7 +86,6 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
         }
 
         const timer = setTimeout(async () => {
-            setSearchingUsers(true);
             try {
                 const users = await userService.searchUsers(searchQuery);
                 // Filter out self and existing chats
@@ -99,8 +97,6 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                 }
             } catch (err) {
                 console.error(err);
-            } finally {
-                setSearchingUsers(false);
             }
         }, 300);
 
