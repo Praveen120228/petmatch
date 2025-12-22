@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -37,30 +38,32 @@ function App() {
       <ToastProvider>
         <Router>
           <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Layout>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/safety" element={<Safety />} />
-                <Route path="/guidelines" element={<Guidelines />} />
-                <Route path="/support" element={<Support />} />
+            <ErrorBoundary>
+              <Layout>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/safety" element={<Safety />} />
+                  <Route path="/guidelines" element={<Guidelines />} />
+                  <Route path="/support" element={<Support />} />
 
-                {/* Protected Routes */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/onboarding" element={<Onboarding />} />
-                  <Route path="/match" element={<MatchFeed />} />
-                  <Route path="/pet/:id" element={<PetProfile />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/messages/:id" element={<ChatRoom />} />
-                  <Route path="/messages/:id/info" element={<ChatSettings />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/user/:id" element={<Profile />} />
-                </Route>
-              </Routes>
-            </Layout>
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/match" element={<MatchFeed />} />
+                    <Route path="/pet/:id" element={<PetProfile />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/messages/:id" element={<ChatRoom />} />
+                    <Route path="/messages/:id/info" element={<ChatSettings />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/user/:id" element={<Profile />} />
+                  </Route>
+                </Routes>
+              </Layout>
+            </ErrorBoundary>
           </div>
         </Router>
       </ToastProvider>
