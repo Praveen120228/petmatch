@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,7 @@ interface ChatListProps {
 }
 
 const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [chats, setChats] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +109,8 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
         try {
             const chatId = await chatService.createConversation(user.id, otherId);
             // Refresh list or nav
-            window.location.href = `/messages/${chatId}`; // Force nav for now or use router if passed
+            navigate(`/messages/${chatId}`);
+            if (onSelectChat) onSelectChat();
         } catch (e) {
             alert("Failed to start chat");
         }
