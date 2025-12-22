@@ -661,12 +661,12 @@ const Profile = () => {
                 {/* Tab Content */}
                 < div style={{ minHeight: '300px' }}>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
 
                         {activeTab === 'pets' && (
                             userPets.length > 0 ? (
                                 userPets.map((pet: any, index: number) => (
-                                    <div key={index} style={{ height: '320px' }}>
+                                    <div key={index} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
                                         <Card padding="0" style={{
                                             borderRadius: '24px',
                                             border: 'none',
@@ -740,7 +740,7 @@ const Profile = () => {
 
                         {(activeTab === 'matches' || activeTab === 'likes') && (
                             (activeTab === 'matches' ? myMatches : myLikes).map((pet) => (
-                                <div key={pet.id} style={{ height: '320px' }}>
+                                <div key={pet.id} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
                                     <Card padding="0" style={{
                                         borderRadius: '24px',
                                         border: 'none',
