@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { User, MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Dog, PawPrint, SlidersHorizontal, Trash, CaretLeft, Camera, X, Check, Crop, Folder, CaretRight } from '@phosphor-icons/react';
+import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
