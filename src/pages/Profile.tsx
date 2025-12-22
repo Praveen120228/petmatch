@@ -32,7 +32,8 @@ const Profile = () => {
         bio: '',
         image: user?.image || '',
         latitude: null as number | null,
-        longitude: null as number | null
+        longitude: null as number | null,
+        show_location: true
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -133,7 +134,8 @@ const Profile = () => {
                                 bio: userProfile.bio || '',
                                 image: userProfile.avatar_url || '',
                                 latitude: userProfile.latitude || null,
-                                longitude: userProfile.longitude || null
+                                longitude: userProfile.longitude || null,
+                                show_location: userProfile.show_location !== false
                             });
                         }
                     }
@@ -225,7 +227,8 @@ const Profile = () => {
                 location: editForm.location,
                 bio: editForm.bio,
                 latitude: editForm.latitude || undefined,
-                longitude: editForm.longitude || undefined
+                longitude: editForm.longitude || undefined,
+                show_location: editForm.show_location
             });
 
             // Update Auth Context (for app-wide name/image)
@@ -364,6 +367,15 @@ const Profile = () => {
                                                     <span className="hide-on-mobile">Locate Me</span>
                                                 </button>
                                             </div>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: '#4b5563' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editForm.show_location}
+                                                    onChange={e => setEditForm(prev => ({ ...prev, show_location: e.target.checked }))}
+                                                    style={{ width: '16px', height: '16px', accentColor: 'var(--primary-600)' }}
+                                                />
+                                                Show my location on public pet profiles
+                                            </label>
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Profile Photo</label>

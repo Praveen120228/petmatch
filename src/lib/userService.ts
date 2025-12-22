@@ -9,6 +9,7 @@ export interface UserProfile {
     location?: string;
     latitude?: number;
     longitude?: number;
+    show_location?: boolean;
 }
 
 export const userService = {

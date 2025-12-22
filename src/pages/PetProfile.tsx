@@ -370,7 +370,7 @@ const PetProfile = () => {
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Location</span>
                                 {/* Use owner's location if available, fallback to hardcoded distance or 'Unknown' */}
                                 <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>
-                                    {pet.owner_profile?.location || pet.distance || 'Unknown'}
+                                    {pet.owner_profile?.show_location === false ? 'Hidden' : (pet.owner_profile?.location || pet.distance || 'Unknown')}
                                 </span>
                             </div>
                             <div>
