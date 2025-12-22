@@ -622,7 +622,7 @@ const Profile = () => {
                                         <Link to={`/pet/${pet.id}`} style={{ display: 'block', aspectRatio: '4/3', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
                                             <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </Link>
-                                        <div style={{ paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <div>
                                                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.name}</h3>
                                                 <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>{pet.breed}</p>
