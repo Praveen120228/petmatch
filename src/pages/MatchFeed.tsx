@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MagnifyingGlass, PawPrint, Faders } from '@phosphor-icons/react';
+import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { featureService } from '../lib/featureService';
@@ -343,106 +343,123 @@ const MatchFeed = () => {
                         {pets.length > 0 ? (
                             <>
                                 {pets.map(pet => (
-                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '100%' }}>
+                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px' }}>
                                         <Card
                                             padding="0"
                                             style={{
-                                                borderRadius: '16px',
-                                                border: '1px solid var(--gray-200)',
-                                                boxShadow: hoveredId === pet.id ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
+                                                borderRadius: '24px',
+                                                border: 'none',
+                                                boxShadow: hoveredId === pet.id ? 'var(--shadow-xl)' : 'var(--shadow-md)',
                                                 transition: 'all 0.3s ease',
                                                 transform: hoveredId === pet.id ? 'translateY(-4px)' : 'none',
                                                 overflow: 'hidden',
-                                                background: 'white',
+                                                background: 'var(--gray-900)',
                                                 height: '100%',
-                                                display: 'flex',
-                                                flexDirection: 'column'
+                                                position: 'relative',
+                                                display: 'block'
                                             }}
                                         >
-                                            {/* Image Container */}
-                                            <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden', background: 'var(--gray-100)', flexShrink: 0 }}>
-                                                <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
-                                                    <img
-                                                        src={pet.image}
-                                                        alt={pet.name}
-                                                        loading="lazy"
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            objectFit: 'cover',
-                                                            transition: 'transform 0.5s ease',
-                                                            transform: hoveredId === pet.id ? 'scale(1.05)' : 'scale(1)'
-                                                        }}
-                                                    />
-                                                </Link>
-
-                                                {/* Like Button (Top Right) */}
-                                                <Button
-                                                    onClick={(e) => handleLike(e, pet)}
+                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                                {/* Full Height Image */}
+                                                <img
+                                                    src={pet.image}
+                                                    alt={pet.name}
+                                                    loading="lazy"
                                                     style={{
-                                                        position: 'absolute',
-                                                        top: '8px',
-                                                        right: '8px',
-                                                        background: 'rgba(255, 255, 255, 0.9)',
-                                                        backdropFilter: 'blur(4px)',
-                                                        borderRadius: '50%',
-                                                        width: '32px',
-                                                        height: '32px',
-                                                        padding: 0,
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                        zIndex: 10,
-                                                        border: 'none',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        cursor: 'pointer'
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                        transition: 'transform 0.5s ease',
+                                                        transform: hoveredId === pet.id ? 'scale(1.05)' : 'scale(1)'
                                                     }}
-                                                >
-                                                    <Heart
-                                                        weight="fill"
-                                                        color={likes.includes(pet.id) ? 'var(--secondary-500)' : 'var(--gray-300)'}
-                                                        size={18}
-                                                    />
-                                                </Button>
+                                                />
+
+                                                {/* Gradient Overlay */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: '60%',
+                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
+                                                    pointerEvents: 'none'
+                                                }} />
+                                            </Link>
+
+                                            {/* Top Left: Distance Badge */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '12px',
+                                                left: '12px',
+                                                background: 'rgba(255, 255, 255, 0.95)',
+                                                backdropFilter: 'blur(4px)',
+                                                padding: '6px 12px',
+                                                borderRadius: '20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                                zIndex: 10
+                                            }}>
+                                                <MapPin weight="fill" size={14} color="var(--primary-600)" />
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
+                                                    {pet.owner_profile?.show_location === false ? 'Hidden' : (getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || 'Unknown')}
+                                                </span>
                                             </div>
 
-                                            {/* Content (Below Image) */}
-                                            <div style={{ padding: '0.75rem', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                                                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{pet.name}</h3>
-                                                </div>
+                                            {/* Top Right: Like Button */}
+                                            <Button
+                                                onClick={(e) => handleLike(e, pet)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '12px',
+                                                    right: '12px',
+                                                    background: 'rgba(255, 255, 255, 0.95)',
+                                                    backdropFilter: 'blur(4px)',
+                                                    borderRadius: '50%',
+                                                    width: '36px',
+                                                    height: '36px',
+                                                    padding: 0,
+                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                                    zIndex: 10,
+                                                    border: 'none',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <Heart
+                                                    weight="fill"
+                                                    color={likes.includes(pet.id) ? 'var(--gray-900)' : 'var(--gray-900)'}
+                                                    size={18}
+                                                />
+                                            </Button>
 
-                                                {/* Info Container with Fade/Blur if too long */}
-                                                <div style={{
-                                                    flex: 1,
-                                                    position: 'relative',
-                                                    overflow: 'hidden',
-                                                    maxHeight: '60px'
+                                            {/* Bottom Left: Info Overlay */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: '16px',
+                                                left: '16px',
+                                                right: '16px',
+                                                zIndex: 10,
+                                                pointerEvents: 'none'
+                                            }}>
+                                                <h3 style={{
+                                                    fontSize: '1.4rem',
+                                                    fontWeight: 800,
+                                                    color: 'white',
+                                                    marginBottom: '4px',
+                                                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                                                    fontFamily: '"Outfit", sans-serif',
+                                                    letterSpacing: '-0.02em'
                                                 }}>
-                                                    <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'inline-flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px', marginBottom: '0.25rem', maxWidth: '100%', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                                                        {pet.owner_profile?.username ? (
-                                                            <>
-                                                                @{pet.owner_profile.username} • {pet.owner_profile?.show_location === false ? 'Hidden' : getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || 'Unknown'}
-                                                            </>
-                                                        ) : (
-                                                            pet.owner_profile?.show_location === false ? 'Location Hidden' : (getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || pet.owner_profile?.location || 'Unknown')
-                                                        )}
-                                                    </span>
-
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', fontWeight: 500, margin: 0 }}>
-                                                        {pet.breed} • {pet.age} {pet.gender ? `• ${pet.gender}` : ''}
-                                                    </p>
-
-                                                    {/* Blur Gradient Overlay */}
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        bottom: 0,
-                                                        left: 0,
-                                                        right: 0,
-                                                        height: '24px',
-                                                        background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))',
-                                                        pointerEvents: 'none'
-                                                    }} />
+                                                    {pet.name}
+                                                </h3>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>
+                                                    <span>{pet.gender || 'Unknown'}</span>
+                                                    <span>•</span>
+                                                    <span>{pet.age}</span>
                                                 </div>
                                             </div>
                                         </Card>

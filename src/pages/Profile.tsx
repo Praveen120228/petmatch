@@ -619,98 +619,62 @@ const Profile = () => {
                         {activeTab === 'pets' && (
                             userPets.length > 0 ? (
                                 userPets.map((pet: any, index: number) => (
-                                    <Card key={index} padding="0" style={{ overflow: 'hidden', border: 'none', boxShadow: 'none' }}>
-                                        <div style={{ aspectRatio: '4/3', width: '100%', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
-                                            {/* Link to pet profile only if it has an ID (mock pets), newly created private pets might not have ID yet if not connected to DB */}
-                                            {pet.id ? (
-                                                <Link to={`/pet/${pet.id}`}>
-                                                    <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                </Link>
-                                            ) : (
+                                    <div key={index} style={{ height: '320px' }}>
+                                        <Card padding="0" style={{
+                                            borderRadius: '24px',
+                                            border: 'none',
+                                            boxShadow: 'var(--shadow-md)',
+                                            overflow: 'hidden',
+                                            background: 'var(--gray-900)',
+                                            height: '100%',
+                                            position: 'relative',
+                                            display: 'block'
+                                        }}>
+                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                                 <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            )}
+                                                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+                                            </Link>
 
-                                            {/* Edit Button (Only for owner) */}
+                                            {/* Owner Actions: Edit / Delete */}
                                             {!isPublic && pet.id && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        setEditingPet(pet);
-                                                    }}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: '8px',
-                                                        right: '48px',
-                                                        background: 'rgba(255,255,255,0.9)',
-                                                        width: '32px',
-                                                        height: '32px',
-                                                        borderRadius: '50%',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        border: 'none',
-                                                        cursor: 'pointer',
-                                                        color: '#2563eb',
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                        zIndex: 10,
-                                                        transition: 'background 0.2s'
-                                                    }}
-                                                    title="Edit Pet"
-                                                    onMouseEnter={e => e.currentTarget.style.background = '#e0f2fe'}
-                                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
-                                                >
-                                                    <PencilSimple size={16} weight="bold" />
-                                                </button>
-                                            )}
-
-                                            {/* Delete Button (Only for owner) */}
-                                            {!isPublic && pet.id && (
-                                                <button
-                                                    onClick={async (e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        if (confirm(`Are you sure you want to delete ${pet.name}?`)) {
-                                                            try {
+                                                <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px', zIndex: 10 }}>
+                                                    <button
+                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingPet(pet); }}
+                                                        style={{
+                                                            width: '36px', height: '36px', borderRadius: '50%',
+                                                            background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                        }}
+                                                    >
+                                                        <PencilSimple size={18} weight="bold" />
+                                                    </button>
+                                                    <button
+                                                        onClick={async (e) => {
+                                                            e.preventDefault(); e.stopPropagation();
+                                                            if (confirm(`Delete ${pet.name}?`)) {
                                                                 await petService.deletePet(pet.id);
                                                                 setPets(prev => prev.filter(p => p.id !== pet.id));
-                                                            } catch (err) {
-                                                                alert("Failed to delete pet. Ensure all dependencies are cleared (try running migration fixes if not done).");
-                                                                console.error(err);
                                                             }
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: '8px',
-                                                        right: '8px',
-                                                        background: 'rgba(255,255,255,0.9)',
-                                                        width: '32px',
-                                                        height: '32px',
-                                                        borderRadius: '50%',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        border: 'none',
-                                                        cursor: 'pointer',
-                                                        color: '#ef4444',
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                        zIndex: 10,
-                                                        transition: 'background 0.2s'
-                                                    }}
-                                                    title="Delete Pet"
-                                                    onMouseEnter={e => e.currentTarget.style.background = '#fee2e2'}
-                                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
-                                                >
-                                                    <Trash size={16} weight="bold" />
-                                                </button>
+                                                        }}
+                                                        style={{
+                                                            width: '36px', height: '36px', borderRadius: '50%',
+                                                            background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                        }}
+                                                    >
+                                                        <Trash size={18} weight="bold" />
+                                                    </button>
+                                                </div>
                                             )}
-                                        </div>
-                                        <div style={{ padding: '1rem' }}>
-                                            <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.name}</h3>
-                                            <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>{pet.breed}, {pet.age} yrs</p>
-                                        </div>
-                                    </Card>
+
+                                            <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10, pointerEvents: 'none' }}>
+                                                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif' }}>{pet.name}</h3>
+                                                <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>{pet.breed}</p>
+                                            </div>
+                                        </Card>
+                                    </div>
                                 ))
                             ) : (
                                 <div style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px' }}>
@@ -721,30 +685,65 @@ const Profile = () => {
                         )}
 
                         {(activeTab === 'matches' || activeTab === 'likes') && (
-                            // In public view, maybe hide matches/likes for privacy? Or show mock for demo? Showing mock for consistency with request "functional buttons"
                             (activeTab === 'matches' ? myMatches : myLikes).map((pet) => (
-                                <div key={pet.id} style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <Card padding="0" style={{ overflow: 'hidden', border: 'none', boxShadow: 'none' }}>
-                                        <Link to={`/pet/${pet.id}`} style={{ display: 'block', aspectRatio: '4/3', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
+                                <div key={pet.id} style={{ height: '320px' }}>
+                                    <Card padding="0" style={{
+                                        borderRadius: '24px',
+                                        border: 'none',
+                                        boxShadow: 'var(--shadow-md)',
+                                        overflow: 'hidden',
+                                        background: 'var(--gray-900)',
+                                        height: '100%',
+                                        position: 'relative',
+                                        display: 'block'
+                                    }}>
+                                        <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                             <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
                                         </Link>
-                                        <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.name}</h3>
-                                                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>{pet.breed}</p>
-                                            </div>
-                                            {activeTab === 'matches' && (
-                                                <Link to="/messages">
-                                                    <Button variant="outline" style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        <ChatCircle size={20} weight="bold" />
-                                                    </Button>
-                                                </Link>
-                                            )}
-                                            {activeTab === 'likes' && (
-                                                <div style={{ color: '#ec4899' }}>
-                                                    <Heart weight="fill" size={24} />
+
+                                        {/* Top Left: Distance */}
+                                        <div style={{
+                                            position: 'absolute', top: '12px', left: '12px',
+                                            background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)',
+                                            padding: '6px 12px', borderRadius: '20px',
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
+                                        }}>
+                                            <MapPin weight="fill" size={14} color="var(--primary-600)" />
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
+                                                {pet.distance || 'Unknown'}
+                                            </span>
+                                        </div>
+
+                                        {/* Top Right Actions */}
+                                        {activeTab === 'matches' && (
+                                            <Link to="/messages" style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                                                <div style={{
+                                                    width: '36px', height: '36px', borderRadius: '50%',
+                                                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                }}>
+                                                    <ChatCircle size={18} weight="bold" />
                                                 </div>
-                                            )}
+                                            </Link>
+                                        )}
+                                        {activeTab === 'likes' && (
+                                            <div style={{
+                                                position: 'absolute', top: '12px', right: '12px', zIndex: 10,
+                                                width: '36px', height: '36px', borderRadius: '50%',
+                                                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                color: '#ec4899', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                            }}>
+                                                <Heart weight="fill" size={18} />
+                                            </div>
+                                        )}
+
+                                        <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10, pointerEvents: 'none' }}>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif' }}>{pet.name}</h3>
+                                            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>{pet.breed}</p>
                                         </div>
                                     </Card>
                                 </div>
@@ -890,102 +889,48 @@ const Profile = () => {
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
                                                     {collectionPets.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
                                                         <div key={pet.id} style={{
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            background: 'white',
-                                                            borderRadius: '20px',
+                                                            position: 'relative',
+                                                            height: '280px',
+                                                            borderRadius: '24px',
                                                             overflow: 'hidden',
-                                                            border: '1px solid #e5e7eb',
-                                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                                                            transition: 'transform 0.2s, box-shadow 0.2s',
-                                                            cursor: 'default'
-                                                        }}
-                                                            onMouseEnter={e => {
-                                                                e.currentTarget.style.transform = 'translateY(-4px)';
-                                                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-                                                            }}
-                                                            onMouseLeave={e => {
-                                                                e.currentTarget.style.transform = 'translateY(0)';
-                                                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-                                                            }}
-                                                        >
-                                                            {/* Image Header */}
-                                                            <div style={{ aspectRatio: '4/3', width: '100%', position: 'relative' }}>
-                                                                <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(255,255,255,0.9)', padding: '4px 10px', borderRadius: '20px', color: '#111827', fontSize: '0.75rem', fontWeight: 700, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                                                                    {pet.type ? pet.type.charAt(0).toUpperCase() + pet.type.slice(1) : 'Pet'}
-                                                                </div>
-                                                                <button
-                                                                    onClick={async (e) => {
-                                                                        e.stopPropagation();
-                                                                        if (confirm(`Remove ${pet.name} from this collection?`)) {
-                                                                            await featureService.removeFromCollection(selectedCol.id, pet.id);
-                                                                            // Update state
-                                                                            setCollections(prev => prev.map(c => {
-                                                                                if (c.id === selectedCol.id) {
-                                                                                    return { ...c, items: c.items?.filter(id => id !== pet.id) };
-                                                                                }
-                                                                                return c;
-                                                                            }));
-                                                                        }
-                                                                    }}
-                                                                    style={{
-                                                                        position: 'absolute',
-                                                                        top: '12px',
-                                                                        right: '12px',
-                                                                        background: 'rgba(255,255,255,0.9)',
-                                                                        width: '32px',
-                                                                        height: '32px',
-                                                                        borderRadius: '50%',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        border: 'none',
-                                                                        cursor: 'pointer',
-                                                                        color: '#ef4444',
-                                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                                        transition: 'background 0.2s'
-                                                                    }}
-                                                                    title="Remove from collection"
-                                                                    onMouseEnter={e => e.currentTarget.style.background = '#fee2e2'}
-                                                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
-                                                                >
-                                                                    <Trash size={16} weight="bold" />
-                                                                </button>
-                                                            </div>
+                                                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                                            background: 'var(--gray-900)'
+                                                        }}>
+                                                            {/* Image */}
+                                                            <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
 
-                                                            {/* Body */}
-                                                            <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                                                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>{pet.name}</h3>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#fbbf24', background: '#fffbeb', padding: '2px 8px', borderRadius: '12px', border: '1px solid #fcd34d' }}>
-                                                                        <Heart size={12} weight="fill" />
-                                                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#b45309' }}>98%</span>
-                                                                    </div>
-                                                                </div>
+                                                            {/* Remove Button */}
+                                                            <button
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    if (confirm(`Remove ${pet.name} from this collection?`)) {
+                                                                        await featureService.removeFromCollection(selectedCol.id, pet.id);
+                                                                        setCollections(prev => prev.map(c => {
+                                                                            if (c.id === selectedCol.id) {
+                                                                                return { ...c, items: c.items?.filter(id => id !== pet.id) };
+                                                                            }
+                                                                            return c;
+                                                                        }));
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    position: 'absolute', top: '12px', right: '12px',
+                                                                    width: '32px', height: '32px', borderRadius: '50%',
+                                                                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                                    border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
+                                                                }}
+                                                            >
+                                                                <Trash size={16} weight="bold" />
+                                                            </button>
 
-                                                                <div style={{ display: 'flex', gap: '8px', fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
-                                                                    <span>{pet.breed}</span>
-                                                                    <span>•</span>
-                                                                    <span>{pet.age}</span>
-                                                                </div>
-
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.875rem', color: '#4b5563', marginBottom: '1rem' }}>
-                                                                    <MapPin size={16} weight="fill" color="#9ca3af" />
-                                                                    <span>{pet.distance || 'Near you'}</span>
-                                                                </div>
-
-                                                                <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flex: 1 }}>
-                                                                    {pet.bio || pet.description || "A lovely pet looking for a home."}
-                                                                </p>
-
-                                                                <div style={{ marginTop: '1.5rem' }}>
-                                                                    <Link to={`/pet/${pet.id}`}>
-                                                                        <Button variant="primary" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>
-                                                                            View Profile
-                                                                        </Button>
-                                                                    </Link>
-                                                                </div>
+                                                            {/* Content */}
+                                                            <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10 }}>
+                                                                <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none' }}>
+                                                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', marginBottom: '2px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif' }}>{pet.name}</h3>
+                                                                    <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8rem', fontWeight: 500 }}>{pet.breed}</p>
+                                                                </Link>
                                                             </div>
                                                         </div>
                                                     ))}
