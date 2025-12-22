@@ -228,8 +228,17 @@ const Profile = () => {
 
     const handleSaveProfile = async () => {
         if (!user) return;
+        if (!editForm.username) return alert("Username cannot be empty");
 
         try {
+            // Check uniqueness if username changed
+            if (editForm.username !== user.username) {
+                const isAvailable = await userService.checkUsernameAvailability(editForm.username, user.id);
+                if (!isAvailable) {
+                    return alert("Username is already taken. Please choose another one.");
+                }
+            }
+
             // Update DB
             await userService.updateProfile(user.id, {
                 name: editForm.name,
@@ -243,14 +252,19 @@ const Profile = () => {
             });
 
             // Update Auth Context (for app-wide name/image)
-            updateUser({ name: editForm.name, image: editForm.image });
+            updateUser({ name: editForm.name, image: editForm.image, username: editForm.username });
 
             // Force reload to refresh data
             setIsEditing(false);
             window.location.reload();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to save profile", err);
-            alert("Failed to save profile changes.");
+            // Handle unique constraint error from DB if frontend check race condition occurred
+            if (err.message && err.message.includes('unique constraint') && err.message.includes('username')) {
+                alert("Username is already taken.");
+            } else {
+                alert("Failed to save profile changes.");
+            }
         }
     };
 

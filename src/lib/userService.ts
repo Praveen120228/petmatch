@@ -54,5 +54,24 @@ export const userService = {
             return [];
         }
         return data;
+    },
+
+    async checkUsernameAvailability(username: string, currentUserId: string): Promise<boolean> {
+        if (!username) return false;
+
+        // Check if any OTHER profile (not current user) has this username
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('username', username)
+            .neq('id', currentUserId)
+            .maybeSingle();
+
+        if (error) {
+            console.error("Error checking username:", error);
+            return false; // Assume unavailable on error safety
+        }
+
+        return !data; // If data exists, username is taken (return false). If no data, available (true).
     }
 };

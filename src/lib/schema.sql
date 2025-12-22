@@ -6,6 +6,7 @@ create table public.profiles (
   id uuid references auth.users not null primary key,
   email text,
   name text,
+  username text unique,
   avatar_url text,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );
