@@ -457,9 +457,11 @@ const MatchFeed = () => {
                                                     {pet.name}
                                                 </h3>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>
-                                                    <span>{pet.gender || 'Unknown'}</span>
+                                                    <span>{pet.breed}</span>
                                                     <span>•</span>
                                                     <span>{pet.age}</span>
+                                                    <span>•</span>
+                                                    <span>{pet.gender || 'Unknown Gender'}</span>
                                                 </div>
                                             </div>
                                         </Card>

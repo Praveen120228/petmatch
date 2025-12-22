@@ -671,7 +671,13 @@ const Profile = () => {
 
                                             <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10, pointerEvents: 'none' }}>
                                                 <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif' }}>{pet.name}</h3>
-                                                <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>{pet.breed}</p>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>
+                                                    <span>{pet.breed}</span>
+                                                    <span>•</span>
+                                                    <span>{pet.age}</span>
+                                                    <span>•</span>
+                                                    <span>{pet.gender || 'Unknown Gender'}</span>
+                                                </div>
                                             </div>
                                         </Card>
                                     </div>
@@ -743,7 +749,13 @@ const Profile = () => {
 
                                         <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10, pointerEvents: 'none' }}>
                                             <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif' }}>{pet.name}</h3>
-                                            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>{pet.breed}</p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>
+                                                <span>{pet.breed}</span>
+                                                <span>•</span>
+                                                <span>{pet.age}</span>
+                                                <span>•</span>
+                                                <span>{pet.gender || 'Unknown Gender'}</span>
+                                            </div>
                                         </div>
                                     </Card>
                                 </div>
@@ -929,7 +941,11 @@ const Profile = () => {
                                                             <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10 }}>
                                                                 <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none' }}>
                                                                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', marginBottom: '2px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif' }}>{pet.name}</h3>
-                                                                    <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8rem', fontWeight: 500 }}>{pet.breed}</p>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.8rem', fontWeight: 500 }}>
+                                                                        <span>{pet.breed}</span>
+                                                                        <span>•</span>
+                                                                        <span>{pet.gender || 'Unknown Gender'}</span>
+                                                                    </div>
                                                                 </Link>
                                                             </div>
                                                         </div>
