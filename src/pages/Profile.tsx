@@ -350,6 +350,16 @@ const Profile = () => {
                                             />
                                         </div>
                                         <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Email</label>
+                                            <input
+                                                type="email"
+                                                value={user?.email || ''}
+                                                readOnly
+                                                disabled
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }}
+                                            />
+                                        </div>
+                                        <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location</label>
                                             <div style={{ position: 'relative' }}>
                                                 <input
