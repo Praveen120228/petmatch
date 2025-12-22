@@ -1,254 +1,92 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { chatService } from '../lib/chatService';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
-import { CalendarBlank, MagnifyingGlass, Plus, ChatCircleDots } from '@phosphor-icons/react';
-import Card from '../components/Card';
+import { Outlet, useParams } from 'react-router-dom';
+import ChatList from '../components/ChatList';
+import { ChatCircleDots } from '@phosphor-icons/react';
 
 const Messages = () => {
-    // const navigate = useNavigate();
-    const { user } = useAuth();
-    const [chats, setChats] = useState<any[]>([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (!user) return;
-        const loadChats = async () => {
-            setLoading(true);
-            try {
-                const data = await chatService.getConversations(user.id);
-                setChats(data || []);
-            } catch (err) {
-                console.error("Failed to load chats", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadChats();
-
-        // Subscribe to conversation updates
-        const channel = supabase
-            .channel(`conversations_${user.id}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'conversations',
-                    filter: `participant_a=eq.${user.id}`
-                },
-                () => loadChats()
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'conversations',
-                    filter: `participant_b=eq.${user.id}`
-                },
-                () => loadChats()
-            )
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [user]);
-
-    // --- Search Logic ---
-    // 1. Existing Chats matching search
-    const filteredChats = useMemo(() => {
-        if (!chats) return [];
-        if (!searchQuery) return chats;
-
-        return chats.filter(c => {
-            const name = c.other_user?.name || 'Unknown';
-            return name.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-    }, [chats, searchQuery]);
-
-    // Helper for time
-    const formatTime = (isoString?: string) => {
-        if (!isoString) return '';
-        const date = new Date(isoString);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    };
-
-    // 2. Discover New Users matching search
-    // TODO: Migrate to Supabase search
-    const discoveredUsers: any[] = [];
-
-    const handleStartChat = async () => {
-        if (!user) return;
-        try {
-            // Need owner ID. Local mock pets stores 'owner' name. 
-            // We need real IDs.
-            // For now, disabling mock discovery.
-            console.warn("Starting chat from mock discovery not supported yet via Supabase");
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    const { id } = useParams();
+    const isMobileChatActive = !!id;
 
     return (
-        <div className="fade-in" style={{ maxWidth: '800px', margin: '0 auto', minHeight: '100vh', padding: '0 2rem' }}>
+        <div className="fade-in" style={{
+            height: 'calc(100vh - 64px)', // Deduct navbar height
+            maxWidth: '1400px',
+            margin: '0 auto',
+            position: 'relative',
+            overflow: 'hidden'
+        }}>
+            <div className="messages-layout" style={{ height: '100%', display: 'flex' }}>
 
-            {/* Header */}
-            <div style={{ padding: '3rem 0 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ padding: '10px', background: 'var(--primary-100)', borderRadius: '12px', color: 'var(--primary-600)' }}>
-                        <ChatCircleDots size={32} weight="duotone" />
-                    </div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--gray-900)' }}>Messages</h1>
+                {/* Left Sidebar */}
+                <div
+                    className="messages-sidebar"
+                    style={{
+                        width: '100%', // Mobile default
+                        height: '100%',
+                        borderRight: '1px solid var(--gray-200)',
+                        background: 'white',
+                        display: isMobileChatActive ? 'none' : 'flex', // Mobile toggle
+                        flexDirection: 'column'
+                    }}
+                >
+                    <ChatList />
                 </div>
 
-                {/* Search Bar */}
-                <div style={{ position: 'relative' }}>
-                    <MagnifyingGlass
-                        size={20}
-                        color="var(--gray-400)"
-                        style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search for people or existing chats..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '1rem 1rem 1rem 3rem',
-                            background: 'white',
-                            border: '1px solid var(--gray-200)',
-                            borderRadius: 'var(--radius-lg)',
-                            fontSize: '1rem',
-                            outline: 'none',
-                            boxShadow: 'var(--shadow-sm)',
-                            transition: 'all 0.2s',
-                            color: 'var(--gray-800)'
-                        }}
-                        onFocus={(e) => {
-                            e.target.style.borderColor = 'var(--primary-300)';
-                            e.target.style.boxShadow = '0 0 0 3px var(--primary-100)';
-                        }}
-                        onBlur={(e) => {
-                            e.target.style.borderColor = 'var(--gray-200)';
-                            e.target.style.boxShadow = 'var(--shadow-sm)';
-                        }}
-                    />
+                {/* Right Content Area */}
+                <div
+                    className="messages-content"
+                    style={{
+                        flex: 1,
+                        height: '100%',
+                        position: 'relative',
+                        display: isMobileChatActive ? 'block' : 'none', // Mobile toggle
+                        background: 'white'
+                    }}
+                >
+                    <Outlet />
                 </div>
             </div>
 
-            {/* Lists */}
-            <div style={{ paddingBottom: '4rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-
-                {/* Case 0: Empty State */}
-                {!loading && filteredChats.length === 0 && (
-                    <Card style={{ padding: '4rem 2rem', textAlign: 'center', background: 'white', border: '1px dashed var(--gray-300)' }}>
-                        <div style={{ width: '80px', height: '80px', background: 'var(--gray-50)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                            <CalendarBlank size={40} weight="duotone" color="var(--gray-400)" />
-                        </div>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--gray-800)', marginBottom: '0.5rem' }}>No messages yet</h3>
-                        <p style={{ color: 'var(--gray-500)' }}>Connect with pet owners to start chatting!</p>
-                    </Card>
-                )}
-
-                {/* Case 1: Search Results - New Users */}
-                {discoveredUsers.length > 0 && (
-                    <section>
-                        <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em' }}>Start a new conversation</h3>
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {discoveredUsers.map((pet: any) => (
-                                <Card
-                                    key={pet.owner}
-                                    interactive
-                                    padding="md"
-                                    onClick={() => handleStartChat()}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--gray-100)' }}
-                                >
-                                    <div style={{ position: 'relative' }}>
-                                        <div style={{ width: '56px', height: '56px', borderRadius: '50%', overflow: 'hidden' }}>
-                                            <img src={`https://ui-avatars.com/api/?name=${pet.owner}&background=random`} alt={pet.owner} style={{ width: '100%', height: '100%' }} />
-                                        </div>
-                                        <div style={{ position: 'absolute', bottom: -2, right: -2, background: 'white', borderRadius: '50%', padding: '2px' }}>
-                                            <div style={{ background: 'var(--primary-500)', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Plus size={12} color="white" weight="bold" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{pet.owner}</h3>
-                                        <p style={{ fontSize: '0.9rem', color: 'var(--gray-500)' }}>Owner of {pet.name}</p>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Case 2: Existing Chats */}
-                {(filteredChats.length > 0 || discoveredUsers.length > 0) && filteredChats.length > 0 && (
-                    <section>
-                        {searchQuery && <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em' }}>Recent Chats</h3>}
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {filteredChats.map(chat => {
-                                const name = chat.other_user?.name || 'Unknown';
-                                const avatar = chat.other_user?.avatar_url || `https://ui-avatars.com/api/?name=${name}&background=random`;
-                                return (
-                                    <Link key={chat.id} to={`/messages/${chat.id}`} style={{ textDecoration: 'none' }}>
-                                        <Card
-                                            hover
-                                            padding="md"
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '1.25rem',
-                                                background: 'white',
-                                                border: '1px solid var(--gray-100)'
-                                            }}
-                                        >
-                                            <div style={{ position: 'relative' }}>
-                                                <img
-                                                    src={avatar}
-                                                    alt={name}
-                                                    style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover' }}
-                                                />
-                                            </div>
-
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                                                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--gray-900)' }}>{name}</h3>
-                                                    <span style={{ fontSize: '0.85rem', color: 'var(--gray-500)' }}>{formatTime(chat.last_message_time)}</span>
-                                                </div>
-                                                <p style={{
-                                                    fontSize: '1rem',
-                                                    color: 'var(--gray-500)',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                }}>
-                                                    {chat.last_message || 'No messages yet'}
-                                                </p>
-                                            </div>
-                                        </Card>
-                                    </Link>
-                                )
-                            })}
-                        </div>
-                    </section>
-                )}
-
-                {/* No Search Results */}
-                {searchQuery && filteredChats.length === 0 && discoveredUsers.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--gray-500)' }}>
-                        <p style={{ fontSize: '1.1rem' }}>No results found for "{searchQuery}"</p>
-                    </div>
-                )}
-            </div>
+            <style>{`
+                @media (min-width: 768px) {
+                    .messages-sidebar {
+                        width: 320px !important; /* Fixed width sidebar */
+                        display: flex !important; /* Always show on desktop */
+                    }
+                    .messages-content {
+                        display: block !important; /* Always show on desktop */
+                    }
+                }
+                @media (min-width: 1024px) {
+                    .messages-sidebar {
+                        width: 380px !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
+
+export const MessagesPlaceholder = () => (
+    <div style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--gray-400)',
+        background: 'var(--gray-50)'
+    }}>
+        <div style={{
+            padding: '2rem',
+            background: 'var(--primary-50)',
+            borderRadius: '50%',
+            marginBottom: '1.5rem'
+        }}>
+            <ChatCircleDots size={64} weight="duotone" color="var(--primary-300)" />
+        </div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '0.5rem' }}>Your Messages</h2>
+        <p style={{ color: 'var(--gray-500)' }}>Select a conversation to start chatting</p>
+    </div>
+);
 
 export default Messages;

@@ -8,7 +8,7 @@ import Signup from './pages/Auth/Signup';
 import Onboarding from './pages/Onboarding';
 import MatchFeed from './pages/MatchFeed';
 import PetProfile from './pages/PetProfile';
-import Messages from './pages/Messages';
+import Messages, { MessagesPlaceholder } from './pages/Messages';
 import Profile from './pages/Profile';
 import ChatRoom from './pages/ChatRoom';
 import ChatSettings from './pages/ChatSettings';
@@ -55,8 +55,10 @@ function App() {
                     <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/match" element={<MatchFeed />} />
                     <Route path="/pet/:id" element={<PetProfile />} />
-                    <Route path="/messages" element={<Messages />} />
-                    <Route path="/messages/:id" element={<ChatRoom />} />
+                    <Route path="/messages" element={<Messages />}>
+                      <Route index element={<MessagesPlaceholder />} />
+                      <Route path=":id" element={<ChatRoom />} />
+                    </Route>
                     <Route path="/messages/:id/info" element={<ChatSettings />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/user/:id" element={<Profile />} />

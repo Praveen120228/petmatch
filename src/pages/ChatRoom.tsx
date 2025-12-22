@@ -91,7 +91,7 @@ const ChatRoom = () => {
     };
 
     if (loading || !chatInfo) return (
-        <div style={{ height: 'calc(100vh - 80px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--gray-500)' }}>Loading chat...</span>
         </div>
     );
@@ -103,7 +103,7 @@ const ChatRoom = () => {
     const petName = chatInfo.pet?.name || 'Pet';
 
     return (
-        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', background: 'white' }}>
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
 
             {/* Header */}
             <div style={{
