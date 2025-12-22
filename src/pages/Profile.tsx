@@ -38,8 +38,29 @@ const Profile = () => {
     });
 
     const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
+    const [traitInput, setTraitInput] = useState(''); // State for new trait input
     const fileInputRef = useRef<HTMLInputElement>(null);
     const petFileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleAddTrait = () => {
+        if (!traitInput.trim() || !editingPet) return;
+        const newTrait = traitInput.trim();
+        if (!editingPet.traits?.includes(newTrait)) {
+            setEditingPet({
+                ...editingPet,
+                traits: [...(editingPet.traits || []), newTrait]
+            });
+        }
+        setTraitInput('');
+    };
+
+    const handleRemoveTrait = (traitToRemove: string) => {
+        if (!editingPet) return;
+        setEditingPet({
+            ...editingPet,
+            traits: editingPet.traits?.filter((t: string) => t !== traitToRemove) || []
+        });
+    };
 
     const handleUserFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -287,6 +308,28 @@ const Profile = () => {
         }
     };
 
+    const handleSavePet = async () => {
+        if (!editingPet) return;
+        try {
+            await petService.updatePet(editingPet.id, {
+                name: editingPet.name,
+                breed: editingPet.breed,
+                age: editingPet.age,
+                gender: editingPet.gender,
+                image: editingPet.image,
+                traits: editingPet.traits,
+                bio: editingPet.bio
+            });
+
+            // Update local state
+            setPets(prev => prev.map(p => p.id === editingPet.id ? editingPet : p));
+            setEditingPet(null);
+        } catch (err) {
+            console.error("Failed to update pet", err);
+            alert("Failed to update pet details");
+        }
+    };
+
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)' }}>
 
@@ -348,7 +391,7 @@ const Profile = () => {
                                     </div>
                                 )
                             }
-                        </div >
+                        </div>
 
                         <div>
                             <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2, color: '#111827' }}>{profileUser.name}</h1>
@@ -525,140 +568,156 @@ const Profile = () => {
                     {
                         editingPet && (
                             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-                                <div style={{ width: '90%', maxWidth: '500px', background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
+                                <div style={{ width: '90%', maxWidth: '500px', background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
+
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Edit Pet: {editingPet.name}</h3>
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Edit Pet Details</h3>
                                         <button onClick={() => setEditingPet(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={24} /></button>
                                     </div>
+
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Pet Photo</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ position: 'relative', width: '60px', height: '60px' }}>
-                                                    <div style={{ width: '100%', height: '100%', borderRadius: '16px', overflow: 'hidden', background: '#f3f4f6' }}>
-                                                        <img src={editingPet.image || `https://ui-avatars.com/api/?name=${editingPet.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                    </div>
-                                                    {editingPet.image && (
-                                                        <div
-                                                            onClick={() => {
-                                                                setCropTarget('pet');
-                                                                setCropImage(editingPet.image);
-                                                            }}
-                                                            style={{
-                                                                position: 'absolute', bottom: -5, right: -5,
-                                                                background: 'white', color: '#374151',
-                                                                borderRadius: '50%', width: '24px', height: '24px',
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                cursor: 'pointer', border: '1px solid #e5e7eb',
-                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                                                            }}
-                                                            title="Crop Photo"
-                                                        >
-                                                            <Crop size={14} weight="bold" />
-                                                        </div>
-                                                    )}
+
+                                        {/* Image Upload */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                                            <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                                                <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                                    <img src={editingPet.image || `https://ui-avatars.com/api/?name=${editingPet.name}`} alt="Pet Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 </div>
-                                                <Button variant="outline" onClick={() => petFileInputRef.current?.click()} size="sm">
-                                                    <Camera size={18} /> Change Photo
-                                                </Button>
-                                                <input
-                                                    type="file"
-                                                    ref={petFileInputRef}
-                                                    onChange={handlePetFileSelect}
-                                                    accept="image/*"
-                                                    style={{ display: 'none' }}
-                                                />
+                                                {editingPet.image && (
+                                                    <div
+                                                        onClick={() => {
+                                                            setCropTarget('pet');
+                                                            setCropImage(editingPet.image);
+                                                        }}
+                                                        style={{
+                                                            position: 'absolute', bottom: 0, right: 0,
+                                                            background: 'white', color: '#374151',
+                                                            borderRadius: '50%', width: '32px', height: '32px',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            cursor: 'pointer', border: '1px solid #e5e7eb',
+                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                        }}
+                                                        title="Crop Photo"
+                                                    >
+                                                        <Crop size={16} weight="bold" />
+                                                    </div>
+                                                )}
                                             </div>
+                                            <Button variant="outline" onClick={() => petFileInputRef.current?.click()} size="sm">
+                                                <Camera size={18} /> Change Photo
+                                            </Button>
+                                            <input
+                                                type="file"
+                                                ref={petFileInputRef}
+                                                onChange={handlePetFileSelect}
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
+                                            />
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
-                                                <input
-                                                    type="text"
-                                                    value={editingPet.name}
-                                                    onChange={e => setEditingPet({ ...editingPet, name: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
-                                                />
-                                            </div>
-                                            <div>
+
+                                        {/* Name */}
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
+                                            <input
+                                                type="text"
+                                                value={editingPet.name}
+                                                onChange={e => setEditingPet({ ...editingPet, name: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                            />
+                                        </div>
+
+                                        {/* Breed & Age Row */}
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <div style={{ flex: 1 }}>
                                                 <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Breed</label>
                                                 <input
                                                     type="text"
-                                                    value={editingPet.breed || ''}
+                                                    value={editingPet.breed}
                                                     onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })}
-                                                    placeholder="e.g. Labrador"
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
                                                 />
                                             </div>
-                                        </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Age (e.g. 2 yrs)</label>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Age</label>
                                                 <input
                                                     type="text"
                                                     value={editingPet.age}
                                                     onChange={e => setEditingPet({ ...editingPet, age: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Color</label>
-                                                <input
-                                                    type="text"
-                                                    value={editingPet.color || ''}
-                                                    placeholder="e.g. Golden"
-                                                    onChange={e => setEditingPet({ ...editingPet, color: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
                                                 />
                                             </div>
                                         </div>
+
+                                        {/* Gender */}
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Gender</label>
                                             <div style={{ display: 'flex', gap: '1rem' }}>
                                                 {['Male', 'Female'].map(g => (
-                                                    <label key={g} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                                        <input
-                                                            type="radio"
-                                                            name="gender"
-                                                            value={g}
-                                                            checked={editingPet.gender === g}
-                                                            onChange={() => setEditingPet({ ...editingPet, gender: g })}
-                                                        />
+                                                    <button
+                                                        key={g}
+                                                        onClick={() => setEditingPet({ ...editingPet, gender: g })}
+                                                        style={{
+                                                            flex: 1,
+                                                            padding: '0.75rem',
+                                                            borderRadius: '8px',
+                                                            border: `1px solid ${editingPet.gender === g ? 'var(--primary-600)' : '#d1d5db'}`,
+                                                            background: editingPet.gender === g ? 'var(--primary-50)' : 'white',
+                                                            color: editingPet.gender === g ? 'var(--primary-700)' : '#374151',
+                                                            fontWeight: 600,
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
                                                         {g}
-                                                    </label>
+                                                    </button>
                                                 ))}
                                             </div>
                                         </div>
+
+                                        {/* Traits */}
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Traits</label>
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                                <input
+                                                    type="text"
+                                                    value={traitInput}
+                                                    onChange={e => setTraitInput(e.target.value)}
+                                                    onKeyDown={e => e.key === 'Enter' && handleAddTrait()}
+                                                    placeholder="Add a trait (e.g. Playful)"
+                                                    style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                />
+                                                <Button onClick={handleAddTrait} variant="outline" size="sm">Add</Button>
+                                            </div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                {editingPet.traits?.map((trait: string, i: number) => (
+                                                    <div key={i} style={{ background: '#f3f4f6', padding: '4px 10px', borderRadius: '20px', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        {trait}
+                                                        <button
+                                                            onClick={() => handleRemoveTrait(trait)}
+                                                            style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#6b7280' }}
+                                                        >
+                                                            <X size={14} weight="bold" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Bio */}
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Bio</label>
                                             <textarea
                                                 value={editingPet.bio || ''}
                                                 onChange={e => setEditingPet({ ...editingPet, bio: e.target.value })}
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '80px', resize: 'vertical' }}
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '80px', fontSize: '1rem', lineHeight: 1.5, resize: 'vertical' }}
                                             />
                                         </div>
+
                                     </div>
+
                                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                         <Button variant="ghost" onClick={() => setEditingPet(null)}>Cancel</Button>
-                                        <Button variant="primary" onClick={async () => {
-                                            try {
-                                                await petService.updatePet(editingPet.id, {
-                                                    name: editingPet.name,
-                                                    age: editingPet.age,
-                                                    gender: editingPet.gender,
-                                                    color: editingPet.color,
-                                                    bio: editingPet.bio,
-                                                    breed: editingPet.breed,
-                                                    image: editingPet.image // Supports update
-                                                });
-                                                // Update local list
-                                                setPets(prev => prev.map(p => p.id === editingPet.id ? editingPet : p));
-                                                setEditingPet(null);
-                                            } catch (err) {
-                                                console.error(err);
-                                                alert("Failed to update pet.");
-                                            }
-                                        }}>Save Pet</Button>
+                                        <Button variant="primary" onClick={handleSavePet}>Save Changes</Button>
                                     </div>
                                 </div>
                             </div>
@@ -675,15 +734,17 @@ const Profile = () => {
                             </Link>
                         )
                     }
-                </div >
-            </div >
 
-            {/* Tabs & Content */}
-            < div style={{ maxWidth: '1000px', margin: '0.5rem auto 2rem', padding: '0 2rem' }}>
 
-                {/* Responsive Styles */}
-                <style>
-                    {`
+                    {/* End of Header Flex */}
+                </div>
+
+                {/* Tabs & Content */}
+                <div style={{ maxWidth: '1000px', margin: '0.5rem auto 2rem', padding: '0 2rem' }}>
+
+                    {/* Responsive Styles */}
+                    <style>
+                        {`
                         @media (max-width: 768px) {
                             .mobile-fab {
                                 position: fixed !important;
@@ -698,68 +759,142 @@ const Profile = () => {
                             .mobile-fab span { display: none; } /* Hide text on mobile */
                         }
                     `}
-                </style>
+                    </style>
 
-                {/* Tab Navigation & Action - Integrated Row */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-end',
-                    marginBottom: '1.5rem',
-                    borderBottom: '1px solid #e5e7eb',
-                    overflowX: 'auto'
-                }}>
-                    <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px', paddingRight: '1rem', flex: 1 }}>
+                    {/* Tab Navigation & Action - Integrated Row */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-end',
+                        marginBottom: '1.5rem',
+                        borderBottom: '1px solid #e5e7eb',
+                        overflowX: 'auto'
+                    }}>
+                        <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px', paddingRight: '1rem', flex: 1 }}>
+                            {
+                                ['pets', 'matches', 'likes', 'collections'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setSearchParams({ tab })}
+                                        style={{
+                                            padding: '0.75rem 0',
+                                            background: 'none',
+                                            border: 'none',
+                                            borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
+                                            color: activeTab === tab ? '#111827' : '#9ca3af',
+                                            fontSize: '1rem',
+                                            fontWeight: activeTab === tab ? 600 : 500,
+                                            cursor: 'pointer',
+                                            textTransform: 'capitalize',
+                                            transition: 'color 0.2s',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0
+                                        }}
+                                    >
+                                        {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
+                                        <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
+                                            {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
+                                        </span>
+                                    </button>
+                                ))
+                            }
+                        </div>
+
+                        {/* Add Pet Button */}
                         {
-                            ['pets', 'matches', 'likes', 'collections'].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setSearchParams({ tab })}
-                                    style={{
-                                        padding: '0.75rem 0',
-                                        background: 'none',
-                                        border: 'none',
-                                        borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
-                                        color: activeTab === tab ? '#111827' : '#9ca3af',
-                                        fontSize: '1rem',
-                                        fontWeight: activeTab === tab ? 600 : 500,
-                                        cursor: 'pointer',
-                                        textTransform: 'capitalize',
-                                        transition: 'color 0.2s',
-                                        whiteSpace: 'nowrap',
-                                        flexShrink: 0
-                                    }}
-                                >
-                                    {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
-                                    <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
-                                        {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
-                                    </span>
-                                </button>
-                            ))
+                            !isPublic && activeTab === 'pets' && (
+                                <div className="mobile-fab" style={{ marginBottom: '0.5rem' }}>
+                                    <Button onClick={handleAddPet} size="sm" variant="primary" style={{ borderRadius: 'var(--radius-full)' }}>
+                                        <Plus weight="bold" size={20} /> <span style={{ marginLeft: '0.5rem' }}>Add New Pet</span>
+                                    </Button>
+                                </div>
+                            )
                         }
                     </div>
 
-                    {/* Add Pet Button */}
-                    {
-                        !isPublic && activeTab === 'pets' && (
-                            <div className="mobile-fab" style={{ marginBottom: '0.5rem' }}>
-                                <Button onClick={handleAddPet} size="sm" variant="primary" style={{ borderRadius: 'var(--radius-full)' }}>
-                                    <Plus weight="bold" size={20} /> <span style={{ marginLeft: '0.5rem' }}>Add New Pet</span>
-                                </Button>
-                            </div>
-                        )
-                    }
-                </div>
+                    {/* Tab Content */}
+                    <div style={{ minHeight: '300px' }}>
 
-                {/* Tab Content */}
-                < div style={{ minHeight: '300px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
+                            {activeTab === 'pets' && (
+                                userPets.length > 0 ? (
+                                    userPets.map((pet: any, index: number) => (
+                                        <div key={index} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
+                                            <Card padding="0" style={{
+                                                borderRadius: '24px',
+                                                border: 'none',
+                                                boxShadow: 'var(--shadow-md)',
+                                                overflow: 'hidden',
+                                                background: 'var(--gray-900)',
+                                                height: '100%',
+                                                position: 'relative',
+                                                display: 'block'
+                                            }}>
+                                                <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                                    <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+                                                </Link>
 
-                        {activeTab === 'pets' && (
-                            userPets.length > 0 ? (
-                                userPets.map((pet: any, index: number) => (
-                                    <div key={index} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
+                                                {/* Owner Actions: Edit / Delete */}
+                                                {!isPublic && pet.id && (
+                                                    <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px', zIndex: 10 }}>
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingPet(pet); }}
+                                                            style={{
+                                                                width: '36px', height: '36px', borderRadius: '50%',
+                                                                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                            }}
+                                                        >
+                                                            <PencilSimple size={18} weight="bold" />
+                                                        </button>
+                                                        <button
+                                                            onClick={async (e) => {
+                                                                e.preventDefault(); e.stopPropagation();
+                                                                if (confirm(`Delete ${pet.name}?`)) {
+                                                                    await petService.deletePet(pet.id);
+                                                                    setPets(prev => prev.filter(p => p.id !== pet.id));
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                width: '36px', height: '36px', borderRadius: '50%',
+                                                                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                            }}
+                                                        >
+                                                            <Trash size={18} weight="bold" />
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                <div style={{ position: 'absolute', bottom: '24px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
+                                                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                                                        {pet.gender || 'Unknown Gender'}
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif', lineHeight: 1.1 }}>{pet.name}</h3>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
+                                                        <span>{pet.breed}</span>
+                                                        <span style={{ opacity: 0.6 }}>•</span>
+                                                        <span>{pet.age}</span>
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px' }}>
+                                        <p>{isPublic ? 'No pets found.' : "You haven't added any pets yet."}</p>
+                                        {!isPublic && <Button variant="ghost" onClick={handleAddPet} style={{ marginTop: '0.5rem', color: '#2563eb' }}>Add one now</Button>}
+                                    </div>
+                                )
+                            )}
+
+                            {(activeTab === 'matches' || activeTab === 'likes') && (
+                                (activeTab === 'matches' ? myMatches : myLikes).map((pet) => (
+                                    <div key={pet.id} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
                                         <Card padding="0" style={{
                                             borderRadius: '24px',
                                             border: 'none',
@@ -775,37 +910,42 @@ const Profile = () => {
                                                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
                                             </Link>
 
-                                            {/* Owner Actions: Edit / Delete */}
-                                            {!isPublic && pet.id && (
-                                                <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px', zIndex: 10 }}>
-                                                    <button
-                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingPet(pet); }}
-                                                        style={{
-                                                            width: '36px', height: '36px', borderRadius: '50%',
-                                                            background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
-                                                            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                                        }}
-                                                    >
-                                                        <PencilSimple size={18} weight="bold" />
-                                                    </button>
-                                                    <button
-                                                        onClick={async (e) => {
-                                                            e.preventDefault(); e.stopPropagation();
-                                                            if (confirm(`Delete ${pet.name}?`)) {
-                                                                await petService.deletePet(pet.id);
-                                                                setPets(prev => prev.filter(p => p.id !== pet.id));
-                                                            }
-                                                        }}
-                                                        style={{
-                                                            width: '36px', height: '36px', borderRadius: '50%',
-                                                            background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
-                                                            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                                        }}
-                                                    >
-                                                        <Trash size={18} weight="bold" />
-                                                    </button>
+                                            {/* Top Left: Distance */}
+                                            <div style={{
+                                                position: 'absolute', top: '12px', left: '12px',
+                                                background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)',
+                                                padding: '6px 12px', borderRadius: '20px',
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
+                                            }}>
+                                                <MapPin weight="fill" size={14} color="var(--primary-600)" />
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
+                                                    {pet.distance || 'Unknown'}
+                                                </span>
+                                            </div>
+
+                                            {/* Top Right Actions */}
+                                            {activeTab === 'matches' && (
+                                                <Link to="/messages" style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                                                    <div style={{
+                                                        width: '36px', height: '36px', borderRadius: '50%',
+                                                        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                    }}>
+                                                        <ChatCircle size={18} weight="bold" />
+                                                    </div>
+                                                </Link>
+                                            )}
+                                            {activeTab === 'likes' && (
+                                                <div style={{
+                                                    position: 'absolute', top: '12px', right: '12px', zIndex: 10,
+                                                    width: '36px', height: '36px', borderRadius: '50%',
+                                                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    color: '#ec4899', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                }}>
+                                                    <Heart weight="fill" size={18} />
                                                 </div>
                                             )}
 
@@ -823,306 +963,228 @@ const Profile = () => {
                                         </Card>
                                     </div>
                                 ))
-                            ) : (
-                                <div style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px' }}>
-                                    <p>{isPublic ? 'No pets found.' : "You haven't added any pets yet."}</p>
-                                    {!isPublic && <Button variant="ghost" onClick={handleAddPet} style={{ marginTop: '0.5rem', color: '#2563eb' }}>Add one now</Button>}
+                            )}
+
+                            {activeTab === 'collections' && (
+                                <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {collections.length > 0 ? collections.map((col: Collection) => (
+                                        <div
+                                            key={col.id}
+                                            onClick={() => setSearchParams({ tab: 'collections', collectionId: String(col.id) })}
+                                            style={{
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '16px',
+                                                overflow: 'hidden',
+                                                cursor: 'pointer',
+                                                transition: 'transform 0.2s, box-shadow 0.2s'
+                                            }}
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            <div style={{ padding: '1.5rem', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                    <div style={{ padding: '0.75rem', background: '#f3f4f6', borderRadius: '12px', color: '#4b5563' }}>
+                                                        <Folder size={28} weight="fill" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937' }}>{col.name}</h3>
+                                                        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                                                            {col.items?.length || 0} {(col.items?.length || 0) === 1 ? 'pet' : 'pets'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div style={{ color: '#9ca3af' }}>
+                                                    <CaretRight size={20} weight="bold" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px', border: '2px dashed #e5e7eb' }}>
+                                            <p style={{ fontWeight: 500 }}>No collections created yet.</p>
+                                            <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Go to a pet profile and click the bookmark icon to start one!</p>
+                                        </div>
+                                    )}
                                 </div>
-                            )
-                        )}
+                            )}
 
-                        {(activeTab === 'matches' || activeTab === 'likes') && (
-                            (activeTab === 'matches' ? myMatches : myLikes).map((pet) => (
-                                <div key={pet.id} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
-                                    <Card padding="0" style={{
-                                        borderRadius: '24px',
-                                        border: 'none',
-                                        boxShadow: 'var(--shadow-md)',
-                                        overflow: 'hidden',
-                                        background: 'var(--gray-900)',
-                                        height: '100%',
-                                        position: 'relative',
-                                        display: 'block'
-                                    }}>
-                                        <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
-                                            <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
-                                        </Link>
-
-                                        {/* Top Left: Distance */}
-                                        <div style={{
-                                            position: 'absolute', top: '12px', left: '12px',
-                                            background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)',
-                                            padding: '6px 12px', borderRadius: '20px',
-                                            display: 'flex', alignItems: 'center', gap: '6px',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
-                                        }}>
-                                            <MapPin weight="fill" size={14} color="var(--primary-600)" />
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
-                                                {pet.distance || 'Unknown'}
-                                            </span>
-                                        </div>
-
-                                        {/* Top Right Actions */}
-                                        {activeTab === 'matches' && (
-                                            <Link to="/messages" style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
-                                                <div style={{
-                                                    width: '36px', height: '36px', borderRadius: '50%',
-                                                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    color: '#2563eb', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                                }}>
-                                                    <ChatCircle size={18} weight="bold" />
-                                                </div>
-                                            </Link>
-                                        )}
-                                        {activeTab === 'likes' && (
-                                            <div style={{
-                                                position: 'absolute', top: '12px', right: '12px', zIndex: 10,
-                                                width: '36px', height: '36px', borderRadius: '50%',
-                                                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                color: '#ec4899', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                            }}>
-                                                <Heart weight="fill" size={18} />
-                                            </div>
-                                        )}
-
-                                        <div style={{ position: 'absolute', bottom: '24px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
-                                            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                                                {pet.gender || 'Unknown Gender'}
-                                            </div>
-                                            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif', lineHeight: 1.1 }}>{pet.name}</h3>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
-                                                <span>{pet.breed}</span>
-                                                <span style={{ opacity: 0.6 }}>•</span>
-                                                <span>{pet.age}</span>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                </div>
-                            ))
-                        )}
-
-                        {activeTab === 'collections' && (
-                            <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {collections.length > 0 ? collections.map((col: Collection) => (
-                                    <div
-                                        key={col.id}
-                                        onClick={() => setSearchParams({ tab: 'collections', collectionId: String(col.id) })}
-                                        style={{
-                                            border: '1px solid #e5e7eb',
-                                            borderRadius: '16px',
-                                            overflow: 'hidden',
-                                            cursor: 'pointer',
-                                            transition: 'transform 0.2s, box-shadow 0.2s'
-                                        }}
-                                        onMouseEnter={e => {
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-                                        }}
-                                        onMouseLeave={e => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}
-                                    >
-                                        <div style={{ padding: '1.5rem', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ padding: '0.75rem', background: '#f3f4f6', borderRadius: '12px', color: '#4b5563' }}>
-                                                    <Folder size={28} weight="fill" />
-                                                </div>
-                                                <div>
-                                                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#1f2937' }}>{col.name}</h3>
-                                                    <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                                                        {col.items?.length || 0} {(col.items?.length || 0) === 1 ? 'pet' : 'pets'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div style={{ color: '#9ca3af' }}>
-                                                <CaretRight size={20} weight="bold" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px', border: '2px dashed #e5e7eb' }}>
-                                        <p style={{ fontWeight: 500 }}>No collections created yet.</p>
-                                        <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Go to a pet profile and click the bookmark icon to start one!</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Collection Details Modal */}
-                        {expandedCollectionId && (() => {
-                            const selectedCol = collections.find(c => c.id === Number(expandedCollectionId));
-                            if (!selectedCol) return null;
-                            return (
-                                <div style={{
-                                    position: 'fixed',
-                                    inset: 0,
-                                    background: 'rgba(0,0,0,0.7)',
-                                    backdropFilter: 'blur(4px)',
-                                    zIndex: 2000,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
+                            {/* Collection Details Modal */}
+                            {expandedCollectionId && (() => {
+                                const selectedCol = collections.find(c => c.id === Number(expandedCollectionId));
+                                if (!selectedCol) return null;
+                                return (
                                     <div style={{
-                                        width: '90%',
-                                        height: '90%',
-                                        background: 'white',
-                                        borderRadius: '24px',
+                                        position: 'fixed',
+                                        inset: 0,
+                                        background: 'rgba(0,0,0,0.7)',
+                                        backdropFilter: 'blur(4px)',
+                                        zIndex: 2000,
                                         display: 'flex',
-                                        flexDirection: 'column',
-                                        overflow: 'hidden',
-                                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
                                     }}>
-                                        {/* Modal Header */}
                                         <div style={{
-                                            padding: '1.5rem 2rem',
-                                            borderBottom: '1px solid #e5e7ebff',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
+                                            width: '90%',
+                                            height: '90%',
                                             background: 'white',
-                                            flexShrink: 0
+                                            borderRadius: '24px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            overflow: 'hidden',
+                                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
                                         }}>
-                                            {/* Left: Back Button */}
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => setSearchParams({ tab: 'collections' })}
-                                                style={{
-                                                    border: '1px solid #e5e7eb',
-                                                    background: 'white',
-                                                    color: '#374151',
-                                                    borderRadius: '99px',
-                                                    padding: '0.5rem 1.25rem',
-                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                                onMouseEnter={e => {
-                                                    e.currentTarget.style.background = '#f9fafb';
-                                                    e.currentTarget.style.borderColor = '#d1d5db';
-                                                }}
-                                                onMouseLeave={e => {
-                                                    e.currentTarget.style.background = 'white';
-                                                    e.currentTarget.style.borderColor = '#e5e7eb';
-                                                }}
-                                            >
-                                                <CaretLeft size={18} weight="bold" style={{ marginRight: '6px' }} /> Back
-                                            </Button>
+                                            {/* Modal Header */}
+                                            <div style={{
+                                                padding: '1.5rem 2rem',
+                                                borderBottom: '1px solid #e5e7ebff',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                background: 'white',
+                                                flexShrink: 0
+                                            }}>
+                                                {/* Left: Back Button */}
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => setSearchParams({ tab: 'collections' })}
+                                                    style={{
+                                                        border: '1px solid #e5e7eb',
+                                                        background: 'white',
+                                                        color: '#374151',
+                                                        borderRadius: '99px',
+                                                        padding: '0.5rem 1.25rem',
+                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseEnter={e => {
+                                                        e.currentTarget.style.background = '#f9fafb';
+                                                        e.currentTarget.style.borderColor = '#d1d5db';
+                                                    }}
+                                                    onMouseLeave={e => {
+                                                        e.currentTarget.style.background = 'white';
+                                                        e.currentTarget.style.borderColor = '#e5e7eb';
+                                                    }}
+                                                >
+                                                    <CaretLeft size={18} weight="bold" style={{ marginRight: '6px' }} /> Back
+                                                </Button>
 
-                                            {/* Center: Title */}
-                                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-                                                {selectedCol.name}
-                                            </h2>
+                                                {/* Center: Title */}
+                                                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+                                                    {selectedCol.name}
+                                                </h2>
 
-                                            {/* Right: Options (Delete) */}
-                                            <Button
-                                                onClick={async () => {
-                                                    if (confirm(`Are you sure you want to delete collection "${selectedCol.name}"?`)) {
-                                                        await featureService.deleteCollection(selectedCol.id);
-                                                        setCollections(prev => prev.filter(c => c.id !== selectedCol.id));
-                                                        setSearchParams({ tab: 'collections' });
-                                                    }
-                                                }}
-                                                style={{ background: '#fee2e2', color: '#ef4444', border: '1px solid #fecaca' }}
-                                            >
-                                                <Trash size={20} weight="bold" /> Delete
-                                            </Button>
-                                        </div>
+                                                {/* Right: Options (Delete) */}
+                                                <Button
+                                                    onClick={async () => {
+                                                        if (confirm(`Are you sure you want to delete collection "${selectedCol.name}"?`)) {
+                                                            await featureService.deleteCollection(selectedCol.id);
+                                                            setCollections(prev => prev.filter(c => c.id !== selectedCol.id));
+                                                            setSearchParams({ tab: 'collections' });
+                                                        }
+                                                    }}
+                                                    style={{ background: '#fee2e2', color: '#ef4444', border: '1px solid #fecaca' }}
+                                                >
+                                                    <Trash size={20} weight="bold" /> Delete
+                                                </Button>
+                                            </div>
 
-                                        {/* Modal Body: Grid */}
-                                        <div style={{
-                                            flex: 1,
-                                            overflowY: 'auto',
-                                            padding: '2rem',
-                                            background: '#f9fafb'
-                                        }}>
-                                            {selectedCol.items && selectedCol.items.length > 0 ? (
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '2rem' }}>
-                                                    {collectionPets.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
-                                                        <div key={pet.id} style={{
-                                                            position: 'relative',
-                                                            height: '320px',
-                                                            width: '240px',
-                                                            margin: '0 auto',
-                                                            borderRadius: '24px',
-                                                            overflow: 'hidden',
-                                                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                                                            background: 'var(--gray-900)'
-                                                        }}>
-                                                            {/* Image */}
-                                                            <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+                                            {/* Modal Body: Grid */}
+                                            <div style={{
+                                                flex: 1,
+                                                overflowY: 'auto',
+                                                padding: '2rem',
+                                                background: '#f9fafb'
+                                            }}>
+                                                {selectedCol.items && selectedCol.items.length > 0 ? (
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '2rem' }}>
+                                                        {collectionPets.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
+                                                            <div key={pet.id} style={{
+                                                                position: 'relative',
+                                                                height: '320px',
+                                                                width: '240px',
+                                                                margin: '0 auto',
+                                                                borderRadius: '24px',
+                                                                overflow: 'hidden',
+                                                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                                                background: 'var(--gray-900)'
+                                                            }}>
+                                                                {/* Image */}
+                                                                <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
 
-                                                            {/* Remove Button */}
-                                                            <button
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    if (confirm(`Remove ${pet.name} from this collection?`)) {
-                                                                        await featureService.removeFromCollection(selectedCol.id, pet.id);
-                                                                        setCollections(prev => prev.map(c => {
-                                                                            if (c.id === selectedCol.id) {
-                                                                                return { ...c, items: c.items?.filter(id => id !== pet.id) };
-                                                                            }
-                                                                            return c;
-                                                                        }));
-                                                                    }
-                                                                }}
-                                                                style={{
-                                                                    position: 'absolute', top: '12px', right: '12px',
-                                                                    width: '32px', height: '32px', borderRadius: '50%',
-                                                                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
-                                                                    border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
-                                                                }}
-                                                            >
-                                                                <Trash size={16} weight="bold" />
-                                                            </button>
+                                                                {/* Remove Button */}
+                                                                <button
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        if (confirm(`Remove ${pet.name} from this collection?`)) {
+                                                                            await featureService.removeFromCollection(selectedCol.id, pet.id);
+                                                                            setCollections(prev => prev.map(c => {
+                                                                                if (c.id === selectedCol.id) {
+                                                                                    return { ...c, items: c.items?.filter(id => id !== pet.id) };
+                                                                                }
+                                                                                return c;
+                                                                            }));
+                                                                        }
+                                                                    }}
+                                                                    style={{
+                                                                        position: 'absolute', top: '12px', right: '12px',
+                                                                        width: '32px', height: '32px', borderRadius: '50%',
+                                                                        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                                        border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                        color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
+                                                                    }}
+                                                                >
+                                                                    <Trash size={16} weight="bold" />
+                                                                </button>
 
-                                                            {/* Content */}
-                                                            <div style={{ position: 'absolute', bottom: '24px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
-                                                                <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', pointerEvents: 'auto' }}>
-                                                                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                                                                        {pet.gender || 'Unknown'}
-                                                                    </div>
-                                                                    <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif', lineHeight: 1.1 }}>{pet.name}</h3>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
-                                                                        <span>{pet.breed}</span>
-                                                                        <span style={{ opacity: 0.6 }}>•</span>
-                                                                        <span>{pet.age}</span>
-                                                                    </div>
-                                                                </Link>
+                                                                {/* Content */}
+                                                                <div style={{ position: 'absolute', bottom: '24px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
+                                                                    <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', pointerEvents: 'auto' }}>
+                                                                        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                                                                            {pet.gender || 'Unknown'}
+                                                                        </div>
+                                                                        <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif', lineHeight: 1.1 }}>{pet.name}</h3>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
+                                                                            <span>{pet.breed}</span>
+                                                                            <span style={{ opacity: 0.6 }}>•</span>
+                                                                            <span>{pet.age}</span>
+                                                                        </div>
+                                                                    </Link>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
-                                                    <Folder size={48} weight="duotone" style={{ opacity: 0.5, marginBottom: '1rem' }} />
-                                                    <p style={{ fontSize: '1.125rem' }}>This collection is empty.</p>
-                                                </div>
-                                            )
-                                            }
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
+                                                        <Folder size={48} weight="duotone" style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                                                        <p style={{ fontSize: '1.125rem' }}>This collection is empty.</p>
+                                                    </div>
+                                                )
+                                                }
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })()}
+                                );
+                            })()}
 
+                        </div>
+                        {cropImage && (
+                            <ImageCropper
+                                imageSrc={cropImage}
+                                onCropComplete={handleCropComplete}
+                                onCancel={() => setCropImage(null)}
+                                aspectRatio={1}
+                            />
+                        )}
                     </div>
-                </div >
-                {cropImage && (
-                    <ImageCropper
-                        imageSrc={cropImage}
-                        onCropComplete={handleCropComplete}
-                        onCancel={() => setCropImage(null)}
-                        aspectRatio={1}
-                    />
-                )}
-            </div >
-        </div >
+                </div>
+            </div>
+        </div>
     );
 };
 

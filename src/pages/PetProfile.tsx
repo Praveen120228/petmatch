@@ -4,11 +4,13 @@ import { featureService } from '../lib/featureService';
 import type { Collection } from '../lib/featureService';
 import { chatService } from '../lib/chatService';
 import { petService } from '../lib/petService';
+import { userService } from '../lib/userService';
 import { supabase } from '../lib/supabase';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
+import { getDistance } from '../utils/distance';
 import { useToast } from '../context/ToastContext';
 
 const PetProfile = () => {
@@ -24,6 +26,7 @@ const PetProfile = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [isMatched, setIsMatched] = useState(false);
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
 
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
@@ -39,14 +42,18 @@ const PetProfile = () => {
 
             // 2. Fetch User Relations (if logged in)
             if (user) {
-                const [likes, matches, cols] = await Promise.all([
+                const [likes, matches, cols, userProfile] = await Promise.all([
                     featureService.getLikes(user.id),
                     featureService.getMatches(user.id),
-                    featureService.getCollections(user.id)
+                    featureService.getCollections(user.id),
+                    userService.getProfile(user.id)
                 ]);
                 setIsLiked(likes.includes(petId));
                 setIsMatched(matches.includes(petId));
                 setCollections(cols);
+                if (userProfile?.latitude && userProfile?.longitude) {
+                    setUserLoc({ lat: userProfile.latitude, lng: userProfile.longitude });
+                }
             }
 
             setLoading(false);
@@ -370,7 +377,11 @@ const PetProfile = () => {
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Location</span>
                                 {/* Use owner's location if available, fallback to hardcoded distance or 'Unknown' */}
                                 <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>
-                                    {pet.owner_profile?.show_location === false ? 'Hidden' : (pet.owner_profile?.location || pet.distance || 'Unknown')}
+                                    {pet.owner_profile?.show_location === false ? 'Hidden' : (
+                                        userLoc && pet.owner_profile?.latitude ?
+                                            getDistance(userLoc.lat, userLoc.lng, pet.owner_profile.latitude, pet.owner_profile.longitude) :
+                                            (pet.owner_profile?.location || 'Unknown')
+                                    )}
                                 </span>
                             </div>
                             <div>
