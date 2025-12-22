@@ -128,7 +128,7 @@ const ChatRoom = () => {
 
                 <div
                     style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, cursor: 'pointer', overflow: 'hidden' }}
-                    onClick={() => navigate(`/messages/${chatId}/info`)}
+                    onClick={() => otherUser?.id && navigate(`/user/${otherUser.id}`)}
                 >
                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gray-100)', overflow: 'hidden', flexShrink: 0 }}>
                         <img src={otherUserAvatar} alt={otherUserName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

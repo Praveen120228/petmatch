@@ -275,6 +275,28 @@ const Profile = () => {
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
 
+                    {/* Back Button (Public Only) */}
+                    {isPublic && (
+                        <div
+                            onClick={() => navigate(-1)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                background: 'white',
+                                boxShadow: 'var(--shadow-sm)',
+                                cursor: 'pointer',
+                                marginRight: '1rem',
+                                color: 'var(--color-text-primary)'
+                            }}
+                        >
+                            <CaretLeft size={24} weight="bold" />
+                        </div>
+                    )}
+
                     {/* User Info */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                         <div
@@ -311,9 +333,10 @@ const Profile = () => {
 
                         <div>
                             <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2, color: '#111827' }}>{profileUser.name}</h1>
+                            {profileUser.username && <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>@{profileUser.username}</p>}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.875rem' }}>
                                 <MapPin weight="fill" color="#9ca3af" size={16} />
-                                <span>{(profileUser as any).location}</span>
+                                <span>{isPublic && !(profileUser as any).show_location ? 'Hidden' : (profileUser as any).location}</span>
                             </div>
                             <p style={{ marginTop: '0.5rem', color: '#4b5563', maxWidth: '400px', lineHeight: 1.4, fontSize: '0.9rem' }}>{(profileUser as any).bio}</p>
                         </div>
