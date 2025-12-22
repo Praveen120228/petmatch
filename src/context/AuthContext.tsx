@@ -62,13 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
             }).catch((err) => {
                 console.error('Session fetch error:', err);
-                // If session fetch fails (e.g. corrupt storage), clear it and reset
-                localStorage.clear();
+                // Note: We removed localStorage.clear() here to prevent wiping session on network glitches
                 if (mounted) setLoading(false);
             });
         } catch (e) {
             console.error("Critical Auth Error:", e);
-            localStorage.clear();
+            // Note: We removed localStorage.clear() here to prevent wiping session on network glitches
             setLoading(false);
         }
 
