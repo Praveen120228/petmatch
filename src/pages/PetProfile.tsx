@@ -201,8 +201,24 @@ const PetProfile = () => {
 
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'white' }}>
+            {/* CSS for Responsiveness */}
+            <style>
+                {`
+                    @media (max-width: 900px) {
+                        .grid-layout { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+                        .hide-on-mobile { display: none !important; }
+                        .show-on-mobile { display: flex !important; }
+                        .main-container { margin-bottom: 80px !important; } /* Space for sticky footer */
+                    }
+                    @media (min-width: 901px) {
+                        .hide-on-desktop { display: none !important; }
+                        .show-on-mobile { display: none !important; }
+                    }
+                `}
+            </style>
+
             {/* Header / Nav */}
-            <div style={{ padding: '1rem 2rem', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', zIndex: 20 }}>
+            <div style={{ padding: '1rem 2rem', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: '72px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', zIndex: 20 }}>
                 <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div onClick={() => navigate(-1)} style={{ color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                         <CaretLeft size={24} weight="bold" />
@@ -211,7 +227,7 @@ const PetProfile = () => {
                 </div>
             </div>
 
-            <div style={{ maxWidth: '1000px', margin: '2rem auto', padding: '0 2rem', display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 350px', gap: '3rem', alignItems: 'start' }}>
+            <div className="main-container grid-layout" style={{ maxWidth: '1000px', margin: '2rem auto', padding: '0 2rem', display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 350px', gap: '3rem', alignItems: 'start' }}>
 
                 {/* Left: Photos & Bio */}
                 <div>
@@ -257,7 +273,25 @@ const PetProfile = () => {
 
                     {/* Bio */}
                     <div style={{ marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>About {pet.name}</h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>About {pet.name}</h2>
+                            {/* Mobile Like Button (Visible near title on mobile) */}
+                            <div className="show-on-mobile" style={{ gap: '0.5rem' }}>
+                                <div
+                                    onClick={handleLike}
+                                    style={{
+                                        cursor: 'pointer',
+                                        padding: '0.5rem',
+                                        borderRadius: '50%',
+                                        background: isLiked ? '#ffe4e6' : '#f3f4f6',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                    }}
+                                >
+                                    <Heart weight={isLiked ? "fill" : "regular"} size={24} color={isLiked ? '#e11d48' : '#374151'} />
+                                </div>
+                            </div>
+                        </div>
+
                         <p style={{ color: '#4b5563', lineHeight: 1.6, fontSize: '1rem' }}>{pet.bio}</p>
                     </div>
 
@@ -285,7 +319,7 @@ const PetProfile = () => {
                                 <p style={{ color: '#6b7280', fontSize: '1.1rem', marginTop: '0.25rem' }}>{pet.breed}</p>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="hide-on-mobile">
                                 {/* Like Button */}
                                 <div
                                     onClick={handleLike}
@@ -346,7 +380,8 @@ const PetProfile = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {/* Desktop Actions - Hidden on mobile */}
+                        <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <Button variant="primary" style={{ width: '100%', backgroundColor: isMatched ? 'var(--color-accent)' : '#64748b', border: 'none' }} onClick={handleMatch}>
                                 <Handshake size={20} weight="bold" /> {isMatched ? 'Matched' : 'Match'}
                             </Button>
@@ -376,6 +411,25 @@ const PetProfile = () => {
                     </Link>
 
                 </div>
+            </div>
+
+            {/* Mobile Sticky Action Footer */}
+            <div className="show-on-mobile" style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0,
+                background: 'white', padding: '1rem',
+                boxShadow: '0 -4px 6px -1px rgba(0,0,0,0.1)',
+                zIndex: 50,
+                display: 'flex', gap: '1rem'
+            }}>
+                <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleCreateCollection}>
+                    <BookmarkSimple size={24} weight="bold" />
+                </Button>
+                <Button variant="primary" style={{ flex: 1, backgroundColor: isMatched ? 'var(--color-accent)' : '#64748b' }} onClick={handleMatch}>
+                    <Handshake size={20} weight="bold" /> {isMatched ? 'Matched' : 'Match'}
+                </Button>
+                <Button variant="outline" style={{ flex: 1 }} onClick={handleMessage}>
+                    Message
+                </Button>
             </div>
 
             {/* Collection Modal */}
