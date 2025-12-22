@@ -439,29 +439,31 @@ const MatchFeed = () => {
                                             {/* Bottom Left: Info Overlay */}
                                             <div style={{
                                                 position: 'absolute',
-                                                bottom: '16px',
-                                                left: '16px',
-                                                right: '16px',
+                                                bottom: '24px',
+                                                left: '24px',
+                                                right: '24px',
                                                 zIndex: 10,
                                                 pointerEvents: 'none'
                                             }}>
+                                                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                                                    {pet.gender || 'Unknown Gender'}
+                                                </div>
                                                 <h3 style={{
-                                                    fontSize: '1.4rem',
+                                                    fontSize: '1.75rem',
                                                     fontWeight: 800,
                                                     color: 'white',
-                                                    marginBottom: '4px',
+                                                    marginBottom: '8px',
                                                     textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                                                     fontFamily: '"Outfit", sans-serif',
-                                                    letterSpacing: '-0.02em'
+                                                    letterSpacing: '-0.02em',
+                                                    lineHeight: 1.1
                                                 }}>
                                                     {pet.name}
                                                 </h3>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', fontWeight: 500 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
                                                     <span>{pet.breed}</span>
-                                                    <span>•</span>
+                                                    <span style={{ opacity: 0.6 }}>•</span>
                                                     <span>{pet.age}</span>
-                                                    <span>•</span>
-                                                    <span>{pet.gender || 'Unknown Gender'}</span>
                                                 </div>
                                             </div>
                                         </Card>
