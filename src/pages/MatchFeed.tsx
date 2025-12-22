@@ -343,7 +343,7 @@ const MatchFeed = () => {
                         {pets.length > 0 ? (
                             <>
                                 {pets.map(pet => (
-                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)}>
+                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '100%' }}>
                                         <Card
                                             padding="0"
                                             style={{
@@ -353,11 +353,14 @@ const MatchFeed = () => {
                                                 transition: 'all 0.3s ease',
                                                 transform: hoveredId === pet.id ? 'translateY(-4px)' : 'none',
                                                 overflow: 'hidden',
-                                                background: 'white'
+                                                background: 'white',
+                                                height: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column'
                                             }}
                                         >
                                             {/* Image Container */}
-                                            <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden', background: 'var(--gray-100)' }}>
+                                            <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden', background: 'var(--gray-100)', flexShrink: 0 }}>
                                                 <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                                     <img
                                                         src={pet.image}
@@ -404,10 +407,19 @@ const MatchFeed = () => {
                                             </div>
 
                                             {/* Content (Below Image) */}
-                                            <div style={{ padding: '0.75rem' }}>
+                                            <div style={{ padding: '0.75rem', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                                                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
-                                                    <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px' }}>
+                                                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{pet.name}</h3>
+                                                </div>
+
+                                                {/* Info Container with Fade/Blur if too long */}
+                                                <div style={{
+                                                    flex: 1,
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
+                                                    maxHeight: '60px'
+                                                }}>
+                                                    <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'inline-flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px', marginBottom: '0.25rem', maxWidth: '100%', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                                                         {pet.owner_profile?.username ? (
                                                             <>
                                                                 @{pet.owner_profile.username} • {pet.owner_profile?.show_location === false ? 'Hidden' : getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || 'Unknown'}
@@ -416,11 +428,22 @@ const MatchFeed = () => {
                                                             pet.owner_profile?.show_location === false ? 'Location Hidden' : (getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || pet.owner_profile?.location || 'Unknown')
                                                         )}
                                                     </span>
-                                                </div>
 
-                                                <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', marginBottom: '0.75rem', fontWeight: 500 }}>
-                                                    {pet.breed} • {pet.age} {pet.gender ? `• ${pet.gender}` : ''}
-                                                </p>
+                                                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', fontWeight: 500, margin: 0 }}>
+                                                        {pet.breed} • {pet.age} {pet.gender ? `• ${pet.gender}` : ''}
+                                                    </p>
+
+                                                    {/* Blur Gradient Overlay */}
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        height: '24px',
+                                                        background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))',
+                                                        pointerEvents: 'none'
+                                                    }} />
+                                                </div>
                                             </div>
                                         </Card>
                                     </div>
