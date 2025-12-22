@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { petService } from '../lib/petService';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import { processImage } from '../utils/imageHandler';
+import { supabase } from '../lib/supabase';
 
 const Onboarding = () => {
     const navigate = useNavigate();
@@ -38,6 +39,7 @@ const Onboarding = () => {
     const [breed, setBreed] = useState('');
     const [age, setAge] = useState('');
     const [gender, setGender] = useState('Male');
+    const [color, setColor] = useState(''); // Added Color State
     const [images, setImages] = useState<string[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -76,6 +78,7 @@ const Onboarding = () => {
                 breed,
                 age: age + ' yrs',
                 gender,
+                color, // Pass color
                 type: petType,
                 image: images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80',
                 images: images,
@@ -86,8 +89,18 @@ const Onboarding = () => {
 
             await petService.createPet(newPetPayload);
 
-            // 2. Save Profile Extra Details (Optional / Future schema update)
-            // await updateUser({ ... }); 
+            // 2. Save Profile Extra Details (Location & Bio)
+            if (location || bio) {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({
+                        location: location,
+                        bio: bio
+                    })
+                    .eq('id', user.id);
+
+                if (error) console.error("Failed to update profile location:", error);
+            }
 
             navigate('/profile');
         } catch (error) {
@@ -264,6 +277,14 @@ const Onboarding = () => {
                             setAge(e.target.value);
                         }
                     }}
+                    fullWidth
+                />
+
+                <Input
+                    label="Color"
+                    placeholder="e.g. Brown & White"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
                     fullWidth
                 />
 

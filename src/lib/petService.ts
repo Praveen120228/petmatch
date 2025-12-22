@@ -80,7 +80,7 @@ export const petService = {
             .from('pets')
             .select(`
                 *,
-                owner_profile:profiles!owner_id(name)
+                owner_profile:profiles!owner_id(name, location)
             `)
             .eq('id', id)
             .single();
@@ -103,7 +103,7 @@ export const petService = {
         return data as Pet[];
     },
 
-    async createPet(pet: Omit<Pet, 'id' | 'likes' | 'distance'>) {
+    async createPet(pet: Omit<Pet, 'id' | 'likes' | 'distance'> & { color?: string }) {
         const { data, error } = await supabase
             .from('pets')
             .insert({
@@ -112,6 +112,7 @@ export const petService = {
                 type: (pet as any).type, // safely access if type definition is lagging
                 age: pet.age,
                 gender: pet.gender,
+                color: pet.color, // Added color
                 image: pet.image,
                 images: pet.images,
                 bio: pet.bio,

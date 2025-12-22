@@ -367,16 +367,23 @@ const PetProfile = () => {
                                 <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.age}</span>
                             </div>
                             <div>
-                                <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Distance</span>
-                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.distance}</span>
+                                <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Location</span>
+                                {/* Use owner's location if available, fallback to hardcoded distance or 'Unknown' */}
+                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>
+                                    {pet.owner_profile?.location || pet.distance || 'Unknown'}
+                                </span>
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Gender</span>
-                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>Male</span>
+                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>
+                                    {pet.gender || 'Unknown'}
+                                </span>
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Color</span>
-                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>Mixed</span>
+                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>
+                                    {pet.color || 'Mixed'}
+                                </span>
                             </div>
                         </div>
 
