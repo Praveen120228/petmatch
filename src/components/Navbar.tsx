@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const location = useLocation();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const navStyle: React.CSSProperties = {
@@ -114,8 +114,14 @@ const Navbar = () => {
                             <Link to="/messages" style={linkStyle('/messages')}>
                                 <Chats size={20} /> Messages
                             </Link>
-                            <Link to="/profile" style={linkStyle('/profile')}>
-                                <User size={20} /> Profile
+                            <Link to="/profile" style={{ ...linkStyle('/profile'), borderRadius: '50%', padding: 0, width: '40px', height: '40px', overflow: 'hidden', border: isActive('/profile') ? '2px solid var(--primary-600)' : '2px solid transparent' }}>
+                                {user?.image ? (
+                                    <img src={user.image} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <User size={24} color="var(--gray-600)" />
+                                    </div>
+                                )}
                             </Link>
                         </>
                     ) : (
