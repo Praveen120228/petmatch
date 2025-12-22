@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { petService } from '../lib/petService';
 import Button from '../components/Button';
-import { Camera, Crop, X, CaretLeft } from '@phosphor-icons/react';
+import { Camera, X, CaretLeft } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 
 const AddPet = () => {
@@ -83,193 +83,209 @@ const AddPet = () => {
     };
 
     return (
-        <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', padding: '2rem' }}>
-            <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', padding: '2rem 1rem' }}>
+            <div style={{ maxWidth: '480px', margin: '0 auto' }}>
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-                    <Button variant="ghost" onClick={() => navigate(-1)} style={{ marginRight: '1rem', padding: '0.5rem' }}>
+                    <Button variant="ghost" onClick={() => navigate(-1)} style={{ marginRight: '0.5rem', padding: '0.5rem', borderRadius: '50%' }}>
                         <CaretLeft size={24} weight="bold" />
                     </Button>
                     <div>
-                        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#111827' }}>Add a New Pet</h1>
-                        <p style={{ color: '#6b7280' }}>Fill in the details below to add your pet.</p>
+                        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827', lineHeight: 1.2 }}>New Companion</h1>
+                        <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>Add your pet's details below.</p>
                     </div>
                 </div>
 
-                <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: 'var(--shadow-md)' }}>
+                <div style={{ background: 'white', borderRadius: '24px', padding: '1.5rem', boxShadow: 'var(--shadow-md)' }}>
 
-                    {/* Image Upload */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                        <div style={{ position: 'relative', width: '120px', height: '120px' }}>
-                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6', border: '4px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                    {/* Image Upload - Centered & Compact */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                                position: 'relative', width: '100px', height: '100px', cursor: 'pointer',
+                                transition: 'transform 0.2s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
                                 <img src={petForm.image || `https://ui-avatars.com/api/?name=${petForm.name || 'Pet'}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
-                            {petForm.image && (
-                                <div
-                                    onClick={() => setCropImage(petForm.image)}
-                                    style={{
-                                        position: 'absolute', bottom: 0, right: 0,
-                                        background: 'white', color: '#374151',
-                                        borderRadius: '50%', width: '36px', height: '36px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        cursor: 'pointer', border: '1px solid #e5e7eb',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                    title="Crop Photo"
-                                >
-                                    <Crop size={18} weight="bold" />
-                                </div>
-                            )}
+                            <div style={{
+                                position: 'absolute', bottom: 0, right: 0,
+                                background: 'var(--primary-600)', color: 'white',
+                                borderRadius: '50%', width: '30px', height: '30px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}>
+                                <Camera size={14} weight="bold" />
+                            </div>
                         </div>
-                        <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-                            <Camera size={20} /> Upload Photo
-                        </Button>
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileSelect}
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                        />
+                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" style={{ display: 'none' }} />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-                        {/* Name */}
+                        {/* Name Input */}
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Name</label>
                             <input
                                 type="text"
                                 value={petForm.name}
                                 onChange={e => setPetForm({ ...petForm, name: e.target.value })}
                                 placeholder="Pet's Name"
-                                style={{ width: '100%', padding: '0.875rem', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb', transition: 'all 0.2s' }}
+                                onFocus={e => { e.target.style.background = 'white'; e.target.style.borderColor = 'var(--primary-300)'; e.target.style.boxShadow = '0 0 0 3px var(--primary-50)'; }}
+                                onBlur={e => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; }}
                             />
                         </div>
 
-                        {/* Species Select */}
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Type</label>
-                            <select
-                                value={petForm.type}
-                                onChange={e => setPetForm({ ...petForm, type: e.target.value })}
-                                style={{ width: '100%', padding: '0.875rem', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '1rem', background: 'white' }}
-                            >
-                                <option value="dog">Dog</option>
-                                <option value="cat">Cat</option>
-                                <option value="other">Other</option>
-                            </select>
+                        {/* Toggles Row: Type & Gender */}
+                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                            {/* Type Toggle */}
+                            <div style={{ flex: 1, minWidth: '140px' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
+                                <div style={{ display: 'flex', background: '#f3f4f6', padding: '4px', borderRadius: '12px' }}>
+                                    {(['dog', 'cat', 'other'] as const).map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setPetForm({ ...petForm, type })}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.5rem',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                background: petForm.type === type ? 'white' : 'transparent',
+                                                color: petForm.type === type ? 'var(--primary-700)' : '#6b7280',
+                                                fontWeight: 600,
+                                                fontSize: '0.875rem',
+                                                boxShadow: petForm.type === type ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                                                cursor: 'pointer',
+                                                textTransform: 'capitalize',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Gender Toggle */}
+                            <div style={{ flex: 1, minWidth: '140px' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gender</label>
+                                <div style={{ display: 'flex', background: '#f3f4f6', padding: '4px', borderRadius: '12px' }}>
+                                    {['Male', 'Female'].map(gender => (
+                                        <button
+                                            key={gender}
+                                            onClick={() => setPetForm({ ...petForm, gender })}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.5rem',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                background: petForm.gender === gender ? 'white' : 'transparent',
+                                                color: petForm.gender === gender ? 'var(--primary-700)' : '#6b7280',
+                                                fontWeight: 600,
+                                                fontSize: '0.875rem',
+                                                boxShadow: petForm.gender === gender ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            {gender}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Breed & Age */}
+                        {/* Breed & Age Row */}
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Breed</label>
+                            <div style={{ flex: 2 }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Breed</label>
                                 <input
                                     type="text"
                                     value={petForm.breed}
                                     onChange={e => setPetForm({ ...petForm, breed: e.target.value })}
-                                    placeholder="e.g. Golden Retriever"
-                                    style={{ width: '100%', padding: '0.875rem', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                    list="breeds"
+                                    placeholder="Brief Breed"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb' }}
                                 />
-                                <datalist id="breeds">
-                                    <option value="Golden Retriever" />
-                                    <option value="Labrador" />
-                                    <option value="Bulldog" />
-                                    <option value="Poodle" />
-                                    <option value="German Shepherd" />
-                                </datalist>
                             </div>
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Age</label>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Age</label>
                                 <input
                                     type="text"
                                     value={petForm.age}
                                     onChange={e => setPetForm({ ...petForm, age: e.target.value })}
-                                    placeholder="e.g. 2 years"
-                                    style={{ width: '100%', padding: '0.875rem', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                    placeholder="2 yrs"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb' }}
                                 />
                             </div>
                         </div>
 
-                        {/* Gender */}
+                        {/* Traits Input (Clean) */}
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Gender</label>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                {['Male', 'Female'].map(g => (
-                                    <button
-                                        key={g}
-                                        onClick={() => setPetForm({ ...petForm, gender: g })}
-                                        style={{
-                                            flex: 1,
-                                            padding: '0.875rem',
-                                            borderRadius: '12px',
-                                            border: `1px solid ${petForm.gender === g ? 'var(--primary-600)' : '#d1d5db'}`,
-                                            background: petForm.gender === g ? 'var(--primary-50)' : 'white',
-                                            color: petForm.gender === g ? 'var(--primary-700)' : '#374151',
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        {g}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Traits */}
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Traits</label>
-                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Traits</label>
+                            <div style={{ position: 'relative' }}>
                                 <input
                                     type="text"
                                     value={traitInput}
                                     onChange={e => setTraitInput(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleAddTrait()}
-                                    placeholder="Add a trait (e.g. Playful)"
-                                    style={{ flex: 1, padding: '0.875rem', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                    placeholder="Add trait + Enter"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', paddingRight: '3rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb' }}
                                 />
-                                <Button onClick={handleAddTrait} variant="outline">Add</Button>
+                                <button
+                                    onClick={handleAddTrait}
+                                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--primary-600)' }}
+                                >
+                                    +
+                                </button>
                             </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {petForm.traits.map((trait, i) => (
-                                    <div key={i} style={{ background: '#f3f4f6', padding: '6px 12px', borderRadius: '20px', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {trait}
-                                        <button
-                                            onClick={() => handleRemoveTrait(trait)}
-                                            style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#6b7280' }}
-                                        >
-                                            <X size={14} weight="bold" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
+                            {petForm.traits.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                                    {petForm.traits.map((trait, i) => (
+                                        <div key={i} style={{ background: 'var(--primary-50)', color: 'var(--primary-700)', padding: '4px 10px', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--primary-100)' }}>
+                                            {trait}
+                                            <button
+                                                onClick={() => handleRemoveTrait(trait)}
+                                                style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--primary-400)' }}
+                                            >
+                                                <X size={12} weight="bold" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Bio */}
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Bio</label>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bio</label>
                             <textarea
                                 value={petForm.bio}
                                 onChange={e => setPetForm({ ...petForm, bio: e.target.value })}
-                                placeholder="Tell us about your pet..."
-                                style={{ width: '100%', padding: '0.875rem', borderRadius: '12px', border: '1px solid #d1d5db', minHeight: '100px', fontSize: '1rem', lineHeight: 1.5, resize: 'vertical' }}
+                                placeholder="What makes your pet special?"
+                                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', minHeight: '80px', fontSize: '1rem', background: '#f9fafb', resize: 'none' }}
                             />
                         </div>
 
-                        <Button
-                            variant="primary"
-                            size="lg"
-                            fullWidth
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                            loading={isSubmitting}
-                        >
-                            Save Pet
-                        </Button>
+                        <div style={{ marginTop: '0.5rem' }}>
+                            <Button
+                                variant="primary"
+                                size="lg"
+                                fullWidth
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                                loading={isSubmitting}
+                                style={{ borderRadius: '16px', fontWeight: 700, fontSize: '1.1rem', boxShadow: 'var(--shadow-colored)' }}
+                            >
+                                Create Profile
+                            </Button>
+                        </div>
 
                     </div>
                 </div>
