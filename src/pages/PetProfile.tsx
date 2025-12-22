@@ -393,11 +393,11 @@ const PetProfile = () => {
                                 variant="primary"
                                 style={{
                                     width: '100%',
-                                    backgroundColor: isMatched ? '#7c3aed' : '#4b5563',
+                                    background: isMatched ? '#7c3aed' : '#4b5563',
                                     color: 'white',
                                     border: 'none',
-                                    transition: 'background-color 0.2s',
-                                    // Override potential active/hover white states with simple inline
+                                    transition: 'background 0.2s',
+                                    opacity: 1
                                 }}
                                 onClick={handleMatch}
                             >
@@ -446,10 +446,11 @@ const PetProfile = () => {
                     variant="primary"
                     style={{
                         flex: 1,
-                        backgroundColor: isMatched ? '#7c3aed' : '#4b5563',
+                        background: isMatched ? '#7c3aed' : '#4b5563',
                         color: 'white',
                         border: 'none',
-                        transition: 'background-color 0.2s'
+                        transition: 'background 0.2s',
+                        opacity: 1
                     }}
                     onClick={handleMatch}
                 >
