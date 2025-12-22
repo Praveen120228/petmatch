@@ -28,13 +28,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         let mounted = true;
 
-        // Safety Timeout to prevent infinite loading
+        // Safety Timeout: If Supabase takes too long (e.g. cold start), 
+        // we unblock the UI immediately so the user isn't stuck on a white screen.
         const timer = setTimeout(() => {
             if (mounted && loading) {
-                console.warn('Auth loading timed out (15s), forcing render. Check network or Supabase status.');
+                console.log('Auth: Session check taking longer than 3s, unblocking UI...');
                 setLoading(false);
             }
-        }, 15000); // 15 seconds max wait (Supabase cold start can take time)
+        }, 3000); // 3 seconds max wait
 
         // 1. Get initial session
         console.log("Auth: Application mounted, fetching session...");
