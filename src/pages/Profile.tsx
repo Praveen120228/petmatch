@@ -61,6 +61,7 @@ const Profile = () => {
     // Data State
     const [profileData, setProfileData] = useState<any>(null); // Real profile data from DB
     const [pets, setPets] = useState<any[]>([]);
+    const [editingPet, setEditingPet] = useState<any>(null); // Pet currently being edited
     const [likedPets, setLikedPets] = useState<any[]>([]);
     const [matchedPets, setMatchedPets] = useState<any[]>([]);
     const [collectionPets, setCollectionPets] = useState<any[]>([]);
@@ -242,7 +243,8 @@ const Profile = () => {
                         )
                     }
 
-                    {/* Edit Modal */}
+
+                    {/* Edit Profile Modal */}
                     {
                         isEditing && (
                             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
@@ -300,6 +302,97 @@ const Profile = () => {
                                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                         <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
                                         <Button variant="primary" onClick={handleSaveProfile}>Save Changes</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* Edit Pet Modal */}
+                    {
+                        editingPet && (
+                            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+                                <div style={{ width: '90%', maxWidth: '500px', background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Edit Pet: {editingPet.name}</h3>
+                                        <button onClick={() => setEditingPet(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={24} /></button>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingPet.name}
+                                                    onChange={e => setEditingPet({ ...editingPet, name: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Age (e.g. 2 yrs)</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingPet.age}
+                                                    onChange={e => setEditingPet({ ...editingPet, age: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Color</label>
+                                            <input
+                                                type="text"
+                                                value={editingPet.color || ''}
+                                                placeholder="e.g. Golden"
+                                                onChange={e => setEditingPet({ ...editingPet, color: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Gender</label>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                {['Male', 'Female'].map(g => (
+                                                    <label key={g} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                                        <input
+                                                            type="radio"
+                                                            name="gender"
+                                                            value={g}
+                                                            checked={editingPet.gender === g}
+                                                            onChange={() => setEditingPet({ ...editingPet, gender: g })}
+                                                        />
+                                                        {g}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Bio</label>
+                                            <textarea
+                                                value={editingPet.bio || ''}
+                                                onChange={e => setEditingPet({ ...editingPet, bio: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '80px', resize: 'vertical' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                        <Button variant="ghost" onClick={() => setEditingPet(null)}>Cancel</Button>
+                                        <Button variant="primary" onClick={async () => {
+                                            try {
+                                                await petService.updatePet(editingPet.id, {
+                                                    name: editingPet.name,
+                                                    age: editingPet.age,
+                                                    gender: editingPet.gender,
+                                                    color: editingPet.color,
+                                                    bio: editingPet.bio
+                                                });
+                                                // Update local list
+                                                setPets(prev => prev.map(p => p.id === editingPet.id ? editingPet : p));
+                                                setEditingPet(null);
+                                            } catch (err) {
+                                                console.error(err);
+                                                alert("Failed to update pet.");
+                                            }
+                                        }}>Save Pet</Button>
                                     </div>
                                 </div>
                             </div>
@@ -409,6 +502,40 @@ const Profile = () => {
                                                 </Link>
                                             ) : (
                                                 <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            )}
+
+                                            {/* Edit Button (Only for owner) */}
+                                            {!isPublic && pet.id && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setEditingPet(pet);
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '8px',
+                                                        right: '48px',
+                                                        background: 'rgba(255,255,255,0.9)',
+                                                        width: '32px',
+                                                        height: '32px',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        color: '#2563eb',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                        zIndex: 10,
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                    title="Edit Pet"
+                                                    onMouseEnter={e => e.currentTarget.style.background = '#e0f2fe'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
+                                                >
+                                                    <PencilSimple size={16} weight="bold" />
+                                                </button>
                                             )}
 
                                             {/* Delete Button (Only for owner) */}

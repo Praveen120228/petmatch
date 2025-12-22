@@ -7,6 +7,7 @@ export interface Pet {
     image?: string;
     images?: string[];
     bio: string;
+    color?: string; // Added color field
     traits: string[];
     owner_id: string; // Changed from ownerId to match DB column name
     distance: string;

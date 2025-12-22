@@ -131,6 +131,21 @@ export const petService = {
         return data;
     },
 
+    async updatePet(id: number, updates: Partial<Pet>) {
+        const { data, error } = await supabase
+            .from('pets')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating pet:', error);
+            throw error;
+        }
+        return dataForUpdate(data);
+    },
+
     async deletePet(id: number) {
         const { error } = await supabase
             .from('pets')
@@ -144,3 +159,6 @@ export const petService = {
         return true;
     }
 };
+
+// Helper to handle any specific data transformation if needed, currently passthrough
+const dataForUpdate = (data: any) => data;
