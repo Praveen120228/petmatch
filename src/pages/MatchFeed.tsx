@@ -399,15 +399,13 @@ const MatchFeed = () => {
                                             <div style={{ padding: '0.75rem' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
                                                     <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
-                                                    {pet.distance && (
-                                                        <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px' }}>
-                                                            {pet.distance}
-                                                        </span>
-                                                    )}
+                                                    <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px' }}>
+                                                        {pet.owner_profile?.location || pet.distance || '1m away'}
+                                                    </span>
                                                 </div>
 
                                                 <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', marginBottom: '0.75rem', fontWeight: 500 }}>
-                                                    {pet.breed} • {pet.age}
+                                                    {pet.breed} • {pet.age} {pet.gender ? `• ${pet.gender}` : ''}
                                                 </p>
                                             </div>
                                         </Card>
