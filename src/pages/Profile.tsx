@@ -947,11 +947,13 @@ const Profile = () => {
                                             background: '#f9fafb'
                                         }}>
                                             {selectedCol.items && selectedCol.items.length > 0 ? (
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '2rem' }}>
                                                     {collectionPets.filter(p => selectedCol.items?.includes(p.id)).map((pet: any) => (
                                                         <div key={pet.id} style={{
                                                             position: 'relative',
-                                                            height: '280px',
+                                                            height: '320px',
+                                                            width: '240px',
+                                                            margin: '0 auto',
                                                             borderRadius: '24px',
                                                             overflow: 'hidden',
                                                             boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
@@ -987,13 +989,13 @@ const Profile = () => {
                                                             </button>
 
                                                             {/* Content */}
-                                                            <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', zIndex: 10 }}>
-                                                                <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none' }}>
-                                                                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
+                                                            <div style={{ position: 'absolute', bottom: '24px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
+                                                                <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', pointerEvents: 'auto' }}>
+                                                                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                                                                         {pet.gender || 'Unknown'}
                                                                     </div>
-                                                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif', lineHeight: 1.1 }}>{pet.name}</h3>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem', fontWeight: 500 }}>
+                                                                    <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.3)', fontFamily: '"Outfit", sans-serif', lineHeight: 1.1 }}>{pet.name}</h3>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
                                                                         <span>{pet.breed}</span>
                                                                         <span style={{ opacity: 0.6 }}>•</span>
                                                                         <span>{pet.age}</span>
@@ -1008,7 +1010,8 @@ const Profile = () => {
                                                     <Folder size={48} weight="duotone" style={{ opacity: 0.5, marginBottom: '1rem' }} />
                                                     <p style={{ fontSize: '1.125rem' }}>This collection is empty.</p>
                                                 </div>
-                                            )}
+                                            )
+                                            }
                                         </div>
                                     </div>
                                 </div>
