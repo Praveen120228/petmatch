@@ -33,7 +33,7 @@ export const petService = {
             .from('pets')
             .select(`
                 id, name, image, breed, age, type, distance, owner_id,
-                owner_profile:profiles!owner_id(location)
+                owner_profile:profiles!owner_id(location, latitude, longitude)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
             .range(from, to);
@@ -83,7 +83,7 @@ export const petService = {
             .from('pets')
             .select(`
                 *,
-                owner_profile:profiles!owner_id(name, location)
+                owner_profile:profiles!owner_id(name, location, latitude, longitude)
             `)
             .eq('id', id)
             .single();

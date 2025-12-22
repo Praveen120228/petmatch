@@ -7,6 +7,8 @@ export interface UserProfile {
     avatar_url?: string;
     bio?: string;
     location?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export const userService = {

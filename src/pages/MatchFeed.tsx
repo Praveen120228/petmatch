@@ -7,6 +7,8 @@ import { featureService } from '../lib/featureService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
+import { userService } from '../lib/userService';
+import { getDistance } from '../utils/distance';
 import { PET_TYPES } from '../data/breeds';
 
 const AGES = ['1 yr', '2 yrs', '3 yrs', '4 yrs', '5 yrs'];
@@ -21,6 +23,7 @@ const MatchFeed = () => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
 
 
     const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -38,6 +41,11 @@ const MatchFeed = () => {
     useEffect(() => {
         if (!user) return;
         featureService.getLikes(user.id).then(setLikes);
+        userService.getProfile(user.id).then(p => {
+            if (p?.latitude && p?.longitude) {
+                setUserLoc({ lat: p.latitude, lng: p.longitude });
+            }
+        });
     }, [user]);
 
     // Load Pets (Paginated)
@@ -400,7 +408,7 @@ const MatchFeed = () => {
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
                                                     <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>{pet.name}</h3>
                                                     <span style={{ fontSize: '0.7rem', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '2px', background: 'var(--gray-50)', padding: '2px 4px', borderRadius: '4px' }}>
-                                                        {pet.owner_profile?.location || pet.distance || '1m away'}
+                                                        {getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || pet.owner_profile?.location || 'Unknown'}
                                                     </span>
                                                 </div>
 

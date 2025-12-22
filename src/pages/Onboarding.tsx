@@ -23,6 +23,7 @@ const Onboarding = () => {
 
     // User details
     const [location, setLocation] = useState('');
+    const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [bio, setBio] = useState('');
 
@@ -75,6 +76,7 @@ const Onboarding = () => {
         setIsLoadingLocation(true);
         navigator.geolocation.getCurrentPosition(async (pos) => {
             const { latitude, longitude } = pos.coords;
+            setCoords({ lat: latitude, lng: longitude });
             try {
                 // Approximate reverse geocoding via OpenStreetMap (Nominatim)
                 // Note: In production, consider a paid service or cache this to avoid rate limits
@@ -135,7 +137,9 @@ const Onboarding = () => {
                     .from('profiles')
                     .update({
                         location: location,
-                        bio: bio
+                        bio: bio,
+                        latitude: coords?.lat || null,
+                        longitude: coords?.lng || null
                     })
                     .eq('id', user.id);
 

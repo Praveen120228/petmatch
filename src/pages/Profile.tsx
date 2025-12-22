@@ -30,7 +30,9 @@ const Profile = () => {
         name: user?.name || '',
         location: '',
         bio: '',
-        image: user?.image || ''
+        image: user?.image || '',
+        latitude: null as number | null,
+        longitude: null as number | null
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,11 +69,11 @@ const Profile = () => {
                 }
 
                 const locString = city ? (state ? `${city}, ${state}` : city) : `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
-                setEditForm(prev => ({ ...prev, location: locString }));
+                setEditForm(prev => ({ ...prev, location: locString, latitude, longitude }));
 
             } catch (err) {
                 console.error("Geocoding failed", err);
-                setEditForm(prev => ({ ...prev, location: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}` }));
+                setEditForm(prev => ({ ...prev, location: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`, latitude, longitude }));
             } finally {
                 setIsLoadingLocation(false);
             }
@@ -129,7 +131,9 @@ const Profile = () => {
                                 name: userProfile.name || '',
                                 location: userProfile.location || '',
                                 bio: userProfile.bio || '',
-                                image: userProfile.avatar_url || ''
+                                image: userProfile.avatar_url || '',
+                                latitude: userProfile.latitude || null,
+                                longitude: userProfile.longitude || null
                             });
                         }
                     }
@@ -219,7 +223,9 @@ const Profile = () => {
                 name: editForm.name,
                 avatar_url: editForm.image, // Ensure mapping matches DB column 'avatar_url'
                 location: editForm.location,
-                bio: editForm.bio
+                bio: editForm.bio,
+                latitude: editForm.latitude || undefined,
+                longitude: editForm.longitude || undefined
             });
 
             // Update Auth Context (for app-wide name/image)
