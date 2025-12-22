@@ -39,23 +39,42 @@ const Profile = () => {
         show_location: true
     });
 
+    const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const petFileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUserFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
+            setCropTarget('user');
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = () => {
                 setCropImage(reader.result as string);
             };
             reader.readAsDataURL(file);
-            // Verify file input value is reset so same file can be selected again
+            e.target.value = '';
+        }
+    };
+
+    const handlePetFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setCropTarget('pet');
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+                setCropImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
             e.target.value = '';
         }
     };
 
     const handleCropComplete = (croppedBase64: string) => {
-        setEditForm(prev => ({ ...prev, image: croppedBase64 }));
+        if (cropTarget === 'user') {
+            setEditForm(prev => ({ ...prev, image: croppedBase64 }));
+        } else if (cropTarget === 'pet' && editingPet) {
+            setEditingPet((prev: any) => ({ ...prev, image: croppedBase64 }));
+        }
         setCropImage(null);
     };
 
@@ -457,7 +476,7 @@ const Profile = () => {
                                                 <input
                                                     type="file"
                                                     ref={fileInputRef}
-                                                    onChange={handleFileSelect}
+                                                    onChange={handleUserFileSelect}
                                                     accept="image/*"
                                                     style={{ display: 'none' }}
                                                 />
@@ -491,6 +510,24 @@ const Profile = () => {
                                         <button onClick={() => setEditingPet(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={24} /></button>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Pet Photo</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ width: '60px', height: '60px', borderRadius: '16px', overflow: 'hidden', background: '#f3f4f6' }}>
+                                                    <img src={editingPet.image || `https://ui-avatars.com/api/?name=${editingPet.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                </div>
+                                                <Button variant="outline" onClick={() => petFileInputRef.current?.click()} size="sm">
+                                                    <Camera size={18} /> Change Photo
+                                                </Button>
+                                                <input
+                                                    type="file"
+                                                    ref={petFileInputRef}
+                                                    onChange={handlePetFileSelect}
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                />
+                                            </div>
+                                        </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                             <div>
                                                 <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
@@ -502,6 +539,18 @@ const Profile = () => {
                                                 />
                                             </div>
                                             <div>
+                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Breed</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingPet.breed || ''}
+                                                    onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })}
+                                                    placeholder="e.g. Labrador"
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
                                                 <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Age (e.g. 2 yrs)</label>
                                                 <input
                                                     type="text"
@@ -510,16 +559,16 @@ const Profile = () => {
                                                     style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
                                                 />
                                             </div>
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Color</label>
-                                            <input
-                                                type="text"
-                                                value={editingPet.color || ''}
-                                                placeholder="e.g. Golden"
-                                                onChange={e => setEditingPet({ ...editingPet, color: e.target.value })}
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
-                                            />
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Color</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingPet.color || ''}
+                                                    placeholder="e.g. Golden"
+                                                    onChange={e => setEditingPet({ ...editingPet, color: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                                />
+                                            </div>
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Gender</label>
@@ -556,7 +605,9 @@ const Profile = () => {
                                                     age: editingPet.age,
                                                     gender: editingPet.gender,
                                                     color: editingPet.color,
-                                                    bio: editingPet.bio
+                                                    bio: editingPet.bio,
+                                                    breed: editingPet.breed,
+                                                    image: editingPet.image // Supports update
                                                 });
                                                 // Update local list
                                                 setPets(prev => prev.map(p => p.id === editingPet.id ? editingPet : p));

@@ -389,7 +389,18 @@ const PetProfile = () => {
 
                         {/* Desktop Actions - Hidden on mobile */}
                         <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <Button variant="primary" style={{ width: '100%', backgroundColor: isMatched ? 'var(--color-accent)' : '#64748b', border: 'none' }} onClick={handleMatch}>
+                            <Button
+                                variant="primary"
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: isMatched ? '#7c3aed' : '#4b5563',
+                                    color: 'white',
+                                    border: 'none',
+                                    transition: 'background-color 0.2s',
+                                    // Override potential active/hover white states with simple inline
+                                }}
+                                onClick={handleMatch}
+                            >
                                 <Handshake size={20} weight="bold" /> {isMatched ? 'Matched' : 'Match'}
                             </Button>
 
@@ -431,7 +442,17 @@ const PetProfile = () => {
                 <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleCreateCollection}>
                     <BookmarkSimple size={24} weight="bold" />
                 </Button>
-                <Button variant="primary" style={{ flex: 1, backgroundColor: isMatched ? 'var(--color-accent)' : '#64748b' }} onClick={handleMatch}>
+                <Button
+                    variant="primary"
+                    style={{
+                        flex: 1,
+                        backgroundColor: isMatched ? '#7c3aed' : '#4b5563',
+                        color: 'white',
+                        border: 'none',
+                        transition: 'background-color 0.2s'
+                    }}
+                    onClick={handleMatch}
+                >
                     <Handshake size={20} weight="bold" /> {isMatched ? 'Matched' : 'Match'}
                 </Button>
                 <Button variant="outline" style={{ flex: 1 }} onClick={handleMessage}>
