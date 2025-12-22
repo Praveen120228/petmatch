@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { CalendarBlank, MagnifyingGlass, ChatCircleDots } from '@phosphor-icons/react';
+import { userService } from '../lib/userService';
+import { CalendarBlank, MagnifyingGlass, ChatCircleDots, UserPlus, CaretRight } from '@phosphor-icons/react';
 import Card from './Card';
 
 interface ChatListProps {
@@ -17,6 +18,8 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
     const [chats, setChats] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const [discoveredUsers, setDiscoveredUsers] = useState<any[]>([]);
+    const [searchingUsers, setSearchingUsers] = useState(false);
 
     useEffect(() => {
         if (!user) return;
@@ -70,18 +73,56 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
 
         return chats.filter(c => {
             const name = c.other_user?.name || 'Unknown';
-            return name.toLowerCase().includes(searchQuery.toLowerCase());
+            const username = c.other_user?.username || '';
+            const q = searchQuery.toLowerCase();
+            return name.toLowerCase().includes(q) || username.toLowerCase().includes(q);
         });
     }, [chats, searchQuery]);
+
+    // Global User Search
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setDiscoveredUsers([]);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setSearchingUsers(true);
+            try {
+                const users = await userService.searchUsers(searchQuery);
+                // Filter out self and existing chats
+                const existingIds = chats.map(c => c.other_user?.id);
+                // Also filter out self (user.id checks if needed, query handled in db but filtering distinct)
+                if (user) {
+                    const filtered = users.filter((u: any) => u.id !== user.id && !existingIds.includes(u.id));
+                    setDiscoveredUsers(filtered);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setSearchingUsers(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, chats, user]);
+
+    const handleStartChat = async (otherId: string) => {
+        if (!user) return;
+        try {
+            const chatId = await chatService.createConversation(user.id, otherId);
+            // Refresh list or nav
+            window.location.href = `/messages/${chatId}`; // Force nav for now or use router if passed
+        } catch (e) {
+            alert("Failed to start chat");
+        }
+    };
 
     const formatTime = (isoString?: string) => {
         if (!isoString) return '';
         const date = new Date(isoString);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
-
-    // 2. Discover New Users matching search - Helper for future use
-    const discoveredUsers: any[] = [];
 
 
 
@@ -146,8 +187,45 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                     </Card>
                 )}
 
-                {/* Discovered Users (Code Placeholder) */}
-                {discoveredUsers.length > 0 && ( /* ... */ null)}
+                {/* Discovered Users Section */}
+                {searchQuery && discoveredUsers.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gray-500)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>People</h4>
+                        <div style={{ display: 'grid', gap: '0.5rem' }}>
+                            {discoveredUsers.map(u => (
+                                <div
+                                    key={u.id}
+                                    onClick={() => handleStartChat(u.id)}
+                                    style={{
+                                        padding: '0.75rem',
+                                        background: 'var(--gray-50)',
+                                        borderRadius: 'var(--radius-lg)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '1rem',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.2s'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-100)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'var(--gray-50)'}
+                                >
+                                    <img
+                                        src={u.avatar_url || `https://ui-avatars.com/api/?name=${u.name}&background=random`}
+                                        alt={u.name}
+                                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--gray-900)' }}>{u.name}</h4>
+                                        {u.username && <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>@{u.username}</span>}
+                                    </div>
+                                    <div style={{ padding: '0.5rem', background: 'white', borderRadius: '50%', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                                        <UserPlus size={18} color="var(--primary-600)" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Chats */}
                 {(filteredChats.length > 0) && (

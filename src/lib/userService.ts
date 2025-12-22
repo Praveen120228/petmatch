@@ -10,6 +10,7 @@ export interface UserProfile {
     latitude?: number;
     longitude?: number;
     show_location?: boolean;
+    username?: string;
 }
 
 export const userService = {
@@ -38,5 +39,20 @@ export const userService = {
             console.error('Error updating profile:', error);
             throw error;
         }
+    },
+
+    async searchUsers(query: string) {
+        if (!query) return [];
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, name, avatar_url, username')
+            .or(`name.ilike.%${query}%,username.ilike.%${query}%`)
+            .limit(10);
+
+        if (error) {
+            console.error("Error searching users", error);
+            return [];
+        }
+        return data;
     }
 };

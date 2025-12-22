@@ -30,6 +30,7 @@ const Profile = () => {
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [editForm, setEditForm] = useState({
         name: user?.name || '',
+        username: user?.username || '',
         location: '',
         bio: '',
         image: user?.image || '',
@@ -138,6 +139,7 @@ const Profile = () => {
                             // Initialize form with fresh data
                             setEditForm({
                                 name: userProfile.name || '',
+                                username: userProfile.username || '',
                                 location: userProfile.location || '',
                                 bio: userProfile.bio || '',
                                 image: userProfile.avatar_url || '',
@@ -231,6 +233,7 @@ const Profile = () => {
             // Update DB
             await userService.updateProfile(user.id, {
                 name: editForm.name,
+                username: editForm.username,
                 avatar_url: editForm.image, // Ensure mapping matches DB column 'avatar_url'
                 location: editForm.location,
                 bio: editForm.bio,
@@ -333,6 +336,16 @@ const Profile = () => {
                                                 type="text"
                                                 value={editForm.name}
                                                 onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Username</label>
+                                            <input
+                                                type="text"
+                                                value={editForm.username}
+                                                onChange={e => setEditForm(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/\s/g, '') }))}
+                                                placeholder="@username"
                                                 style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
                                             />
                                         </div>

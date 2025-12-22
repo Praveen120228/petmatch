@@ -22,6 +22,7 @@ const Onboarding = () => {
     const [isAnimating, setIsAnimating] = useState(false);
 
     // User details
+    const [username, setUsername] = useState('');
     const [location, setLocation] = useState('');
     const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -139,6 +140,7 @@ const Onboarding = () => {
                 const { error } = await supabase
                     .from('profiles')
                     .update({
+                        username: username,
                         location: location,
                         bio: bio,
                         latitude: coords?.lat || null,
@@ -162,6 +164,16 @@ const Onboarding = () => {
                 <User size={48} color="var(--color-secondary)" weight="duotone" />
                 <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>About You</h2>
                 <p style={{ color: 'var(--color-text-secondary)' }}>Tell us a bit about yourself.</p>
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+                <Input
+                    label="Username (Unique)"
+                    placeholder="@username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
+                    fullWidth
+                    required
+                />
             </div>
             <div style={{ position: 'relative' }}>
                 <Input

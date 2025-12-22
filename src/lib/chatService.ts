@@ -8,8 +8,8 @@ export const chatService = {
             .from('conversations')
             .select(`
                 *,
-                p1:profiles!participant_a(id, name, avatar_url),
-                p2:profiles!participant_b(id, name, avatar_url)
+                p1:profiles!participant_a(id, name, avatar_url, username),
+                p2:profiles!participant_b(id, name, avatar_url, username)
             `)
             .or(`participant_a.eq.${userId},participant_b.eq.${userId}`)
             .order('last_message_time', { ascending: false });

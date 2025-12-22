@@ -6,6 +6,7 @@ interface User {
     name: string;
     email: string;
     image?: string;
+    username?: string;
 }
 
 interface AuthContextType {
@@ -140,7 +141,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     id: data.id,
                     name: data.name || email.split('@')[0],
                     email: data.email || email,
-                    image: data.avatar_url
+                    image: data.avatar_url,
+                    username: data.username
                 });
             }
         } catch (error) {
@@ -209,6 +211,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const updates: any = {};
         if (data.name) updates.name = data.name;
+        if (data.username) updates.username = data.username;
         if (data.image) updates.avatar_url = data.image;
 
         const { error } = await supabase
