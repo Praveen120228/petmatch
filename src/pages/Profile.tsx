@@ -4,11 +4,12 @@ import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom'
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, X, Trash, CaretLeft } from '@phosphor-icons/react';
+import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
 import type { Collection } from '../lib/featureService';
 import { Folder, CaretRight, Camera } from '@phosphor-icons/react';
-import { processImage } from '../utils/imageHandler';
+
 
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
@@ -25,6 +26,7 @@ const Profile = () => {
 
     // Edit State
     const [isEditing, setIsEditing] = useState(false);
+    const [cropImage, setCropImage] = useState<string | null>(null);
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [editForm, setEditForm] = useState({
         name: user?.name || '',
@@ -40,14 +42,20 @@ const Profile = () => {
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            try {
-                const base64 = await processImage(e.target.files[0]);
-                setEditForm(prev => ({ ...prev, image: base64 }));
-            } catch (err) {
-                console.error("Image processing failed", err);
-                alert("Failed to process image.");
-            }
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+                setCropImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+            // Verify file input value is reset so same file can be selected again
+            e.target.value = '';
         }
+    };
+
+    const handleCropComplete = (croppedBase64: string) => {
+        setEditForm(prev => ({ ...prev, image: croppedBase64 }));
+        setCropImage(null);
     };
 
     const handleGetLocation = () => {
@@ -983,6 +991,14 @@ const Profile = () => {
 
                     </div>
                 </div >
+                {cropImage && (
+                    <ImageCropper
+                        imageSrc={cropImage}
+                        onCropComplete={handleCropComplete}
+                        onCancel={() => setCropImage(null)}
+                        aspectRatio={1}
+                    />
+                )}
             </div >
         </div >
     );

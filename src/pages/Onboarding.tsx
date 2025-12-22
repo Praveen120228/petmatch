@@ -5,10 +5,10 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import SearchableSelect from '../components/SearchableSelect';
 import { User, PawPrint, Camera, MapPin } from '@phosphor-icons/react';
+import ImageCropper from '../components/ImageCropper';
 import { useAuth } from '../context/AuthContext';
 import { petService } from '../lib/petService';
 import { PET_TYPES, BREEDS } from '../data/breeds';
-import { processImage } from '../utils/imageHandler';
 import { supabase } from '../lib/supabase';
 
 const Onboarding = () => {
@@ -43,23 +43,26 @@ const Onboarding = () => {
     const [gender, setGender] = useState('Male');
     const [color, setColor] = useState(''); // Added Color State
     const [images, setImages] = useState<string[]>([]);
+    const [croppingImage, setCroppingImage] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            const newImages: string[] = [];
-            for (let i = 0; i < e.target.files.length; i++) {
-                try {
-                    const base64 = await processImage(e.target.files[i]);
-                    newImages.push(base64);
-                } catch (err) {
-                    console.error("Image processing failed", err);
-                    alert("Failed to process image. Try a smaller file.");
-                }
-            }
-            setImages(prev => [...prev, ...newImages].slice(0, 5)); // Cap at 5
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+                setCroppingImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+            // Reset input
+            e.target.value = '';
         }
+    };
+
+    const handleCropComplete = (croppedBase64: string) => {
+        setImages(prev => [...prev, croppedBase64]);
+        setCroppingImage(null);
     };
 
     const handleNext = () => {
@@ -434,6 +437,14 @@ const Onboarding = () => {
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: step === 1 ? 'var(--color-accent)' : 'rgba(255,255,255,0.2)' }} />
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: step === 2 ? 'var(--color-accent)' : 'rgba(255,255,255,0.2)' }} />
             </div>
+            {croppingImage && (
+                <ImageCropper
+                    imageSrc={croppingImage}
+                    onCropComplete={handleCropComplete}
+                    onCancel={() => setCroppingImage(null)}
+                    aspectRatio={4 / 3}
+                />
+            )}
         </div>
     );
 };
