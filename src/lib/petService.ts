@@ -32,7 +32,7 @@ export const petService = {
         let query = supabase
             .from('pets')
             .select(`
-                id, name, image, breed, age, type, distance, owner_id,
+                id, name, image, breed, age, gender, type, distance, owner_id,
                 owner_profile:profiles!owner_id(location, latitude, longitude, show_location, username)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
