@@ -43,7 +43,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.log("Auth: Session fetch completed", session ? "User found" : "No session");
 
             if (session?.user) {
-                // Determine if we need to fetch profile (check if already have it or wait)
+                // OPTIMIZATION: Set basic user state immediately to unblock UI
+                // This makes the app load instantly while profile data fetches in background
+                setUser({
+                    id: session.user.id,
+                    email: session.user.email!,
+                    name: session.user.email!.split('@')[0], // Temporary name
+                    image: '' // Temporary image
+                });
+                setLoading(false); // <--- UNBLOCK UI HERE
+
+                // Fetch full profile in background
                 fetchProfile(session.user.id, session.user.email!);
             } else {
                 setLoading(false);
@@ -58,8 +68,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!mounted) return;
 
             if (session?.user) {
-                // Only fetch if we don't have the user or it's a different user
-                // But for now, safest is to fetch to ensure freshness, but fetchProfile handles loading state
+                // If we don't have a user yet, set basic info immediately
+                setUser(prev => prev || {
+                    id: session.user.id,
+                    email: session.user.email!,
+                    name: session.user.email!.split('@')[0],
+                    image: ''
+                });
+
+                // Background update
                 await fetchProfile(session.user.id, session.user.email!);
             } else {
                 setUser(null);
@@ -84,8 +101,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .single();
 
             if (error) {
-                console.log('Auth: Profile missing or error, attempting creation...', error);
-                // Attempt to Create Profile (Lazy init for old users or race conditions)
+                console.log('Auth: Profile missing, attempting creation...');
+                // Attempt to Create Profile (Lazy init)
                 const { data: newProfile, error: createError } = await supabase
                     .from('profiles')
                     .insert({
@@ -97,21 +114,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     .select()
                     .single();
 
-                if (createError) {
-                    console.error('Failed to auto-create profile:', createError);
-                    // Fallback to local state only
-                    setUser({ id: userId, name: email.split('@')[0], email: email });
-                } else {
+                if (!createError) {
                     console.log("Auth: Profile auto-created");
+                    // Update with created profile
                     setUser({
                         id: newProfile.id,
                         name: newProfile.name,
                         email: newProfile.email,
                         image: newProfile.avatar_url
                     });
+                } else {
+                    console.error('Failed to auto-create profile:', createError);
+                    // Fallback to local state only if creation failed and user wasn't set by basic info
+                    setUser(prev => prev || { id: userId, name: email.split('@')[0], email: email });
                 }
             } else if (data) {
-                console.log("Auth: Profile loaded from DB");
+                console.log("Auth: Profile loaded, updating user state");
+                // Update with fetched profile
                 setUser({
                     id: data.id,
                     name: data.name || email.split('@')[0],
@@ -121,10 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         } catch (error) {
             console.error('Profile fetch unexpected error:', error);
-        } finally {
-            console.log("Auth: Loading state cleared");
-            setLoading(false);
         }
+        // Note: We do NOT set loading(false) here anymore, as it's done earlier
     };
 
     const login = async (email: string, password: string) => {
