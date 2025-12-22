@@ -25,6 +25,7 @@ const Profile = () => {
 
     // Edit State
     const [isEditing, setIsEditing] = useState(false);
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [editForm, setEditForm] = useState({
         name: user?.name || '',
         location: '',
@@ -44,6 +45,41 @@ const Profile = () => {
                 alert("Failed to process image.");
             }
         }
+    };
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) return alert("Geolocation is not supported by your browser");
+
+        setIsLoadingLocation(true);
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const { latitude, longitude } = pos.coords;
+            try {
+                // Approximate reverse geocoding via OpenStreetMap (Nominatim)
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                const data = await res.json();
+
+                let city = '';
+                let state = '';
+
+                if (data.address) {
+                    city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                    state = data.address.state || data.address.country || '';
+                }
+
+                const locString = city ? (state ? `${city}, ${state}` : city) : `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+                setEditForm(prev => ({ ...prev, location: locString }));
+
+            } catch (err) {
+                console.error("Geocoding failed", err);
+                setEditForm(prev => ({ ...prev, location: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}` }));
+            } finally {
+                setIsLoadingLocation(false);
+            }
+        }, (err) => {
+            console.error(err);
+            alert("Could not retrieve location. Please allow location access.");
+            setIsLoadingLocation(false);
+        });
     };
 
 
@@ -285,12 +321,43 @@ const Profile = () => {
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location</label>
-                                            <input
-                                                type="text"
-                                                value={editForm.location}
-                                                onChange={e => setEditForm({ ...editForm, location: e.target.value })}
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                            />
+                                            <div style={{ position: 'relative' }}>
+                                                <input
+                                                    type="text"
+                                                    value={editForm.location}
+                                                    onChange={e => setEditForm({ ...editForm, location: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                    disabled={isLoadingLocation}
+                                                />
+                                                <button
+                                                    onClick={handleGetLocation}
+                                                    disabled={isLoadingLocation}
+                                                    type="button"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        right: '8px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        color: isLoadingLocation ? 'var(--gray-400)' : 'var(--primary-600)',
+                                                        cursor: isLoadingLocation ? 'wait' : 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        fontSize: '0.875rem',
+                                                        fontWeight: 600
+                                                    }}
+                                                    title="Find my location"
+                                                >
+                                                    {isLoadingLocation ? (
+                                                        <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⌛</span>
+                                                    ) : (
+                                                        <MapPin size={20} weight="fill" />
+                                                    )}
+                                                    <span className="hide-on-mobile">Locate Me</span>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Profile Photo</label>
