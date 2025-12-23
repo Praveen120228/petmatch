@@ -18,7 +18,6 @@ export interface Pet {
         location: string;
         country?: string;
         state?: string;
-        city?: string;
         avatar_url?: string;
         username?: string;
     };

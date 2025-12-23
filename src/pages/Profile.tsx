@@ -34,18 +34,13 @@ const Profile = () => {
         username: user?.username || '',
         location: '',
         country: '',
-        state: '',
-        city: '', // Added city
+        state: '', // Added state
         bio: '',
         image: user?.image || '',
         latitude: null as number | null,
         longitude: null as number | null,
         show_location: true
     });
-
-    const [citySearch, setCitySearch] = useState('');
-    const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
-    const [isSearchingCities, setIsSearchingCities] = useState(false);
 
     const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
     const [traitInput, setTraitInput] = useState(''); // State for new trait input
@@ -131,7 +126,7 @@ const Profile = () => {
                 }
 
                 const locString = city ? (state ? `${city}, ${state}` : city) : `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
-                setEditForm(prev => ({ ...prev, location: locString, country: countryName, state: state, city: city, latitude, longitude }));
+                setEditForm(prev => ({ ...prev, location: locString, country: countryName, state: state, latitude, longitude }));
 
             } catch (err) {
                 console.error("Geocoding failed", err);
@@ -144,48 +139,6 @@ const Profile = () => {
             alert("Could not retrieve location. Please allow location access.");
             setIsLoadingLocation(false);
         });
-    };
-
-    const handleSearchCities = async (query: string) => {
-        setCitySearch(query);
-        if (query.length < 3) {
-            setCitySuggestions([]);
-            return;
-        }
-
-        setIsSearchingCities(true);
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&type=city&addressdetails=1&limit=5`);
-            const data = await res.json();
-            setCitySuggestions(data || []);
-        } catch (err) {
-            console.error("City search failed", err);
-        } finally {
-            setIsSearchingCities(false);
-        }
-    };
-
-    const handleSelectCity = (suggestion: any) => {
-        const addr = suggestion.address;
-        const city = addr.city || addr.town || addr.village || addr.municipality || suggestion.display_name.split(',')[0];
-        const state = addr.state || '';
-        const country = addr.country || '';
-        const lat = parseFloat(suggestion.lat);
-        const lon = parseFloat(suggestion.lon);
-
-        const locString = city ? (state ? `${city}, ${state}` : city) : suggestion.display_name;
-
-        setEditForm(prev => ({
-            ...prev,
-            city,
-            state,
-            country,
-            location: locString,
-            latitude: lat,
-            longitude: lon
-        }));
-        setCitySearch('');
-        setCitySuggestions([]);
     };
 
 
@@ -240,8 +193,7 @@ const Profile = () => {
                                 username: userProfile.username || '',
                                 location: userProfile.location || '',
                                 country: userProfile.country || '',
-                                state: userProfile.state || '',
-                                city: userProfile.city || '', // Load city
+                                state: userProfile.state || '', // Load state,
                                 bio: userProfile.bio || '',
                                 image: userProfile.avatar_url || '',
                                 latitude: userProfile.latitude || null,
@@ -387,8 +339,7 @@ const Profile = () => {
                 avatar_url: avatarUrl, // Ensure mapping matches DB column 'avatar_url'
                 location: editForm.location,
                 country: editForm.country,
-                state: editForm.state,
-                city: editForm.city, // Added city
+                state: editForm.state, // Added state
                 bio: editForm.bio,
                 latitude: editForm.latitude || undefined,
                 longitude: editForm.longitude || undefined,
@@ -627,65 +578,14 @@ const Profile = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>City Search</label>
-                                            <div style={{ position: 'relative' }}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Search for your city..."
-                                                    value={citySearch}
-                                                    onChange={e => handleSearchCities(e.target.value)}
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                                />
-                                                {isSearchingCities && (
-                                                    <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }}>
-                                                        <div className="animate-spin" style={{ width: '16px', height: '16px', border: '2px solid var(--primary-200)', borderTopColor: 'var(--primary-600)', borderRadius: '50%' }} />
-                                                    </div>
-                                                )}
-                                                {citySuggestions.length > 0 && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        top: '100%',
-                                                        left: 0,
-                                                        right: 0,
-                                                        background: 'white',
-                                                        border: '1px solid #d1d5db',
-                                                        borderRadius: '8px',
-                                                        marginTop: '4px',
-                                                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                                                        zIndex: 50,
-                                                        maxHeight: '200px',
-                                                        overflowY: 'auto'
-                                                    }}>
-                                                        {citySuggestions.map((s, i) => (
-                                                            <div
-                                                                key={i}
-                                                                onClick={() => handleSelectCity(s)}
-                                                                style={{
-                                                                    padding: '0.75rem',
-                                                                    cursor: 'pointer',
-                                                                    fontSize: '0.875rem',
-                                                                    borderBottom: i === citySuggestions.length - 1 ? 'none' : '1px solid #f3f4f6'
-                                                                }}
-                                                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                                                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                                                            >
-                                                                {s.display_name}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location (Selected)</label>
+                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location</label>
                                             <div style={{ position: 'relative' }}>
                                                 <input
                                                     type="text"
                                                     value={editForm.location}
                                                     onChange={e => setEditForm({ ...editForm, location: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: '#f9fafb' }}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
                                                     disabled={isLoadingLocation}
-                                                    placeholder="Selected location..."
                                                 />
                                                 <button
                                                     onClick={handleGetLocation}
