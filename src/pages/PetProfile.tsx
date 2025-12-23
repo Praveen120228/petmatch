@@ -327,13 +327,38 @@ const PetProfile = () => {
                                     position: 'absolute', bottom: '1rem', right: '1rem',
                                     background: 'rgba(0,0,0,0.6)', color: 'white',
                                     padding: '0.25rem 0.75rem', borderRadius: '1rem',
-                                    fontSize: '0.875rem', fontWeight: 600
+                                    fontSize: '0.875rem', fontWeight: 600,
+                                    zIndex: 5
                                 }}>
                                     📷 {pet.images.length}
                                 </div>
                             </div>
                         ) : (
                             <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        )}
+
+                        {/* Dating Badge Overlay */}
+                        {pet.partner_pet_id && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                left: '1rem',
+                                background: 'rgba(225, 29, 72, 0.95)',
+                                color: 'white',
+                                padding: '8px 16px',
+                                borderRadius: '24px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontWeight: 800,
+                                fontSize: '0.9rem',
+                                boxShadow: '0 4px 15px rgba(225, 29, 72, 0.4)',
+                                zIndex: 10,
+                                transform: 'rotate(-2deg)'
+                            }}>
+                                <Heart weight="fill" size={18} className="pulse-animation" />
+                                IN A RELATIONSHIP
+                            </div>
                         )}
                     </div>
 
@@ -384,13 +409,27 @@ const PetProfile = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.5rem' }}>
                             <div>
                                 <h2 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{pet.name}</h2>
-                                {datingInfo?.partner && (
+                                {datingInfo?.partner ? (
+                                    <Link to={`/pet/${datingInfo.partner.id}`} style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                        marginTop: '0.75rem', background: '#fff1f2', color: '#e11d48',
+                                        padding: '6px 14px', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 800,
+                                        textDecoration: 'none', border: '1px solid #fecdd3',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 2px 4px rgba(225, 29, 72, 0.05)'
+                                    }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = '#ffe4e6'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                    >
+                                        <Heart weight="fill" size={16} /> Dating {datingInfo.partner.name}
+                                    </Link>
+                                ) : pet.partner_pet_id && (
                                     <div style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                        marginTop: '0.5rem', background: '#ffe4e6', color: '#e11d48',
-                                        padding: '4px 10px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700
+                                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                        marginTop: '0.75rem', background: '#f3f4f6', color: '#6b7280',
+                                        padding: '6px 14px', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 700
                                     }}>
-                                        <Heart weight="fill" size={14} /> Dating {datingInfo.partner.name}
+                                        <Heart weight="fill" size={16} /> In a Relationship
                                     </div>
                                 )}
                                 <p style={{ color: '#6b7280', fontSize: '1.1rem', marginTop: '0.25rem' }}>{pet.breed}</p>

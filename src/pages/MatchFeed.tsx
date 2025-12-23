@@ -413,18 +413,19 @@ const MatchFeed = () => {
                                                     position: 'absolute',
                                                     top: '52px',
                                                     left: '12px',
-                                                    background: '#ffe4e6',
-                                                    padding: '4px 10px',
-                                                    borderRadius: '12px',
+                                                    background: 'rgba(255, 241, 242, 0.9)',
+                                                    backdropFilter: 'blur(8px)',
+                                                    padding: '6px 12px',
+                                                    borderRadius: '14px',
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: '4px',
-                                                    boxShadow: '0 2px 8px rgba(225, 29, 72, 0.2)',
+                                                    gap: '6px',
+                                                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.25)',
                                                     zIndex: 10,
-                                                    border: '1px solid #fda4af'
+                                                    border: '1px solid rgba(254, 205, 211, 0.5)'
                                                 }}>
-                                                    <Heart weight="fill" size={12} color="#e11d48" className="pulse-animation" />
-                                                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#e11d48', textTransform: 'uppercase' }}>Dating</span>
+                                                    <Heart weight="fill" size={14} color="#e11d48" className="pulse-animation" />
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#e11d48', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dating</span>
                                                 </div>
                                             )}
 
