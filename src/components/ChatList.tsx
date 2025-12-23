@@ -317,20 +317,23 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                     {chat.last_message && chat.last_sender_id === user?.id && (
                                                         <span style={{
                                                             fontSize: '12px',
-                                                            color: 'var(--gray-400)',
-                                                            lineHeight: 1
-                                                        }}>✓</span>
+                                                            color: chat.last_message_read ? 'var(--primary-400)' : 'var(--gray-400)',
+                                                            lineHeight: 1,
+                                                            marginRight: '2px'
+                                                        }}>
+                                                            {chat.last_message_read ? '✓✓' : '✓'}
+                                                        </span>
                                                     )}
                                                     <p style={{
                                                         fontSize: '0.825rem',
-                                                        color: hasUnread ? 'var(--gray-900)' : 'var(--gray-500)',
-                                                        fontWeight: hasUnread ? 500 : 400,
+                                                        color: !chat.last_message_read ? 'var(--gray-900)' : 'var(--gray-500)',
+                                                        fontWeight: !chat.last_message_read ? 600 : 400,
                                                         whiteSpace: 'nowrap',
                                                         overflow: 'hidden',
                                                         textOverflow: 'ellipsis',
                                                         flex: 1
                                                     }}>
-                                                        {chat.last_message || 'No messages yet'}
+                                                        {chat.last_sender_id === user?.id ? 'You: ' : ''}{chat.last_message || 'No messages yet'}
                                                     </p>
                                                 </div>
                                                 {hasUnread && (

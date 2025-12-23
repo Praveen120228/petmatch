@@ -35,6 +35,15 @@ export const chatService = {
                 .neq('sender_id', userId)
                 .eq('read', false);
 
+            // Fetch last message details (specifically read status)
+            const { data: lastMsg } = await supabase
+                .from('messages')
+                .select('read')
+                .eq('conversation_id', conv.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
             return {
                 id: conv.id,
                 participant_a: conv.participant_a,
@@ -43,6 +52,7 @@ export const chatService = {
                 pet_id: conv.pet_id,
                 last_message: conv.last_message,
                 last_message_time: conv.last_message_time,
+                last_message_read: lastMsg ? lastMsg.read : true,
                 other_user: otherProfile,
                 unread_count: count || 0
             };
