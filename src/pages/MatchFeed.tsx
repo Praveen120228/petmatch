@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import Card from '../components/Card';
@@ -10,6 +10,7 @@ import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { getDistance } from '../utils/distance';
 import { PET_TYPES } from '../data/breeds';
+import PetCardSkeleton from '../components/PetCardSkeleton';
 
 const AGES = ['1 yr', '2 yrs', '3 yrs', '4 yrs', '5 yrs'];
 
@@ -36,6 +37,7 @@ const MatchFeed = () => {
     const [selectedType, setSelectedType] = useState<string>('all');
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
     const [selectedAges, setSelectedAges] = useState<string[]>([]);
+    const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
 
     // Load Likes (Once)
     useEffect(() => {
@@ -65,7 +67,9 @@ const MatchFeed = () => {
                     type: selectedType,
                     breeds: selectedBreeds,
                     ages: selectedAges,
-                    search: searchQuery
+                    search: searchQuery,
+                    distance: maxDistance,
+                    userLocation: userLoc
                 }
             );
 
@@ -100,7 +104,7 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedType, selectedBreeds, selectedAges, searchQuery]);
+    }, [user, selectedType, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc]);
 
     // Derived Filter Options (Breeds)
     // Note: Ideally fetching available breeds from server would be better than just from loaded pets
@@ -164,6 +168,21 @@ const MatchFeed = () => {
             showToast("Failed to update like", "error");
         }
     };
+
+    // Infinite Scroll Observer
+    const observer = useRef<IntersectionObserver | null>(null);
+    const observerRef = useCallback((node: HTMLDivElement) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                loadPets(false);
+            }
+        }, { threshold: 0.1, rootMargin: '100px' });
+
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore]);
 
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', display: 'flex', flexDirection: 'column' }}>
@@ -241,7 +260,7 @@ const MatchFeed = () => {
                     display: 'flex',
                     flexDirection: 'column'
                 }}>
-                    <div style={{ width: window.innerWidth <= 768 ? '100%' : '300px', flexShrink: 0 }}>
+                    <div style={{ width: window.innerWidth <= 768 ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Filters</h2>
                             {(selectedType !== 'all' || selectedBreeds.length > 0 || selectedAges.length > 0) && (
@@ -249,7 +268,7 @@ const MatchFeed = () => {
                             )}
                         </div>
 
-                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto', flex: 1 }}>
                             {/* Categories */}
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Pet Type</h3>
@@ -316,7 +335,29 @@ const MatchFeed = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Distance */}
+                            <div>
+                                <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>
+                                    Distance: {maxDistance} km
+                                </h3>
+                                <div style={{ padding: '0 0.5rem' }}>
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="500"
+                                        value={maxDistance}
+                                        onChange={(e) => setMaxDistance(Number(e.target.value))}
+                                        style={{ width: '100%', accentColor: 'var(--primary-600)', cursor: 'pointer' }}
+                                    />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                        <span>1km</span>
+                                        <span>500km</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         {/* Mobile Apply Button */}
                         {window.innerWidth <= 768 && (
                             <div style={{ padding: '1rem', borderTop: '1px solid var(--color-border)', marginTop: 'auto' }}>
@@ -340,7 +381,11 @@ const MatchFeed = () => {
                         gap: '1rem',
                         paddingBottom: '2rem'
                     }}>
-                        {pets.length > 0 ? (
+                        {loading && pets.length === 0 ? (
+                            Array.from({ length: 8 }).map((_, i) => (
+                                <PetCardSkeleton key={i} />
+                            ))
+                        ) : pets.length > 0 ? (
                             <>
                                 {pets.map(pet => (
                                     <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
@@ -501,22 +546,27 @@ const MatchFeed = () => {
                             )
                         )}
 
-                        {/* Load More Trigger */}
+                        {/* Infinite Scroll Sentinel */}
                         {pets.length > 0 && hasMore && (
-                            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '2rem 0' }}>
-                                <Button
-                                    onClick={() => loadPets(false)}
-                                    disabled={loading}
-                                    style={{ minWidth: '150px' }}
-                                >
-                                    {loading ? 'Loading...' : 'Load More'}
-                                </Button>
+                            <div
+                                ref={observerRef}
+                                style={{
+                                    gridColumn: '1 / -1',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    padding: '2rem 0',
+                                    minHeight: '80px'
+                                }}
+                            >
+                                {loading && (
+                                    <div className="skeleton-pulse" style={{ width: '150px', height: '40px', borderRadius: '20px' }}></div>
+                                )}
                             </div>
                         )}
                     </div>
                 </main>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

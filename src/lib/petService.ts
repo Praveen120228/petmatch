@@ -24,6 +24,8 @@ export const petService = {
             breeds?: string[];
             ages?: string[];
             search?: string;
+            distance?: number;
+            userLocation?: { lat: number; lng: number } | null;
         }
     ): Promise<{ data: Pet[]; count: number }> {
         const from = (page - 1) * limit;
@@ -78,7 +80,36 @@ export const petService = {
             console.error('Error fetching paginated pets:', error);
             return { data: [], count: 0 };
         }
-        return { data: data as unknown as Pet[], count: count || 0 };
+
+        let result = data as unknown as Pet[];
+
+        // Post-filter by distance if user location is available
+        // Note: For large datasets, this should be done in DB (PostGIS/Haversine)
+        if (filters?.distance && filters?.userLocation && filters.userLocation.lat && filters.userLocation.lng) {
+            const getDist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+                const R = 6371; // Radius of the earth in km
+                const dLat = (lat2 - lat1) * (Math.PI / 180);
+                const dLon = (lon2 - lon1) * (Math.PI / 180);
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const d = R * c; // Distance in km
+                return d;
+            };
+
+            result = result.filter(pet => {
+                const owner = (pet as any).owner_profile;
+                if (!owner || !owner.latitude || !owner.longitude) return false;
+                const d = getDist(filters.userLocation!.lat, filters.userLocation!.lng, owner.latitude, owner.longitude);
+                // Attach distance for display if needed
+                (pet as any).distance = `${Math.round(d)}km`; // Update display string
+                return d <= filters.distance!;
+            });
+        }
+
+        return { data: result, count: count || 0 };
     },
 
     async getUserPets(userId: string): Promise<Pet[]> {
