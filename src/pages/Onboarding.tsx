@@ -15,8 +15,13 @@ const Onboarding = () => {
     const [username, setUsername] = useState('');
     const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
-    const [state, setState] = useState(''); // Added state
+    const [state, setState] = useState('');
+    const [city, setCity] = useState(''); // Added city state
     const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
+
+    const [citySearch, setCitySearch] = useState('');
+    const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
+    const [isSearchingCities, setIsSearchingCities] = useState(false);
     const [image, setImage] = useState<string | null>(null);
     const [croppingImage, setCroppingImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +37,8 @@ const Onboarding = () => {
                     setUsername(p.username || '');
                     setLocation(p.location || '');
                     setCountry(p.country || '');
-                    setState(p.state || ''); // Load state
+                    setState(p.state || '');
+                    setCity(p.city || ''); // Load city
                     if (p.avatar_url) setImage(p.avatar_url);
                     if (p.latitude && p.longitude) setCoords({ lat: p.latitude, lng: p.longitude });
                 }
@@ -81,7 +87,8 @@ const Onboarding = () => {
                 }
 
                 if (countryName) setCountry(countryName);
-                if (state) setState(state); // Set state
+                if (state) setState(state);
+                if (city) setCity(city);
 
                 if (city) {
                     setLocation(state ? `${city}, ${state}` : city);
@@ -99,6 +106,44 @@ const Onboarding = () => {
             alert("Could not retrieve location. Please allow location access.");
             setIsLoadingLocation(false);
         });
+    };
+
+    const handleSearchCities = async (query: string) => {
+        setCitySearch(query);
+        if (query.length < 3) {
+            setCitySuggestions([]);
+            return;
+        }
+
+        setIsSearchingCities(true);
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&type=city&addressdetails=1&limit=5`);
+            const data = await res.json();
+            setCitySuggestions(data || []);
+        } catch (err) {
+            console.error("City search failed", err);
+        } finally {
+            setIsSearchingCities(false);
+        }
+    };
+
+    const handleSelectCity = (suggestion: any) => {
+        const addr = suggestion.address;
+        const cityValue = addr.city || addr.town || addr.village || addr.municipality || suggestion.display_name.split(',')[0];
+        const stateValue = addr.state || '';
+        const countryValue = addr.country || '';
+        const lat = parseFloat(suggestion.lat);
+        const lon = parseFloat(suggestion.lon);
+
+        const locString = cityValue ? (stateValue ? `${cityValue}, ${stateValue}` : cityValue) : suggestion.display_name;
+
+        setCity(cityValue);
+        setState(stateValue);
+        setCountry(countryValue);
+        setLocation(locString);
+        setCoords({ lat, lng: lon });
+        setCitySearch('');
+        setCitySuggestions([]);
     };
 
     const handleFinish = async () => {
@@ -121,7 +166,8 @@ const Onboarding = () => {
                 username: username,
                 location: location,
                 country: country,
-                state: state, // Save state
+                state: state,
+                city: city, // Save city
                 latitude: coords?.lat,
                 longitude: coords?.lng,
                 avatar_url: image || undefined
@@ -246,7 +292,56 @@ const Onboarding = () => {
 
                     <div style={{ position: 'relative' }}>
                         <Input
-                            label="Location"
+                            label="City Search"
+                            placeholder="Type to search your city..."
+                            value={citySearch}
+                            onChange={(e) => handleSearchCities(e.target.value)}
+                            fullWidth
+                        />
+                        {isSearchingCities && (
+                            <div style={{ position: 'absolute', right: '12px', top: '38px' }}>
+                                <div className="animate-spin" style={{ width: '16px', height: '16px', border: '2px solid var(--primary-200)', borderTopColor: 'var(--primary-600)', borderRadius: '50%' }} />
+                            </div>
+                        )}
+                        {citySuggestions.length > 0 && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                background: 'white',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '8px',
+                                marginTop: '-12px',
+                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                                zIndex: 50,
+                                maxHeight: '200px',
+                                overflowY: 'auto'
+                            }}>
+                                {citySuggestions.map((s, i) => (
+                                    <div
+                                        key={i}
+                                        onClick={() => handleSelectCity(s)}
+                                        style={{
+                                            padding: '0.75rem',
+                                            cursor: 'pointer',
+                                            fontSize: '0.875rem',
+                                            borderBottom: i === citySuggestions.length - 1 ? 'none' : '1px solid #f3f4f6',
+                                            color: '#374151'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                    >
+                                        {s.display_name}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ position: 'relative' }}>
+                        <Input
+                            label="Location (Selected)"
                             placeholder="City, State"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}

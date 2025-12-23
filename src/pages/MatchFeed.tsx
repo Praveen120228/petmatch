@@ -45,6 +45,7 @@ const MatchFeed = () => {
     const [locationQuery, setLocationQuery] = useState('');
     const [countryQuery, setCountryQuery] = useState(''); // New Country State
     const [stateQuery, setStateQuery] = useState(''); // New State filter
+    const [cityQuery, setCityQuery] = useState(''); // New City filter
     const [breedSearchQuery, setBreedSearchQuery] = useState(''); // New state for breed search
 
     // Load Likes (Once)
@@ -80,7 +81,8 @@ const MatchFeed = () => {
                     userLocation: userLoc,
                     location: locationQuery,
                     country: countryQuery,
-                    state: stateQuery, // Pass state
+                    state: stateQuery,
+                    city: cityQuery, // Pass city
                     gender: selectedGender
                 }
             );
@@ -116,7 +118,7 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedTypes, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery, countryQuery, stateQuery]);
+    }, [user, selectedTypes, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery, countryQuery, stateQuery, cityQuery]);
 
 
 
@@ -264,7 +266,8 @@ const MatchFeed = () => {
         setAgeRange([0, 21]);
         setLocationQuery('');
         setCountryQuery('');
-        setStateQuery(''); // Added
+        setStateQuery('');
+        setCityQuery(''); // Added city reset
         showToast('Filters cleared', 'info');
     };
 
@@ -665,6 +668,24 @@ const MatchFeed = () => {
                                             placeholder="State..."
                                             value={stateQuery}
                                             onChange={(e) => setStateQuery(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem 1rem 0.75rem 2.5rem',
+                                                borderRadius: 'var(--radius-md)',
+                                                border: '1px solid var(--color-border)',
+                                                fontSize: '0.95rem',
+                                                background: 'var(--color-bg-app)',
+                                                color: 'var(--color-text-primary)'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
+                                        <input
+                                            type="text"
+                                            placeholder="City..."
+                                            value={cityQuery}
+                                            onChange={(e) => setCityQuery(e.target.value)}
                                             style={{
                                                 width: '100%',
                                                 padding: '0.75rem 1rem 0.75rem 2.5rem',

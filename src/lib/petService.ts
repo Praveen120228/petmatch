@@ -28,7 +28,8 @@ export const petService = {
             userLocation?: { lat: number; lng: number } | null;
             location?: string;
             country?: string;
-            state?: string; // Added state filter
+            state?: string;
+            city?: string; // Added city filter
             gender?: string;
         }
     ): Promise<{ data: Pet[]; count: number }> {
@@ -39,7 +40,7 @@ export const petService = {
             .from('pets')
             .select(`
                 id, name, image, breed, age, gender, type, distance, owner_id, partner_pet_id,
-                owner_profile:profiles!owner_id!inner(location, country, state, latitude, longitude, show_location, username, avatar_url)
+                owner_profile:profiles!owner_id!inner(location, country, state, city, latitude, longitude, show_location, username, avatar_url)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
             .range(from, to);
@@ -77,6 +78,11 @@ export const petService = {
         if (filters?.state) {
             // Filter by dedicated state column OR fallback to location string
             query = query.or(`state.ilike.%${filters.state}%,location.ilike.%${filters.state}%`, { foreignTable: 'profiles' });
+        }
+
+        if (filters?.city) {
+            // Filter by dedicated city column OR fallback to location string
+            query = query.or(`city.ilike.%${filters.city}%,location.ilike.%${filters.city}%`, { foreignTable: 'profiles' });
         }
 
         const { data, error, count } = await query;
