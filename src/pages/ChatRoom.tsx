@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CaretLeft, PaperPlaneRight, DotsThreeVertical, ImageSquare, X } from '@phosphor-icons/react';
+import { CaretLeft, PaperPlaneRight, DotsThreeVertical, ImageSquare, X, DownloadSimple } from '@phosphor-icons/react';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +18,17 @@ const ChatRoom = () => {
     const [chatInfo, setChatInfo] = useState<any | null>(null);
     const [inputText, setInputText] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [viewingImage, setViewingImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const downloadImage = (base64Str: string) => {
+        const link = document.createElement('a');
+        link.href = base64Str;
+        link.download = `petmatch-shared-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     useEffect(() => {
         if (!chatId || !user) return;
@@ -207,10 +217,15 @@ const ChatRoom = () => {
                                         <img
                                             src={msg.image}
                                             alt="Attachment"
+                                            onClick={() => setViewingImage(msg.image)}
                                             style={{
-                                                maxWidth: '100%',
+                                                maxWidth: '200px',
+                                                maxHeight: '200px',
                                                 borderRadius: '12px',
-                                                display: 'block'
+                                                display: 'block',
+                                                objectFit: 'cover',
+                                                cursor: 'pointer',
+                                                border: '1px solid rgba(0,0,0,0.1)'
                                             }}
                                         />
                                     </div>
@@ -323,6 +338,51 @@ const ChatRoom = () => {
                     </Button>
                 </form>
             </div>
+            {/* Lightbox Overlay */}
+            {viewingImage && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 2000,
+                    background: 'rgba(0,0,0,0.9)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '1rem'
+                }} onClick={() => setViewingImage(null)}>
+
+                    {/* Toolbar */}
+                    <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '1rem' }} onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => downloadImage(viewingImage)}
+                            style={{
+                                background: 'white', border: 'none', borderRadius: '50%',
+                                width: '40px', height: '40px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', opacity: 0.9
+                            }}
+                            title="Download"
+                        >
+                            <DownloadSimple size={20} color="black" />
+                        </button>
+                        <button
+                            onClick={() => setViewingImage(null)}
+                            style={{
+                                background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
+                                width: '40px', height: '40px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', color: 'white'
+                            }}
+                        >
+                            <X size={24} weight="bold" />
+                        </button>
+                    </div>
+
+                    <img
+                        src={viewingImage}
+                        alt="Full size"
+                        style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: '8px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
+                        onClick={e => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 };
