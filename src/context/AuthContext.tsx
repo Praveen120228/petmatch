@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setUser({
                         id: session.user.id,
                         email: session.user.email!,
-                        name: session.user.email!.split('@')[0],
+                        name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
                         image: ''
                     });
                     // Fetch full profile in background
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     return {
                         id: session.user.id,
                         email: session.user.email!,
-                        name: session.user.email!.split('@')[0],
+                        name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
                         image: ''
                     };
                 });
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     .insert({
                         id: userId,
                         email: email,
-                        name: email.split('@')[0],
+                        name: (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
                         avatar_url: ''
                     })
                     .select()
@@ -149,7 +149,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     } else {
                         console.error('Failed to auto-create profile:', createError);
                         // Fallback to local state only if creation failed and data is still missing
-                        setUser(prev => prev || { id: userId, name: email.split('@')[0], email: email });
+                        const { data: userData } = await supabase.auth.getUser();
+                        const metaName = userData.user?.user_metadata?.name;
+                        setUser(prev => prev || { id: userId, name: metaName || email.split('@')[0], email: email });
                         return;
                     }
                 } else {
@@ -164,7 +166,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.log("Auth: Profile loaded, updating user state");
                 setUser({
                     id: data.id,
-                    name: data.name || email.split('@')[0],
+                    name: data.name || (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
                     email: data.email || email,
                     image: data.avatar_url,
                     username: data.username

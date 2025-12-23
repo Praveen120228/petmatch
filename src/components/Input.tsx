@@ -44,7 +44,12 @@ const Input: React.FC<InputProps> = ({
 
     return (
         <div style={containerStyle} className={className}>
-            {label && <label style={labelStyle}>{label}</label>}
+            {label && (
+                <label style={labelStyle}>
+                    {label}
+                    {props.required && <span style={{ color: 'var(--color-accent)', marginLeft: '2px' }}>*</span>}
+                </label>
+            )}
             <input
                 style={inputStyle}
                 onFocus={(e) => {
