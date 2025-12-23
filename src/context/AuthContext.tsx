@@ -140,6 +140,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         } else {
                             console.error("Auth: Failed to fetch profile after conflict:", retryError);
                         }
+                    } else if (createError.code === '23503') {
+                        // Error 23503: Foreign key violation (auth.uid() does not exist in auth.users)
+                        // This happens if the user was deleted from DB but local session persists
+                        console.error("Auth: Stale session detected (User missing in DB). Forcing logout.");
+                        await logout();
+                        return;
                     } else {
                         console.error('Failed to auto-create profile:', createError);
                         // Fallback to local state only if creation failed and data is still missing
