@@ -27,6 +27,7 @@ export const petService = {
             distance?: number;
             userLocation?: { lat: number; lng: number } | null;
             location?: string;
+            gender?: string;
         }
     ): Promise<{ data: Pet[]; count: number }> {
         const from = (page - 1) * limit;
@@ -51,6 +52,10 @@ export const petService = {
 
         if (filters?.ages && filters.ages.length > 0) {
             query = query.in('age', filters.ages);
+        }
+
+        if (filters?.gender && filters.gender !== 'all') {
+            query = query.eq('gender', filters.gender);
         }
 
         if (filters?.search) {

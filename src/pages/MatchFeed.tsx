@@ -35,6 +35,7 @@ const MatchFeed = () => {
     // Filter State
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedType, setSelectedType] = useState<string>('all');
+    const [selectedGender, setSelectedGender] = useState<string>('all');
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
     const [selectedAges, setSelectedAges] = useState<string[]>([]);
     const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
@@ -71,7 +72,8 @@ const MatchFeed = () => {
                     search: searchQuery,
                     distance: maxDistance,
                     userLocation: userLoc,
-                    location: locationQuery
+                    location: locationQuery,
+                    gender: selectedGender
                 }
             );
 
@@ -106,36 +108,27 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedType, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
+    }, [user, selectedType, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
 
     // Derived Filter Options (Breeds)
-    // Note: Ideally fetching available breeds from server would be better than just from loaded pets
-    // But for now, we leave as is or simplify. 
-    // If we only show breeds from loaded pets, the filter list shrinks.
-    // Let's assume for now we don't strictly enforce "available" breeds validation in UI or we use static if possible.
-    // The current UI derives from 'allPets' (which is now 'pets'). 
-    // This means you can only filter by breeds you see. This is a common pattern in infinite scroll with client-side derived facets.
     const availableBreeds = useMemo(() => {
-        // We can just show breeds from ALL currently loaded pets
-        return [...new Set(pets.map(p => p.breed))];
-    }, [pets]);
+        if (selectedType === 'all') return [];
+        return PET_TYPES.find(t => t.id === selectedType)?.breeds || [];
+    }, [selectedType]);
 
     // Handlers
     const toggleBreed = (breed: string) => {
-        setSelectedBreeds(prev =>
-            prev.includes(breed) ? prev.filter(b => b !== breed) : [...prev, breed]
-        );
+        setSelectedBreeds(prev => prev.includes(breed) ? prev.filter(b => b !== breed) : [...prev, breed]);
     };
 
     const toggleAge = (age: string) => {
-        setSelectedAges(prev =>
-            prev.includes(age) ? prev.filter(a => a !== age) : [...prev, age]
-        );
+        setSelectedAges(prev => prev.includes(age) ? prev.filter(a => a !== age) : [...prev, age]);
     };
 
     const clearFilters = () => {
         setSearchQuery('');
         setSelectedType('all');
+        setSelectedGender('all');
         setSelectedBreeds([]);
         setSelectedAges([]);
         setLocationQuery('');
@@ -287,6 +280,37 @@ const MatchFeed = () => {
                                             />
                                             {type.label}
                                         </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Gender */}
+                            <div>
+                                <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Gender</h3>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    {[
+                                        { id: 'all', label: 'All' },
+                                        { id: 'Male', label: 'Male' },
+                                        { id: 'Female', label: 'Female' }
+                                    ].map((g) => (
+                                        <button
+                                            key={g.id}
+                                            onClick={() => setSelectedGender(g.id)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '6px 0',
+                                                borderRadius: 'var(--radius-md)',
+                                                border: `1px solid ${selectedGender === g.id ? 'var(--primary-600)' : 'var(--color-border)'}`,
+                                                background: selectedGender === g.id ? 'var(--primary-50)' : 'white',
+                                                color: selectedGender === g.id ? 'var(--primary-700)' : 'var(--color-text-secondary)',
+                                                fontSize: '0.875rem',
+                                                cursor: 'pointer',
+                                                fontWeight: 500,
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            {g.label}
+                                        </button>
                                     ))}
                                 </div>
                             </div>
