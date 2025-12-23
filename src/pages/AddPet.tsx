@@ -7,7 +7,8 @@ import { Camera, X, CaretLeft, PencilSimple } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 import SearchableSelect from '../components/SearchableSelect';
 import { storageService } from '../lib/storageService';
-import { PET_TYPES, BREEDS_BY_TYPE } from '../lib/petBreeds';
+import { PET_TYPES } from '../data/breeds';
+import { BREEDS_BY_TYPE } from '../lib/petBreeds'; // Keep for breeds list
 
 const AddPet = () => {
     const navigate = useNavigate();
@@ -303,9 +304,12 @@ const AddPet = () => {
                             <div style={{ flex: 1, minWidth: '140px' }}>
                                 <SearchableSelect
                                     label="TYPE"
-                                    options={PET_TYPES}
+                                    options={PET_TYPES.map(t => t.label)}
                                     value={petForm.type.charAt(0).toUpperCase() + petForm.type.slice(1)}
-                                    onChange={(val) => setPetForm({ ...petForm, type: val.toLowerCase() })}
+                                    onChange={(val) => {
+                                        const typeId = PET_TYPES.find(t => t.label === val)?.id || val.toLowerCase();
+                                        setPetForm({ ...petForm, type: typeId });
+                                    }}
                                     placeholder="Select Type"
                                 />
                             </div>
@@ -362,14 +366,27 @@ const AddPet = () => {
                             </div>
 
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Age</label>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Age (Years)</label>
                                 <input
                                     type="text"
                                     inputMode="numeric"
                                     pattern="[0-9]*"
                                     value={petForm.age}
                                     onChange={e => {
-                                        const val = e.target.value.replace(/[^0-9]/g, '');
+                                        let val = e.target.value.replace(/[^0-9]/g, '');
+
+                                        // Validate Max Age based on Type
+                                        const typeInfo = PET_TYPES.find(t => t.id === petForm.type);
+                                        const maxAge = (typeInfo?.maxLifespan || 20) + 5;
+
+                                        if (val && parseInt(val) > maxAge) {
+                                            // Optional: User feedback or just clamp
+                                            // For now, let's clamp it silently or toast? 
+                                            // User asked to "limit", forcing it is clearest
+                                            val = maxAge.toString();
+                                            alert(`Age limited to ${maxAge} years for ${typeInfo?.label || 'this pet type'}.`);
+                                        }
+
                                         setPetForm({ ...petForm, age: val });
                                     }}
                                     placeholder="2"

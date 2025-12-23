@@ -1,11 +1,11 @@
 export const PET_TYPES = [
-    { id: 'dog', label: 'Dog', icon: 'Dog' },
-    { id: 'cat', label: 'Cat', icon: 'Cat' },
-    { id: 'rabbit', label: 'Rabbit', icon: 'Rabbit' },
-    { id: 'bird', label: 'Bird', icon: 'Bird' },
-    { id: 'hamster', label: 'Hamster', icon: 'Hamster' },
-    { id: 'reptile', label: 'Reptile', icon: 'Snake' },
-    { id: 'fish', label: 'Fish', icon: 'Fish' },
+    { id: 'dog', label: 'Dog', icon: 'Dog', maxLifespan: 20 },
+    { id: 'cat', label: 'Cat', icon: 'Cat', maxLifespan: 25 },
+    { id: 'rabbit', label: 'Rabbit', icon: 'Rabbit', maxLifespan: 15 },
+    { id: 'bird', label: 'Bird', icon: 'Bird', maxLifespan: 80 },
+    { id: 'hamster', label: 'Hamster', icon: 'Hamster', maxLifespan: 5 },
+    { id: 'reptile', label: 'Reptile', icon: 'Snake', maxLifespan: 100 },
+    { id: 'fish', label: 'Fish', icon: 'Fish', maxLifespan: 30 },
 ];
 
 export const BREEDS: Record<string, string[]> = {
