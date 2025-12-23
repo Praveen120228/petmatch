@@ -82,14 +82,15 @@ export const chatService = {
         return (data as Message[]).reverse();
     },
 
-    async sendMessage(conversationId: number, senderId: string, text: string) {
+    async sendMessage(conversationId: number, senderId: string, text: string, image?: string) {
         // 1. Insert Message
         const { data, error } = await supabase
             .from('messages')
             .insert({
                 conversation_id: conversationId,
                 sender_id: senderId,
-                text: text
+                text: text,
+                image: image
             })
             .select()
             .single();
@@ -97,10 +98,11 @@ export const chatService = {
         if (error) throw error;
 
         // 2. Update Conversation metadata
+        const previewText = text || (image ? '[Image]' : 'New message');
         await supabase
             .from('conversations')
             .update({
-                last_message: text,
+                last_message: previewText,
                 last_message_time: new Date().toISOString()
             })
             .eq('id', conversationId);

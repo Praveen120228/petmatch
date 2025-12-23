@@ -58,6 +58,7 @@ create table public.messages (
   conversation_id bigint references public.conversations(id) on delete cascade not null,
   sender_id uuid references public.profiles(id) on delete cascade not null,
   text text not null,
+  image text,
   created_at timestamp with time zone default timezone('utc'::text, now()),
   read boolean default false
 );

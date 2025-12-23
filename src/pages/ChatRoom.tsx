@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CaretLeft, PaperPlaneRight, DotsThreeVertical } from '@phosphor-icons/react';
+import { CaretLeft, PaperPlaneRight, DotsThreeVertical, ImageSquare, X } from '@phosphor-icons/react';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -12,10 +12,12 @@ const ChatRoom = () => {
     const { id } = useParams<{ id: string }>();
     const chatId = Number(id);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const imageInputRef = useRef<HTMLInputElement>(null);
 
     const [messages, setMessages] = useState<any[]>([]);
     const [chatInfo, setChatInfo] = useState<any | null>(null);
     const [inputText, setInputText] = useState('');
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -75,14 +77,33 @@ const ChatRoom = () => {
         scrollToBottom();
     }, [messages.length]);
 
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+                setSelectedImage(reader.result as string);
+                // Scroll to bottom to show preview
+                scrollToBottom();
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!inputText.trim() || !user) return;
+        if ((!inputText.trim() && !selectedImage) || !user) return;
 
         try {
             const textIdx = inputText;
-            setInputText(''); // Optimistic clear
-            await chatService.sendMessage(chatId, user.id, textIdx);
+            const imageIdx = selectedImage || undefined;
+
+            // Optimistic clear
+            setInputText('');
+            setSelectedImage(null);
+
+            await chatService.sendMessage(chatId, user.id, textIdx, imageIdx);
             // New message will come via subscription
         } catch (err) {
             console.error("Failed to send", err);
@@ -181,7 +202,20 @@ const ChatRoom = () => {
                                     lineHeight: 1.5
                                 }}
                             >
-                                {msg.text}
+                                {msg.image && (
+                                    <div style={{ marginBottom: msg.text ? '0.5rem' : 0 }}>
+                                        <img
+                                            src={msg.image}
+                                            alt="Attachment"
+                                            style={{
+                                                maxWidth: '100%',
+                                                borderRadius: '12px',
+                                                display: 'block'
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                {msg.text && <div style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</div>}
                             </div>
                         </div>
                     );
@@ -190,61 +224,105 @@ const ChatRoom = () => {
             </div>
 
             {/* Input Area */}
-            <form
-                onSubmit={handleSend}
-                style={{
-                    padding: '1rem', // Reduced padding
-                    background: 'white',
-                    borderTop: '1px solid var(--gray-200)',
-                    display: 'flex',
-                    gap: '0.5rem',
-                    alignItems: 'center'
-                }}
-            >
-                <input
-                    type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Type your message..."
-                    style={{
-                        flex: 1,
-                        padding: '1rem 1.5rem',
-                        borderRadius: 'var(--radius-full)',
-                        border: '1px solid var(--gray-200)',
-                        background: 'var(--gray-50)',
-                        fontSize: '1rem',
-                        outline: 'none',
-                        transition: 'all 0.2s',
-                        color: 'var(--gray-900)'
-                    }}
-                    onFocus={e => {
-                        e.target.style.background = 'white';
-                        e.target.style.borderColor = 'var(--primary-400)';
-                        e.target.style.boxShadow = '0 0 0 4px var(--primary-50)';
-                    }}
-                    onBlur={e => {
-                        e.target.style.background = 'var(--gray-50)';
-                        e.target.style.borderColor = 'var(--gray-200)';
-                        e.target.style.boxShadow = 'none';
-                    }}
-                />
-                <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={!inputText.trim()}
+            <div style={{ background: 'white', borderTop: '1px solid var(--gray-200)' }}>
+
+                {/* Image Preview */}
+                {selectedImage && (
+                    <div style={{ padding: '0.5rem 1rem', display: 'flex' }}>
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                            <img
+                                src={selectedImage}
+                                alt="Preview"
+                                style={{ height: '80px', borderRadius: '12px', border: '1px solid var(--gray-200)' }}
+                            />
+                            <button
+                                onClick={() => setSelectedImage(null)}
+                                style={{
+                                    position: 'absolute', top: -8, right: -8,
+                                    background: 'var(--gray-900)', color: 'white',
+                                    border: 'none', borderRadius: '50%',
+                                    width: '24px', height: '24px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <X size={14} weight="bold" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <form
+                    onSubmit={handleSend}
                     style={{
                         padding: '1rem',
-                        borderRadius: '50%',
-                        width: '54px',
-                        height: '54px',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
+                        gap: '0.5rem',
+                        alignItems: 'center'
                     }}
                 >
-                    <PaperPlaneRight size={24} weight="fill" />
-                </Button>
-            </form>
+                    <input
+                        type="file"
+                        ref={imageInputRef}
+                        onChange={handleFileSelect}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                    />
+
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => imageInputRef.current?.click()}
+                        style={{ padding: '1rem', borderRadius: '50%', color: 'var(--gray-500)' }}
+                    >
+                        <ImageSquare size={24} />
+                    </Button>
+
+                    <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Type your message..."
+                        style={{
+                            flex: 1,
+                            padding: '1rem 1.5rem',
+                            borderRadius: 'var(--radius-full)',
+                            border: '1px solid var(--gray-200)',
+                            background: 'var(--gray-50)',
+                            fontSize: '1rem',
+                            outline: 'none',
+                            transition: 'all 0.2s',
+                            color: 'var(--gray-900)'
+                        }}
+                        onFocus={e => {
+                            e.target.style.background = 'white';
+                            e.target.style.borderColor = 'var(--primary-400)';
+                            e.target.style.boxShadow = '0 0 0 4px var(--primary-50)';
+                        }}
+                        onBlur={e => {
+                            e.target.style.background = 'var(--gray-50)';
+                            e.target.style.borderColor = 'var(--gray-200)';
+                            e.target.style.boxShadow = 'none';
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={!inputText.trim() && !selectedImage}
+                        style={{
+                            padding: '1rem',
+                            borderRadius: '50%',
+                            width: '54px',
+                            height: '54px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <PaperPlaneRight size={24} weight="fill" />
+                    </Button>
+                </form>
+            </div>
         </div>
     );
 };
