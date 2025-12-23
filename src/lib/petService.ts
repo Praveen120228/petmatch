@@ -99,7 +99,7 @@ export const petService = {
             .from('pets')
             .select(`
                 *,
-                owner_profile:profiles!owner_id(name, location, latitude, longitude, show_location, avatar_url)
+                owner_profile:profiles!owner_id(name, location, latitude, longitude, show_location, avatar_url, username)
             `)
             .eq('id', id)
             .single();

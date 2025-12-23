@@ -8,7 +8,7 @@ import { userService } from '../lib/userService';
 import { supabase } from '../lib/supabase';
 import Button from '../components/Button';
 import Card from '../components/Card';
-import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash, Sparkle } from '@phosphor-icons/react';
+import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash, Sparkle, CaretRight } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { getDistance } from '../utils/distance';
 import { useToast } from '../context/ToastContext';
@@ -566,14 +566,34 @@ const PetProfile = () => {
 
                     {/* Owner Info - Link to Public Profile */}
                     <Link to={`/user/${pet.owner_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <Card style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'border-color 0.2s' }}>
-                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6' }}>
-                                <img src={`https://ui-avatars.com/api/?name=${pet.owner}&background=random`} alt={pet.owner} style={{ width: '100%', height: '100%' }} />
+                        <Card style={{
+                            padding: '1.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            border: '1px solid #f3f4f6',
+                            background: 'white'
+                        }}
+                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary-200)'; e.currentTarget.style.background = '#fcfaff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#f3f4f6'; e.currentTarget.style.background = 'white'; }}
+                        >
+                            <div style={{ width: '52px', height: '52px', borderRadius: '50%', overflow: 'hidden', border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                <img
+                                    src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || pet.owner || 'U'}&background=ede9fe&color=7c3aed`}
+                                    alt={pet.owner_profile?.username || pet.owner}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
                             </div>
-                            <div>
-                                <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Owned by</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{pet.owner_profile?.name || pet.owner || 'Unknown'}</span>
+                            <div style={{ flex: 1 }}>
+                                <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Owned by</span>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '1rem', fontWeight: 800, color: '#111827' }}>@{pet.owner_profile?.username || 'user'}</span>
+                                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{pet.owner_profile?.name || pet.owner || 'Pet Matcher'}</span>
+                                </div>
                             </div>
+                            <CaretRight size={20} color="#9ca3af" />
                         </Card>
                     </Link>
 
