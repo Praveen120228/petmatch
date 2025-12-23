@@ -100,15 +100,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchProfile = async (userId: string, email: string) => {
         console.log("Auth: Fetching profile from DB...");
         try {
-            const { data, error } = await supabase
+            // 1. Attempt to fetch
+            let { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single();
 
+            // 2. If missing, attempt to create (handle race conditions)
             if (error) {
                 console.log('Auth: Profile missing, attempting creation...');
-                // Attempt to Create Profile (Lazy init)
+
                 const { data: newProfile, error: createError } = await supabase
                     .from('profiles')
                     .insert({
@@ -120,23 +122,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     .select()
                     .single();
 
-                if (!createError) {
-                    console.log("Auth: Profile auto-created");
-                    // Update with created profile
-                    setUser({
-                        id: newProfile.id,
-                        name: newProfile.name,
-                        email: newProfile.email,
-                        image: newProfile.avatar_url
-                    });
+                if (createError) {
+                    // Check for conflict (409) or other errors that imply it exists now
+                    // Postgres error 23505 is unique_violation
+                    if (createError.code === '23505' || createError.message.includes('duplicate key')) {
+                        console.log("Auth: Profile creation conflict, fetching existing...");
+                        // Retry fetch
+                        const { data: retryData, error: retryError } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', userId)
+                            .single();
+
+                        if (retryData) {
+                            data = retryData;
+                            error = null;
+                        } else {
+                            console.error("Auth: Failed to fetch profile after conflict:", retryError);
+                        }
+                    } else {
+                        console.error('Failed to auto-create profile:', createError);
+                        // Fallback to local state only if creation failed and data is still missing
+                        setUser(prev => prev || { id: userId, name: email.split('@')[0], email: email });
+                        return;
+                    }
                 } else {
-                    console.error('Failed to auto-create profile:', createError);
-                    // Fallback to local state only if creation failed and user wasn't set by basic info
-                    setUser(prev => prev || { id: userId, name: email.split('@')[0], email: email });
+                    data = newProfile;
+                    error = null;
+                    console.log("Auth: Profile auto-created");
                 }
-            } else if (data) {
+            }
+
+            // 3. Update State with final data
+            if (data) {
                 console.log("Auth: Profile loaded, updating user state");
-                // Update with fetched profile
                 setUser({
                     id: data.id,
                     name: data.name || email.split('@')[0],
@@ -148,7 +167,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.error('Profile fetch unexpected error:', error);
         }
-        // Note: We do NOT set loading(false) here anymore, as it's done earlier
     };
 
     const login = async (email: string, password: string) => {
@@ -178,18 +196,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Check if email confirmation is required (session will be null)
             if (!data.session) {
                 return { success: true, confirmationRequired: true };
-            }
-
-            // Manually insert profile to ensure it exists immediately
-            const { error: profileError } = await supabase.from('profiles').insert({
-                id: data.user.id,
-                email: email,
-                name: name,
-                avatar_url: ''
-            });
-
-            if (profileError) {
-                console.warn('Profile creation warning:', profileError.message);
             }
 
             // Set local state immediately for responsiveness
