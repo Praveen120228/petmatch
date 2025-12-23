@@ -36,6 +36,7 @@ const PetProfile = () => {
 
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         const loadData = async () => {
@@ -301,64 +302,71 @@ const PetProfile = () => {
                     {/* Image Gallery */}
                     <div style={{ width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', position: 'relative', background: '#000' }}>
                         {pet.images && pet.images.length > 0 ? (
-                            <div style={{
-                                display: 'flex',
-                                overflowX: 'auto',
-                                scrollSnapType: 'x mandatory',
-                                height: '100%',
-                                scrollbarWidth: 'none' // Firefox
-                            }} className="no-scrollbar">
-                                {pet.images.map((img: string, idx: number) => (
-                                    <img
-                                        key={idx}
-                                        src={img}
-                                        alt={`${pet.name} ${idx + 1}`}
-                                        style={{
-                                            flex: '0 0 100%',
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover',
-                                            scrollSnapAlign: 'center'
-                                        }}
-                                    />
-                                ))}
+                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    transform: `translateX(-${currentImageIndex * 100}%)`,
+                                    height: '100%'
+                                }}>
+                                    {pet.images.map((img: string, idx: number) => (
+                                        <div key={idx} style={{ flex: '0 0 100%', width: '100%', height: '100%' }}>
+                                            <img
+                                                src={img}
+                                                alt={`${pet.name} ${idx + 1}`}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
                                 {/* Photo Counter */}
                                 <div style={{
                                     position: 'absolute', bottom: '1rem', right: '1rem',
                                     background: 'rgba(0,0,0,0.6)', color: 'white',
                                     padding: '0.25rem 0.75rem', borderRadius: '1rem',
                                     fontSize: '0.875rem', fontWeight: 600,
-                                    zIndex: 5
+                                    zIndex: 5, backdropFilter: 'blur(4px)'
                                 }}>
-                                    📷 {pet.images.length}
+                                    {currentImageIndex + 1} / {pet.images.length}
                                 </div>
+
+                                {/* Navigation Arrows */}
+                                {pet.images.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={() => setCurrentImageIndex(prev => Math.max(0, prev - 1))}
+                                            style={{
+                                                position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)',
+                                                background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '40px', height: '40px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10,
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)', opacity: currentImageIndex === 0 ? 0.3 : 1, transition: 'all 0.2s',
+                                                pointerEvents: currentImageIndex === 0 ? 'none' : 'auto'
+                                            }}
+                                        >
+                                            <CaretLeft size={24} weight="bold" color="#111827" />
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentImageIndex(prev => Math.min(pet.images.length - 1, prev + 1))}
+                                            style={{
+                                                position: 'absolute', top: '50%', right: '1rem', transform: 'translateY(-50%)',
+                                                background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '40px', height: '40px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10,
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)', opacity: currentImageIndex === pet.images.length - 1 ? 0.3 : 1, transition: 'all 0.2s',
+                                                pointerEvents: currentImageIndex === pet.images.length - 1 ? 'none' : 'auto'
+                                            }}
+                                        >
+                                            <CaretRight size={24} weight="bold" color="#111827" />
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         ) : (
                             <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        )}
-
-                        {/* Dating Badge Overlay */}
-                        {pet.partner_pet_id && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '1rem',
-                                left: '1rem',
-                                background: 'rgba(225, 29, 72, 0.95)',
-                                color: 'white',
-                                padding: '8px 16px',
-                                borderRadius: '24px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                fontWeight: 800,
-                                fontSize: '0.9rem',
-                                boxShadow: '0 4px 15px rgba(225, 29, 72, 0.4)',
-                                zIndex: 10,
-                                transform: 'rotate(-2deg)'
-                            }}>
-                                <Heart weight="fill" size={18} className="pulse-animation" />
-                                IN A RELATIONSHIP
-                            </div>
                         )}
                     </div>
 
