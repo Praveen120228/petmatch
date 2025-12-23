@@ -200,9 +200,9 @@ const ChatRoom = () => {
                         >
                             <div
                                 style={{
-                                    padding: '1rem 1.25rem',
+                                    padding: '0.75rem 1rem',
                                     background: isMe
-                                        ? 'linear-gradient(135deg, var(--primary-600), var(--primary-500))'
+                                        ? 'linear-gradient(135deg, #a78bfa, #8b5cf6)' // Lighter purple (Violet-400 to Violet-500)
                                         : 'white',
                                     color: isMe ? 'white' : 'var(--gray-800)',
                                     borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
