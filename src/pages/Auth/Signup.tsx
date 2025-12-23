@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
@@ -12,16 +12,18 @@ const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const isSigningUp = useRef(false);
 
-    // Redirect if already logged in
+    // Redirect if already logged in (but not if just signed up)
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && !isSigningUp.current) {
             navigate('/match');
         }
     }, [isAuthenticated, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        isSigningUp.current = true;
         const { success, error, confirmationRequired } = await signup(name, email, password);
 
         if (success) {
