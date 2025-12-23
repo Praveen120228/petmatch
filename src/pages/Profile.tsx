@@ -1292,46 +1292,72 @@ const Profile = () => {
                                                     <Card style={{ padding: '1.5rem', background: 'white' }}>
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                                                            {/* Relationship Section */}
+                                                            {/* Relationship Section - Premium Card */}
                                                             {relationship ? (
                                                                 <div style={{
-                                                                    padding: '1.25rem',
-                                                                    background: '#fff1f2',
-                                                                    borderRadius: '20px',
+                                                                    padding: '2.5rem 1.5rem',
+                                                                    background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+                                                                    borderRadius: '24px',
                                                                     border: '1px solid #fecdd3',
                                                                     display: 'flex',
+                                                                    flexDirection: 'column',
                                                                     alignItems: 'center',
-                                                                    justifyContent: 'space-between',
-                                                                    flexWrap: 'wrap',
-                                                                    gap: '1.5rem'
+                                                                    gap: '2rem',
+                                                                    position: 'relative',
+                                                                    overflow: 'hidden'
                                                                 }}>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flex: 1, justifyContent: 'center' }}>
-                                                                        <div style={{ textAlign: 'center' }}>
-                                                                            <img src={pet.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                                                                            <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '0.9rem' }}>{pet.name}</div>
+                                                                    {/* Decorative background heart */}
+                                                                    <Heart weight="fill" size={120} color="#e11d48" style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.04, transform: 'rotate(-15deg)' }} />
+
+                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', width: '100%', position: 'relative', zIndex: 1 }}>
+                                                                        {/* My Pet */}
+                                                                        <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <img src={pet.image} style={{ width: '84px', height: '84px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                                                            <div style={{ fontWeight: 800, marginTop: '0.75rem', fontSize: '1rem', color: '#111827' }}>{pet.name}</div>
                                                                         </div>
 
-                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-                                                                            <Heart weight="fill" size={32} color="#e11d48" className="pulse-animation" />
-                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#e11d48', letterSpacing: '0.05em' }}>DATING</span>
+                                                                        {/* Center Heart Badge */}
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                                                            <div style={{
+                                                                                background: 'white',
+                                                                                padding: '12px',
+                                                                                borderRadius: '50%',
+                                                                                boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center'
+                                                                            }}>
+                                                                                <Heart weight="fill" size={28} color="#e11d48" className="pulse-animation" />
+                                                                            </div>
+                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#e11d48', letterSpacing: '0.12em', textTransform: 'uppercase' }}>DATING</span>
                                                                         </div>
 
-                                                                        <Link to={`/pet/${relationship.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                                                                            <img src={relationship.partner.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                                                                            <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '0.9rem' }}>{relationship.partner.name}</div>
+                                                                        {/* Partner */}
+                                                                        <Link to={`/pet/${relationship.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <img src={relationship.partner.image} style={{ width: '84px', height: '84px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                                                            <div style={{ fontWeight: 800, marginTop: '0.75rem', fontSize: '1rem', color: '#111827' }}>{relationship.partner.name}</div>
                                                                         </Link>
                                                                     </div>
 
-                                                                    <div style={{ width: window.innerWidth <= 600 ? '100%' : 'auto', display: 'flex', justifyContent: 'center' }}>
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            style={{ borderColor: '#ef4444', color: '#ef4444', background: 'white', fontWeight: 700, minWidth: '120px' }}
-                                                                            onClick={() => handleBreakUp(pet.id)}
-                                                                        >
-                                                                            Break Up
-                                                                        </Button>
-                                                                    </div>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        style={{
+                                                                            borderColor: '#fda4af',
+                                                                            color: '#e11d48',
+                                                                            background: 'rgba(255, 255, 255, 0.7)',
+                                                                            fontWeight: 700,
+                                                                            fontSize: '0.8rem',
+                                                                            padding: '0.5rem 1.75rem',
+                                                                            borderRadius: '12px',
+                                                                            backdropFilter: 'blur(4px)',
+                                                                            zIndex: 2,
+                                                                            transition: 'all 0.2s'
+                                                                        }}
+                                                                        onClick={() => handleBreakUp(pet.id)}
+                                                                    >
+                                                                        End Relationship
+                                                                    </Button>
                                                                 </div>
                                                             ) : (
                                                                 !petRequests.length && (
