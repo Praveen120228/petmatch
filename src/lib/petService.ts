@@ -54,7 +54,8 @@ export const petService = {
         }
 
         if (filters?.search) {
-            query = query.or(`name.ilike.%${filters.search}%,breed.ilike.%${filters.search}%`);
+            // "search" matches name OR breed OR owner location.
+            query = query.or(`name.ilike.%${filters.search}%,breed.ilike.%${filters.search}%,owner_profile.location.ilike.%${filters.search}%`);
         }
 
         if (filters?.location) {
