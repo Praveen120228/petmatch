@@ -433,6 +433,7 @@ const MatchFeed = () => {
                                         {/* Min Thumb */}
                                         <input
                                             type="range"
+                                            className="age-slider-thumb"
                                             min={0}
                                             max={ageOptions.length - 1}
                                             value={ageRange[0]}
@@ -456,6 +457,7 @@ const MatchFeed = () => {
                                         {/* Max Thumb */}
                                         <input
                                             type="range"
+                                            className="age-slider-thumb"
                                             min={0}
                                             max={ageOptions.length - 1}
                                             value={ageRange[1]}
@@ -478,9 +480,10 @@ const MatchFeed = () => {
 
                                         {/* CSS to make thumbs clickable */}
                                         <style>{`
-                                            input[type=range]::-webkit-slider-thumb {
+                                            .age-slider-thumb::-webkit-slider-thumb {
                                                 pointer-events: auto; /* Enable pointer events on thumb */
                                                 appearance: none;
+                                                -webkit-appearance: none;
                                                 width: 16px;
                                                 height: 16px;
                                                 border-radius: 50%;
@@ -488,9 +491,11 @@ const MatchFeed = () => {
                                                 border: 2px solid white;
                                                 box-shadow: 0 1px 3px rgba(0,0,0,0.3);
                                                 cursor: pointer;
-                                                margin-top: -7px; /* Align vertical */
+                                                /* Center vertically in the 20px height input */
+                                                /* No margin needed if height matches container or is centered by default */
+                                                /* If alignment is still off, use margin-top to tweak */
                                             }
-                                            input[type=range]::-moz-range-thumb {
+                                            .age-slider-thumb::-moz-range-thumb {
                                                 pointer-events: auto;
                                                 appearance: none;
                                                 width: 16px;
@@ -500,6 +505,7 @@ const MatchFeed = () => {
                                                 border: 2px solid white;
                                                 box-shadow: 0 1px 3px rgba(0,0,0,0.3);
                                                 cursor: pointer;
+                                                border: none; /* Reset Mozilla default border if any */
                                             }
                                         `}</style>
                                     </div>
