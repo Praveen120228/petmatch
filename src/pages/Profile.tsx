@@ -1309,7 +1309,7 @@ const Profile = () => {
                                                             {/* Relationship Section - Premium Card */}
                                                             {relationship ? (
                                                                 <div style={{
-                                                                    padding: '3rem 2rem',
+                                                                    padding: '2rem',
                                                                     background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
                                                                     borderRadius: '24px',
                                                                     border: '1px solid #fecdd3',

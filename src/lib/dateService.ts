@@ -67,33 +67,14 @@ export const dateService = {
 
     // Accept a request
     async acceptRequest(requestId: number) {
-        // Transaction-like logic via Supabase (or sequential ops)
-        // 1. Get request details
-        const { data: req } = await supabase.from('dating_requests').select('*').eq('id', requestId).single();
-        if (!req) throw new Error("Request not found");
+        const { data, error } = await supabase.rpc('accept_dating_request', { request_id: requestId });
 
-        // 2. Verify availability again
-        const { data: requester } = await supabase.from('pets').select('partner_pet_id').eq('id', req.requester_pet_id).single();
-        const { data: target } = await supabase.from('pets').select('partner_pet_id').eq('id', req.target_pet_id).single();
+        if (error) throw error;
 
-        if (requester?.partner_pet_id || target?.partner_pet_id) {
-            // Auto-reject if taken? Or error?
-            throw new Error("One of the pets is no longer available.");
+        // Check custom error from RPC function
+        if (data && data.success === false) {
+            throw new Error(data.error || "Failed to accept request");
         }
-
-        // 3. Update Request Status
-        const { error: updateError } = await supabase
-            .from('dating_requests')
-            .update({ status: 'accepted' })
-            .eq('id', requestId);
-
-        if (updateError) throw updateError;
-
-        // 4. Set Partners (Exclusivity)
-        await supabase.from('pets').update({ partner_pet_id: req.target_pet_id }).eq('id', req.requester_pet_id);
-        await supabase.from('pets').update({ partner_pet_id: req.requester_pet_id }).eq('id', req.target_pet_id);
-
-        // 5. Cancel or Reject all other pending requests involving these two? (Optional polish)
     },
 
     // Reject a request
