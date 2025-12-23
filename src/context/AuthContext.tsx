@@ -22,8 +22,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(() => {
+        // Hydrate from localStorage immediately
+        try {
+            const cached = localStorage.getItem('petmatch_user');
+            return cached ? JSON.parse(cached) : null;
+        } catch {
+            return null;
+        }
+    });
+    const [loading, setLoading] = useState(!user); // If user exists, not loading initially
 
     // Initialize Auth State & Listen for Changes
     useEffect(() => {
@@ -41,21 +49,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                 if (session?.user) {
                     console.log("Auth: Session restored for", session.user.email);
-                    setUser({
-                        id: session.user.id,
-                        email: session.user.email!,
-                        name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-                        image: ''
-                    });
-                    // Fetch full profile in background
+
+                    // Only update state if cache was empty to prevent flicker
+                    if (!user) {
+                        setUser({
+                            id: session.user.id,
+                            email: session.user.email!,
+                            name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
+                            image: ''
+                        });
+                        setLoading(false); // Can show immediately
+                    }
+
+                    // Fetch full profile in background to revalidate
                     fetchProfile(session.user.id, session.user.email!);
                 } else {
                     console.log("Auth: No active session found.");
                     setUser(null);
+                    localStorage.removeItem('petmatch_user');
+                    if (mounted) setLoading(false);
                 }
             } catch (error) {
                 console.error("Auth: Initialization error:", error);
-            } finally {
                 if (mounted) setLoading(false);
             }
         };
@@ -169,8 +184,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: data.name || (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
                     email: data.email || email,
                     image: data.avatar_url,
-                    username: data.username
                 });
+
+                // Update Cache
+                localStorage.setItem('petmatch_user', JSON.stringify({
+                    id: data.id,
+                    name: data.name || (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
+                    email: data.email || email,
+                    image: data.avatar_url,
+                    username: data.username
+                }));
             }
         } catch (error) {
             console.error('Profile fetch unexpected error:', error);
@@ -235,13 +258,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (error) throw error;
 
-        setUser(prev => prev ? { ...prev, ...data } : null);
+        setUser(prev => {
+            const updated = prev ? { ...prev, ...data } : null;
+            if (updated) localStorage.setItem('petmatch_user', JSON.stringify(updated));
+            return updated;
+        });
     };
 
     const logout = async () => {
         await supabase.auth.signOut();
         // Force clear local storage to prevent stale tokens from freezing the app on next login
-        localStorage.clear();
+        localStorage.clear(); // This clears everything including petmatch_user
         setUser(null);
     };
 
