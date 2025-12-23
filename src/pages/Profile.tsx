@@ -547,90 +547,14 @@ const Profile = () => {
                                         <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Edit Profile</h3>
                                         <button onClick={() => setIsEditing(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={24} /></button>
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
-                                            <input
-                                                type="text"
-                                                value={editForm.name}
-                                                onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Username</label>
-                                            <input
-                                                type="text"
-                                                value={editForm.username}
-                                                onChange={e => setEditForm(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/\s/g, '') }))}
-                                                placeholder="@username"
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Email</label>
-                                            <input
-                                                type="email"
-                                                value={user?.email || ''}
-                                                readOnly
-                                                disabled
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location</label>
-                                            <div style={{ position: 'relative' }}>
-                                                <input
-                                                    type="text"
-                                                    value={editForm.location}
-                                                    onChange={e => setEditForm({ ...editForm, location: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                                    disabled={isLoadingLocation}
-                                                />
-                                                <button
-                                                    onClick={handleGetLocation}
-                                                    disabled={isLoadingLocation}
-                                                    type="button"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        right: '8px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                        background: 'transparent',
-                                                        border: 'none',
-                                                        color: isLoadingLocation ? 'var(--gray-400)' : 'var(--primary-600)',
-                                                        cursor: isLoadingLocation ? 'wait' : 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '4px',
-                                                        fontSize: '0.875rem',
-                                                        fontWeight: 600
-                                                    }}
-                                                    title="Find my location"
-                                                >
-                                                    {isLoadingLocation ? (
-                                                        <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⌛</span>
-                                                    ) : (
-                                                        <MapPin size={20} weight="fill" />
-                                                    )}
-                                                    <span className="hide-on-mobile">Locate Me</span>
-                                                </button>
-                                            </div>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: '#4b5563' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={editForm.show_location}
-                                                    onChange={e => setEditForm(prev => ({ ...prev, show_location: e.target.checked }))}
-                                                    style={{ width: '16px', height: '16px', accentColor: 'var(--primary-600)' }}
-                                                />
-                                                Show my location on public pet profiles
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Profile Photo</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ position: 'relative', width: '60px', height: '60px' }}>
-                                                    <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
+                                        {/* Top Section: Photo + Fields */}
+                                        <div style={{ display: 'flex', gap: '2rem' }}>
+                                            {/* Column 1: Profile Photo */}
+                                            <div style={{ flex: '0 0 auto', width: '180px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#374151', alignSelf: 'flex-start' }}>Profile Photo</label>
+                                                <div style={{ position: 'relative', width: '150px', height: '150px' }}>
+                                                    <div style={{ width: '100%', height: '100%', borderRadius: '16px', overflow: 'hidden', background: '#f3f4f6', border: '1px solid #e5e7eb' }}>
                                                         <img src={editForm.image || `https://ui-avatars.com/api/?name=${editForm.name}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     </div>
                                                     {editForm.image && (
@@ -640,20 +564,20 @@ const Profile = () => {
                                                                 setCropImage(editForm.image);
                                                             }}
                                                             style={{
-                                                                position: 'absolute', bottom: -5, right: -5,
+                                                                position: 'absolute', bottom: -10, right: -10,
                                                                 background: 'white', color: '#374151',
-                                                                borderRadius: '50%', width: '24px', height: '24px',
+                                                                borderRadius: '50%', width: '32px', height: '32px',
                                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                                 cursor: 'pointer', border: '1px solid #e5e7eb',
-                                                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)', zIndex: 10
                                                             }}
                                                             title="Crop Photo"
                                                         >
-                                                            <Crop size={14} weight="bold" />
+                                                            <Crop size={18} weight="bold" />
                                                         </div>
                                                     )}
                                                 </div>
-                                                <Button variant="outline" onClick={() => fileInputRef.current?.click()} size="sm">
+                                                <Button variant="outline" onClick={() => fileInputRef.current?.click()} size="sm" style={{ width: '100%' }}>
                                                     <Camera size={18} /> Change Photo
                                                 </Button>
                                                 <input
@@ -664,13 +588,106 @@ const Profile = () => {
                                                     style={{ display: 'none' }}
                                                 />
                                             </div>
+
+                                            {/* Column 2: Grid of Fields */}
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                                {/* Row 1: Name & Username */}
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
+                                                        <input
+                                                            type="text"
+                                                            value={editForm.name}
+                                                            onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Username</label>
+                                                        <input
+                                                            type="text"
+                                                            value={editForm.username}
+                                                            onChange={e => setEditForm(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/\s/g, '') }))}
+                                                            placeholder="@username"
+                                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Row 2: Email & Location */}
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Email</label>
+                                                        <input
+                                                            type="email"
+                                                            value={user?.email || ''}
+                                                            readOnly
+                                                            disabled
+                                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location</label>
+                                                        <div style={{ position: 'relative' }}>
+                                                            <input
+                                                                type="text"
+                                                                value={editForm.location}
+                                                                onChange={e => setEditForm({ ...editForm, location: e.target.value })}
+                                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                                disabled={isLoadingLocation}
+                                                            />
+                                                            <button
+                                                                onClick={handleGetLocation}
+                                                                disabled={isLoadingLocation}
+                                                                type="button"
+                                                                style={{
+                                                                    position: 'absolute',
+                                                                    right: '8px',
+                                                                    top: '50%',
+                                                                    transform: 'translateY(-50%)',
+                                                                    background: 'transparent',
+                                                                    border: 'none',
+                                                                    color: isLoadingLocation ? 'var(--gray-400)' : 'var(--primary-600)',
+                                                                    cursor: isLoadingLocation ? 'wait' : 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px',
+                                                                    fontSize: '0.875rem',
+                                                                    fontWeight: 600
+                                                                }}
+                                                                title="Find my location"
+                                                            >
+                                                                {isLoadingLocation ? (
+                                                                    <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⌛</span>
+                                                                ) : (
+                                                                    <MapPin size={20} weight="fill" />
+                                                                )}
+                                                                <span className="hide-on-mobile">Locate Me</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', cursor: 'pointer', fontSize: '0.875rem', color: '#4b5563' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={editForm.show_location}
+                                                        onChange={e => setEditForm(prev => ({ ...prev, show_location: e.target.checked }))}
+                                                        style={{ width: '16px', height: '16px', accentColor: 'var(--primary-600)' }}
+                                                    />
+                                                    Show my location on public pet profiles
+                                                </label>
+                                            </div>
                                         </div>
+
+                                        {/* Bottom Section: Bio */}
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Bio</label>
                                             <textarea
                                                 value={editForm.bio}
                                                 onChange={e => setEditForm({ ...editForm, bio: e.target.value })}
-                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '100px', fontSize: '1rem', lineHeight: 1.5, resize: 'vertical' }}
+                                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '80px', fontSize: '1rem', lineHeight: 1.5, resize: 'vertical' }}
+                                                placeholder="Tell us about yourself..."
                                             />
                                         </div>
                                     </div>
