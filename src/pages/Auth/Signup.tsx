@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
     const navigate = useNavigate();
-    const { signup, isAuthenticated } = useAuth();
+    const { signup, isAuthenticated, loading } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,10 +16,10 @@ const Signup = () => {
 
     // Redirect if already logged in (but not if just signed up)
     useEffect(() => {
-        if (isAuthenticated && !isSigningUp.current) {
+        if (!loading && isAuthenticated && !isSigningUp.current) {
             navigate('/match');
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, loading, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
