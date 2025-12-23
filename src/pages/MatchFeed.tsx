@@ -34,9 +34,9 @@ const MatchFeed = () => {
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedType, setSelectedType] = useState<string>('all');
+    const [selectedTypes, setSelectedTypes] = useState<string[]>([]); // Multi-select array
     const [selectedGender, setSelectedGender] = useState<string>('all');
-    const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
+    const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]); // Keep as array
     // Age Slider State: [min, max] indices
     // Default 22 items (0 to 20+), so max index is 21
     const [ageRange, setAgeRange] = useState<[number, number]>([0, 21]);
@@ -70,7 +70,7 @@ const MatchFeed = () => {
                 currentPage,
                 20,
                 {
-                    type: selectedType,
+                    type: selectedTypes, // Pass array directly
                     breeds: selectedBreeds,
                     ages: selectedAges,
                     search: searchQuery,
@@ -112,16 +112,22 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedType, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
+    }, [user, selectedTypes, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
         let maxAge = 20; // Default (All)
 
-        if (selectedType !== 'all') {
-            const typeInfo = PET_TYPES.find(t => t.id === selectedType);
-            if (typeInfo?.maxLifespan) {
-                maxAge = typeInfo.maxLifespan + 5; // Lifespan + 5 buffer
+        if (selectedTypes.length > 0 && !selectedTypes.includes('all')) {
+            let maxLifespan = 0;
+            selectedTypes.forEach(tId => {
+                const typeInfo = PET_TYPES.find(t => t.id === tId);
+                if (typeInfo?.maxLifespan && typeInfo.maxLifespan > maxLifespan) {
+                    maxLifespan = typeInfo.maxLifespan;
+                }
+            });
+            if (maxLifespan > 0) {
+                maxAge = maxLifespan + 5; // Lifespan + 5 buffer
             }
         }
 
@@ -130,7 +136,7 @@ const MatchFeed = () => {
             ...Array.from({ length: maxAge }, (_, i) => `${i + 1} yr${i === 0 ? '' : 's'}`),
             `${maxAge}+ yrs`
         ];
-    }, [selectedType]);
+    }, [selectedTypes]);
 
     // Reset or Clamp Age Range when options change
     useEffect(() => {
@@ -201,29 +207,54 @@ const MatchFeed = () => {
 
     // Derived Filter Options (Breeds) based on Type AND Search
     const availableBreeds = useMemo(() => {
-        if (selectedType === 'all') return [];
-        let breeds = BREEDS[selectedType] || [];
+        let breeds: string[] = [];
+
+        if (selectedTypes.length === 0) {
+            return [];
+        } else {
+            selectedTypes.forEach(t => {
+                if (BREEDS[t]) {
+                    breeds = [...breeds, ...BREEDS[t]];
+                }
+            });
+        }
 
         // Filter by breed search query
         if (breedSearchQuery) {
             breeds = breeds.filter(b => b.toLowerCase().includes(breedSearchQuery.toLowerCase()));
         }
 
-        return breeds;
-    }, [selectedType, breedSearchQuery]);
+        return [...new Set(breeds)].sort();
+    }, [selectedTypes, breedSearchQuery]);
 
     // Handlers
+    const toggleType = (typeId: string) => {
+        if (typeId === 'all') {
+            setSelectedTypes([]);
+            setSelectedBreeds([]);
+            return;
+        }
+
+        setSelectedTypes(prev => {
+            if (prev.includes(typeId)) {
+                return prev.filter(t => t !== typeId);
+            } else {
+                return [...prev, typeId];
+            }
+        });
+        setSelectedBreeds([]);
+    };
+
     const toggleBreed = (breed: string) => {
         setSelectedBreeds(prev => prev.includes(breed) ? prev.filter(b => b !== breed) : [...prev, breed]);
     };
 
     const clearFilters = () => {
         setSearchQuery('');
-        setSelectedType('all');
+        setSelectedTypes([]);
         setSelectedGender('all');
         setSelectedBreeds([]);
-        setBreedSearchQuery(''); // Reset breed search
-        // Default max age is 20, plus <1 and 20+, so 22 items. Max index 21.
+        setBreedSearchQuery('');
         setAgeRange([0, 21]);
         setLocationQuery('');
         showToast('Filters cleared', 'info');
@@ -353,7 +384,7 @@ const MatchFeed = () => {
                     <div style={{ width: window.innerWidth <= 768 ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Filters</h2>
-                            {(selectedType !== 'all' || selectedBreeds.length > 0 || selectedAges.length > 0) && (
+                            {(selectedTypes.length > 0 || selectedBreeds.length > 0 || selectedAges.length > 0) && (
                                 <button onClick={clearFilters} style={{ fontSize: '0.875rem', color: 'var(--primary-600)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>CLEAR</button>
                             )}
                         </div>
@@ -363,18 +394,26 @@ const MatchFeed = () => {
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Pet Type</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    {[{ id: 'all', label: 'All Types' }, ...PET_TYPES].map((type) => (
-                                        <label key={type.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.95rem', color: selectedType === type.id ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>
-                                            <input
-                                                type="radio"
-                                                name="petType"
-                                                checked={selectedType === type.id}
-                                                onChange={() => { setSelectedType(type.id); setSelectedBreeds([]); }}
-                                                style={{ width: '18px', height: '18px', accentColor: 'var(--primary-600)' }}
-                                            />
-                                            {type.label}
-                                        </label>
-                                    ))}
+                                    {[
+                                        { id: 'all', label: 'All Types' },
+                                        ...PET_TYPES
+                                    ].map((type) => {
+                                        const isChecked = type.id === 'all'
+                                            ? selectedTypes.length === 0
+                                            : selectedTypes.includes(type.id);
+
+                                        return (
+                                            <label key={type.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.95rem', color: isChecked ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked}
+                                                    onChange={() => toggleType(type.id)}
+                                                    style={{ width: '18px', height: '18px', accentColor: 'var(--primary-600)', borderRadius: '4px' }}
+                                                />
+                                                {type.label}
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -515,7 +554,7 @@ const MatchFeed = () => {
                             {/* Breed */}
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Breed</h3>
-                                {selectedType === 'all' ? (
+                                {selectedTypes.length === 0 ? (
                                     <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>Select a category to filter breeds</p>
                                 ) : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

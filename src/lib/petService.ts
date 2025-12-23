@@ -20,7 +20,7 @@ export const petService = {
         page: number = 1,
         limit: number = 20,
         filters?: {
-            type?: string;
+            type?: string[]; // Changed to string array
             breeds?: string[];
             ages?: string[];
             search?: string;
@@ -42,8 +42,8 @@ export const petService = {
             .neq('owner_id', currentUserId)
             .range(from, to);
 
-        if (filters?.type && filters.type !== 'all') {
-            query = query.eq('type', filters.type);
+        if (filters?.type && filters.type.length > 0 && !filters.type.includes('all')) {
+            query = query.in('type', filters.type);
         }
 
         if (filters?.breeds && filters.breeds.length > 0) {
