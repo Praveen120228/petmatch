@@ -445,19 +445,6 @@ const MatchFeed = () => {
                                                 zIndex: 10,
                                                 pointerEvents: 'none'
                                             }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', overflow: 'hidden', border: '1px solid white' }}>
-                                                        <img
-                                                            src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'User'}&background=random`}
-                                                            alt="Owner"
-                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                        />
-                                                    </div>
-                                                    <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', fontWeight: 600 }}>
-                                                        {pet.owner_profile?.username || 'Owner'}
-                                                    </div>
-                                                </div>
-
                                                 <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                                                     {pet.gender || 'Unknown Gender'}
                                                 </div>
@@ -465,7 +452,7 @@ const MatchFeed = () => {
                                                     fontSize: '1.75rem',
                                                     fontWeight: 800,
                                                     color: 'white',
-                                                    marginBottom: '8px',
+                                                    marginBottom: '4px',
                                                     textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                                                     fontFamily: '"Outfit", sans-serif',
                                                     letterSpacing: '-0.02em',
@@ -473,6 +460,21 @@ const MatchFeed = () => {
                                                 }}>
                                                     {pet.name}
                                                 </h3>
+
+                                                {/* Owner Avatar - Right Aligned */}
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem', fontWeight: 600 }}>
+                                                        {pet.owner_profile?.username || 'Owner'}
+                                                    </div>
+                                                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.6)' }}>
+                                                        <img
+                                                            src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'User'}&background=random`}
+                                                            alt="Owner"
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    </div>
+                                                </div>
+
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
                                                     <span>{pet.breed}</span>
                                                     <span style={{ opacity: 0.6 }}>•</span>
