@@ -9,7 +9,7 @@ import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { getDistance } from '../utils/distance';
-import { PET_TYPES } from '../data/breeds';
+import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
 
 const AGES = ['1 yr', '2 yrs', '3 yrs', '4 yrs', '5 yrs'];
@@ -113,7 +113,7 @@ const MatchFeed = () => {
     // Derived Filter Options (Breeds)
     const availableBreeds = useMemo(() => {
         if (selectedType === 'all') return [];
-        return PET_TYPES.find(t => t.id === selectedType)?.breeds || [];
+        return BREEDS[selectedType] || [];
     }, [selectedType]);
 
     // Handlers
