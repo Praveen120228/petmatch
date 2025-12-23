@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight } from '@phosphor-icons/react';
+import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight, PawPrint } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
@@ -1263,93 +1263,115 @@ const Profile = () => {
 
 
 
-                            {/* DATES TAB */}
+                            {/* DATES TAB - Organized by Pet */}
                             {activeTab === 'dates' && !isPublic && (
-                                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                    {/* Requests Section */}
-                                    <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Date Requests</h3>
-                                            {dateRequests.length > 0 && (
-                                                <span style={{ background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600 }}>
-                                                    {dateRequests.length}
-                                                </span>
-                                            )}
+                                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                    {userPets.length === 0 ? (
+                                        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '24px', border: '1px solid #e5e7eb' }}>
+                                            <PawPrint size={48} weight="duotone" color="#9ca3af" style={{ marginBottom: '1rem' }} />
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>No pets yet</h3>
+                                            <p style={{ color: '#6b7280', marginTop: '0.5rem' }}>Add a pet to start dating!</p>
+                                            <Button onClick={handleAddPet} variant="primary" style={{ marginTop: '1.5rem' }}>Add Pet</Button>
                                         </div>
+                                    ) : (
+                                        userPets.map(pet => {
+                                            const petRequests = dateRequests.filter(r => r.target_pet_id === pet.id);
+                                            const relationship = myRelationships.find(r => r.myPet.id === pet.id);
 
-                                        {dateRequests.length === 0 ? (
-                                            <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280', background: '#f9fafb', borderRadius: '12px' }}>
-                                                <p>No pending requests.</p>
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                {dateRequests.map(req => (
-                                                    <div key={req.id} style={{ padding: '1rem', border: '1px solid #f3f4f6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#f9fafb' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                            {/* Requester Info */}
-                                                            <Link to={`/pet/${req.requester.id}`} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
-                                                                <img src={req.requester.image} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
-                                                                <div>
-                                                                    <div style={{ fontWeight: 700 }}>{req.requester.name}</div>
-                                                                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>wants to date your pet</div>
-                                                                </div>
-                                                            </Link>
-                                                        </div>
-                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                            <Button size="sm" variant="primary" onClick={() => handleAcceptDate(req.id)}>Accept</Button>
-                                                            <Button size="sm" variant="outline" onClick={() => handleRejectDate(req.id)}>Reject</Button>
-                                                        </div>
+                                            return (
+                                                <div key={pet.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                    {/* Pet Header */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0 0.5rem' }}>
+                                                        <img src={pet.image} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} />
+                                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>{pet.name}'s Dating</h3>
+                                                        {!relationship && petRequests.length === 0 && (
+                                                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>• Single</span>
+                                                        )}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
 
-                                    {/* Active Relationships Section */}
-                                    <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-                                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <Heart weight="fill" color="#e11d48" size={24} />
-                                            Active Relationships
-                                        </h3>
+                                                    <Card style={{ padding: '1.5rem', background: 'white' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                                        {myRelationships.length === 0 ? (
-                                            <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280', background: '#f9fafb', borderRadius: '12px' }}>
-                                                <p>No active relationships.</p>
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                {myRelationships.map((rel: any) => (
-                                                    <div key={rel.myPet.id} style={{ padding: '1.5rem', border: '1px solid #fecdd3', background: '#fff1f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flex: 1, justifyContent: 'center' }}>
-                                                            {/* My Pet */}
-                                                            <div style={{ textAlign: 'center' }}>
-                                                                <div style={{ position: 'relative', display: 'inline-block' }}>
-                                                                    <img src={rel.myPet.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }} />
+                                                            {/* Relationship Section */}
+                                                            {relationship ? (
+                                                                <div style={{
+                                                                    padding: '1.25rem',
+                                                                    background: '#fff1f2',
+                                                                    borderRadius: '20px',
+                                                                    border: '1px solid #fecdd3',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'space-between',
+                                                                    flexWrap: 'wrap',
+                                                                    gap: '1.5rem'
+                                                                }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flex: 1, justifyContent: 'center' }}>
+                                                                        <div style={{ textAlign: 'center' }}>
+                                                                            <img src={pet.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                                                                            <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '0.9rem' }}>{pet.name}</div>
+                                                                        </div>
+
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                                                                            <Heart weight="fill" size={32} color="#e11d48" className="pulse-animation" />
+                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#e11d48', letterSpacing: '0.05em' }}>DATING</span>
+                                                                        </div>
+
+                                                                        <Link to={`/pet/${relationship.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                                                                            <img src={relationship.partner.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                                                                            <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '0.9rem' }}>{relationship.partner.name}</div>
+                                                                        </Link>
+                                                                    </div>
+
+                                                                    <div style={{ width: window.innerWidth <= 600 ? '100%' : 'auto', display: 'flex', justifyContent: 'center' }}>
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            style={{ borderColor: '#ef4444', color: '#ef4444', background: 'white', fontWeight: 700, minWidth: '120px' }}
+                                                                            onClick={() => handleBreakUp(pet.id)}
+                                                                        >
+                                                                            Break Up
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
-                                                                <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '1rem' }}>{rel.myPet.name}</div>
-                                                            </div>
+                                                            ) : (
+                                                                !petRequests.length && (
+                                                                    <div style={{ textAlign: 'center', padding: '1rem', color: '#9ca3af', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                                                                        No active relationship.
+                                                                    </div>
+                                                                )
+                                                            )}
 
-                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-                                                                <Heart weight="fill" size={32} color="#e11d48" className="pulse-animation" />
-                                                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e11d48', letterSpacing: '0.05em' }}>DATING</span>
-                                                            </div>
-
-                                                            {/* Partner */}
-                                                            <Link to={`/pet/${rel.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                                                                <div style={{ position: 'relative', display: 'inline-block' }}>
-                                                                    <img src={rel.partner.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }} />
+                                                            {/* Requests Section */}
+                                                            {petRequests.length > 0 && (
+                                                                <div style={{ borderTop: relationship ? '1px solid #f3f4f6' : 'none', paddingTop: relationship ? '1.5rem' : '0' }}>
+                                                                    <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#4b5563', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                        Pending Requests ({petRequests.length})
+                                                                    </h4>
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                                        {petRequests.map(req => (
+                                                                            <div key={req.id} style={{ padding: '0.875rem', border: '1px solid #f3f4f6', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#f9fafb' }}>
+                                                                                <Link to={`/pet/${req.requester.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}>
+                                                                                    <img src={req.requester.image} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white' }} />
+                                                                                    <div>
+                                                                                        <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{req.requester.name}</div>
+                                                                                        <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>wants to date</div>
+                                                                                    </div>
+                                                                                </Link>
+                                                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                                    <Button size="sm" variant="primary" style={{ padding: '0.4rem 1rem' }} onClick={() => handleAcceptDate(req.id)}>Accept</Button>
+                                                                                    <Button size="sm" variant="outline" style={{ padding: '0.4rem 1rem' }} onClick={() => handleRejectDate(req.id)}>Reject</Button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
                                                                 </div>
-                                                                <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '1rem' }}>{rel.partner.name}</div>
-                                                            </Link>
+                                                            )}
                                                         </div>
-                                                        <div style={{ paddingLeft: '2rem', borderLeft: '1px solid #fecdd3' }}>
-                                                            <Button variant="outline" style={{ borderColor: '#ef4444', color: '#ef4444', background: 'white' }} onClick={() => handleBreakUp(rel.myPet.id)}>Break Up</Button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                                                    </Card>
+                                                </div>
+                                            );
+                                        })
+                                    )}
                                 </div>
                             )}
                         </div>
