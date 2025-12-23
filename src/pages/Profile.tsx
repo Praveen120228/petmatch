@@ -11,6 +11,7 @@ import type { Collection } from '../lib/featureService';
 
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
+import { storageService } from '../lib/storageService';
 
 const Profile = () => {
     const { user, logout, updateUser } = useAuth();
@@ -279,11 +280,18 @@ const Profile = () => {
                 }
             }
 
+            // 1. Upload Avatar if changed (Base64)
+            let avatarUrl = editForm.image;
+            if (editForm.image && editForm.image.startsWith('data:')) {
+                const blob = storageService.base64ToBlob(editForm.image);
+                avatarUrl = await storageService.uploadAvatar(blob, user.id);
+            }
+
             // Update DB
             await userService.updateProfile(user.id, {
                 name: editForm.name,
                 username: editForm.username,
-                avatar_url: editForm.image, // Ensure mapping matches DB column 'avatar_url'
+                avatar_url: avatarUrl, // Ensure mapping matches DB column 'avatar_url'
                 location: editForm.location,
                 bio: editForm.bio,
                 latitude: editForm.latitude || undefined,
@@ -292,7 +300,7 @@ const Profile = () => {
             });
 
             // Update Auth Context (for app-wide name/image)
-            updateUser({ name: editForm.name, image: editForm.image, username: editForm.username });
+            updateUser({ name: editForm.name, image: avatarUrl, username: editForm.username });
 
             // Force reload to refresh data
             setIsEditing(false);
@@ -309,20 +317,28 @@ const Profile = () => {
     };
 
     const handleSavePet = async () => {
-        if (!editingPet) return;
+        if (!editingPet || !user) return; // Need user for ID
         try {
+            // 1. Upload Image if changed
+            let imageUrl = editingPet.image;
+            if (editingPet.image && editingPet.image.startsWith('data:')) {
+                const blob = storageService.base64ToBlob(editingPet.image);
+                imageUrl = await storageService.uploadPetImage(blob, user.id);
+            }
+
             await petService.updatePet(editingPet.id, {
                 name: editingPet.name,
                 breed: editingPet.breed,
                 age: editingPet.age,
                 gender: editingPet.gender,
-                image: editingPet.image,
+                image: imageUrl,
                 traits: editingPet.traits,
                 bio: editingPet.bio
             });
 
-            // Update local state
-            setPets(prev => prev.map(p => p.id === editingPet.id ? editingPet : p));
+            // Update local state with new URL
+            const updatedPet = { ...editingPet, image: imageUrl };
+            setPets(prev => prev.map(p => p.id === editingPet.id ? updatedPet : p));
             setEditingPet(null);
         } catch (err) {
             console.error("Failed to update pet", err);

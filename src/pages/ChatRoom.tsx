@@ -4,6 +4,7 @@ import { CaretLeft, PaperPlaneRight, DotsThreeVertical, ImageSquare, X, Download
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { storageService } from '../lib/storageService';
 import Button from '../components/Button';
 
 const ChatRoom = () => {
@@ -107,7 +108,14 @@ const ChatRoom = () => {
 
         try {
             const textIdx = inputText;
-            const imageIdx = selectedImage || undefined;
+
+            // 1. Upload Image if present (Base64)
+            let imageIdx = selectedImage || undefined;
+            if (selectedImage && selectedImage.startsWith('data:')) {
+                // Optimistic clear happens after trigger, but we need blob first
+                const blob = storageService.base64ToBlob(selectedImage);
+                imageIdx = await storageService.uploadChatImage(blob, chatId);
+            }
 
             // Optimistic clear
             setInputText('');

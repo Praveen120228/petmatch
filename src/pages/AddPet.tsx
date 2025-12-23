@@ -6,6 +6,7 @@ import Button from '../components/Button';
 import { Camera, X, CaretLeft, PencilSimple } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 import SearchableSelect from '../components/SearchableSelect';
+import { storageService } from '../lib/storageService';
 import { PET_TYPES, BREEDS_BY_TYPE } from '../lib/petBreeds';
 
 const AddPet = () => {
@@ -143,10 +144,33 @@ const AddPet = () => {
 
         setIsSubmitting(true);
         try {
+            // 1. Upload Images to Storage
+            const uploadedImageUrls: string[] = [];
+
+            // Process each image sequentially (or parallel)
+            for (const imgStr of petForm.images) {
+                if (imgStr.startsWith('data:')) {
+                    // It's a raw base64, needs upload
+                    const blob = storageService.base64ToBlob(imgStr);
+                    const url = await storageService.uploadPetImage(blob, user.id);
+                    uploadedImageUrls.push(url);
+                } else if (imgStr.startsWith('http')) {
+                    // Already a URL (e.g. edit mode existing image)
+                    uploadedImageUrls.push(imgStr);
+                }
+            }
+
+            // Ensure we have at least one image if required, or handle empty
+            const primaryImage = uploadedImageUrls.length > 0 ? uploadedImageUrls[0] : '';
+
+            // 2. Submit Pet Data with URLs
             await petService.createPet({
                 ...petForm,
-                owner_id: user.id
+                owner_id: user.id,
+                images: uploadedImageUrls,
+                image: primaryImage
             });
+
             navigate('/profile');
         } catch (err) {
             console.error("Failed to create pet", err);
