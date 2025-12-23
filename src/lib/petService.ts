@@ -27,6 +27,7 @@ export const petService = {
             distance?: number;
             userLocation?: { lat: number; lng: number } | null;
             location?: string;
+            country?: string; // Added country filter
             gender?: string;
         }
     ): Promise<{ data: Pet[]; count: number }> {
@@ -65,6 +66,10 @@ export const petService = {
 
         if (filters?.location) {
             query = query.filter('owner_profile.location', 'ilike', `%${filters.location}%`);
+        }
+
+        if (filters?.country) {
+            query = query.filter('owner_profile.location', 'ilike', `%${filters.country}%`);
         }
 
         const { data, error, count } = await query;

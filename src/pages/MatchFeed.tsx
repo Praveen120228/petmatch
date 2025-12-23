@@ -43,6 +43,7 @@ const MatchFeed = () => {
     const [selectedAges, setSelectedAges] = useState<string[]>([]); // Derived from range for API
     const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
     const [locationQuery, setLocationQuery] = useState('');
+    const [countryQuery, setCountryQuery] = useState(''); // New Country State
     const [breedSearchQuery, setBreedSearchQuery] = useState(''); // New state for breed search
 
     // Load Likes (Once)
@@ -77,6 +78,7 @@ const MatchFeed = () => {
                     distance: maxDistance,
                     userLocation: userLoc,
                     location: locationQuery,
+                    country: countryQuery, // Pass country
                     gender: selectedGender
                 }
             );
@@ -112,7 +114,9 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedTypes, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
+    }, [user, selectedTypes, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery, countryQuery]);
+
+
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
@@ -257,6 +261,7 @@ const MatchFeed = () => {
         setBreedSearchQuery('');
         setAgeRange([0, 21]);
         setLocationQuery('');
+        setCountryQuery('');
         showToast('Filters cleared', 'info');
     };
 
@@ -613,23 +618,43 @@ const MatchFeed = () => {
                             {/* Location Search */}
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Location</h3>
-                                <div style={{ position: 'relative' }}>
-                                    <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
-                                    <input
-                                        type="text"
-                                        placeholder="City, state..."
-                                        value={locationQuery}
-                                        onChange={(e) => setLocationQuery(e.target.value)}
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.75rem 1rem 0.75rem 2.5rem',
-                                            borderRadius: 'var(--radius-md)',
-                                            border: '1px solid var(--color-border)',
-                                            fontSize: '0.95rem',
-                                            background: 'var(--color-bg-app)',
-                                            color: 'var(--color-text-primary)'
-                                        }}
-                                    />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    <div style={{ position: 'relative' }}>
+                                        <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
+                                        <input
+                                            type="text"
+                                            placeholder="City..."
+                                            value={locationQuery}
+                                            onChange={(e) => setLocationQuery(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem 1rem 0.75rem 2.5rem',
+                                                borderRadius: 'var(--radius-md)',
+                                                border: '1px solid var(--color-border)',
+                                                fontSize: '0.95rem',
+                                                background: 'var(--color-bg-app)',
+                                                color: 'var(--color-text-primary)'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
+                                        <input
+                                            type="text"
+                                            placeholder="Country..."
+                                            value={countryQuery}
+                                            onChange={(e) => setCountryQuery(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem 1rem 0.75rem 2.5rem',
+                                                borderRadius: 'var(--radius-md)',
+                                                border: '1px solid var(--color-border)',
+                                                fontSize: '0.95rem',
+                                                background: 'var(--color-bg-app)',
+                                                color: 'var(--color-text-primary)'
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
