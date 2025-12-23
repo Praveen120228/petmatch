@@ -27,6 +27,7 @@ export interface Chat {
     id: number;
     participant_a: string; // UUID
     participant_b: string; // UUID
+    last_sender_id?: string; // UUID
     pet_id?: number;
     last_message: string;
     last_message_time: string;

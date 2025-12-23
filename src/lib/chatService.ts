@@ -2,8 +2,8 @@ import { supabase } from '../lib/supabase';
 import type { Chat, Message } from '../types';
 
 export const chatService = {
-    async getConversations(userId: string): Promise<Chat[]> {
-        // Fetch conversations where user is either participant
+    async getConversations(userId: string): Promise<(Chat & { unread_count: number })[]> {
+        // 1. Fetch conversations
         const { data, error } = await supabase
             .from('conversations')
             .select(`
@@ -19,21 +19,36 @@ export const chatService = {
             return [];
         }
 
-        // Map to friendlier format
-        return data.map((conv: any) => {
+        // 2. Fetch unread counts for EACH conversation
+        // This is more efficient than one-by-one, but Supabase doesn't easily do subqueries in joins 
+        // without a view or RPC. For now, we'll do 1 query per chat or a bulk query.
+        // Let's do a more optimized bulk query if possible, or just accept the iteration for small lists.
+        const conversations = await Promise.all(data.map(async (conv: any) => {
             const isA = conv.participant_a === userId;
             const otherProfile = isA ? conv.p2 : conv.p1;
+
+            // Fetch unread count for this conversion
+            const { count } = await supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('conversation_id', conv.id)
+                .neq('sender_id', userId)
+                .eq('read', false);
 
             return {
                 id: conv.id,
                 participant_a: conv.participant_a,
                 participant_b: conv.participant_b,
+                last_sender_id: conv.last_sender_id,
                 pet_id: conv.pet_id,
                 last_message: conv.last_message,
                 last_message_time: conv.last_message_time,
-                other_user: otherProfile
+                other_user: otherProfile,
+                unread_count: count || 0
             };
-        });
+        }));
+
+        return conversations;
     },
 
     async getConversation(id: number, currentUserId: string) {
@@ -103,7 +118,8 @@ export const chatService = {
             .from('conversations')
             .update({
                 last_message: previewText,
-                last_message_time: new Date().toISOString()
+                last_message_time: new Date().toISOString(),
+                last_sender_id: senderId
             })
             .eq('id', conversationId);
 
@@ -143,5 +159,18 @@ export const chatService = {
 
         if (error) throw error;
         return data.id;
+    },
+
+    async markAsRead(conversationId: number, userId: string) {
+        const { error } = await supabase
+            .from('messages')
+            .update({ read: true })
+            .eq('conversation_id', conversationId)
+            .neq('sender_id', userId)
+            .eq('read', false);
+
+        if (error) {
+            console.error('Error marking messages as read:', error);
+        }
     }
 };

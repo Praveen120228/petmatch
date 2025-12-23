@@ -36,8 +36,8 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
         };
         loadChats();
 
-        // Subscribe to conversation updates
-        const channel = supabase
+        // 1. Subscribe to conversation metadata updates (last_message, etc)
+        const convChannel = supabase
             .channel(`conversations_${user.id}`)
             .on(
                 'postgres_changes',
@@ -61,8 +61,41 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
             )
             .subscribe();
 
+        // 2. Subscribe to new messages globally to update unread counts and move to top
+        const msgChannel = supabase
+            .channel(`global_messages_${user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages'
+                    // We can't easily filter by "involved conversations" here in a single filter string, 
+                    // but we can filter by the payload in the callback or just refresh everything.
+                },
+                () => {
+                    // Check if this message involves the user
+                    // (Actually loadChats is safer and handles sorting)
+                    loadChats();
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                },
+                () => {
+                    // Refresh if a message was marked as read (to update count)
+                    loadChats();
+                }
+            )
+            .subscribe();
+
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(convChannel);
+            supabase.removeChannel(msgChannel);
         };
     }, [user]);
 
@@ -231,6 +264,7 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                         {filteredChats.map(chat => {
                             const name = chat.other_user?.name || 'Unknown';
                             const avatar = chat.other_user?.avatar_url || `https://ui-avatars.com/api/?name=${name}&background=random`;
+                            const hasUnread = chat.unread_count > 0;
 
                             return (
                                 <NavLink
@@ -259,22 +293,65 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                 alt={name}
                                                 style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
                                             />
+                                            {/* Online status indicator could go here */}
                                         </div>
 
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                                                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--gray-900)' }}>{name}</h3>
-                                                <span style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>{formatTime(chat.last_message_time)}</span>
+                                                <h3 style={{
+                                                    fontSize: '0.95rem',
+                                                    fontWeight: hasUnread ? 800 : 600,
+                                                    color: 'var(--gray-900)'
+                                                }}>{name}</h3>
+                                                <span style={{
+                                                    fontSize: '0.7rem',
+                                                    color: hasUnread ? '#00a884' : 'var(--gray-500)',
+                                                    fontWeight: hasUnread ? 700 : 400
+                                                }}>
+                                                    {formatTime(chat.last_message_time)}
+                                                </span>
                                             </div>
-                                            <p style={{
-                                                fontSize: '0.875rem',
-                                                color: 'var(--gray-500)',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                            }}>
-                                                {chat.last_message || 'No messages yet'}
-                                            </p>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, minWidth: 0 }}>
+                                                    {/* If last message was sent by me, show status */}
+                                                    {chat.last_message && chat.last_sender_id === user?.id && (
+                                                        <span style={{
+                                                            fontSize: '12px',
+                                                            color: '#9ca3af',
+                                                            lineHeight: 1
+                                                        }}>✓</span>
+                                                    )}
+                                                    <p style={{
+                                                        fontSize: '0.825rem',
+                                                        color: hasUnread ? 'var(--gray-900)' : 'var(--gray-500)',
+                                                        fontWeight: hasUnread ? 500 : 400,
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        flex: 1
+                                                    }}>
+                                                        {chat.last_message || 'No messages yet'}
+                                                    </p>
+                                                </div>
+                                                {hasUnread && (
+                                                    <div style={{
+                                                        background: '#00a884',
+                                                        color: 'white',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: 700,
+                                                        borderRadius: '50%',
+                                                        minWidth: '20px',
+                                                        height: '20px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        marginLeft: '8px',
+                                                        padding: '0 4px'
+                                                    }}>
+                                                        {chat.unread_count}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </NavLink>

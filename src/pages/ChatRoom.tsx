@@ -46,6 +46,9 @@ const ChatRoom = () => {
                 // 2. Fetch Messages
                 const msgs = await chatService.getMessages(chatId);
                 setMessages(msgs || []);
+
+                // 3. Mark as Read
+                await chatService.markAsRead(chatId, user.id);
             } catch (err) {
                 console.error("Failed to load chat", err);
             } finally {
@@ -55,7 +58,7 @@ const ChatRoom = () => {
 
         loadData();
 
-        // 3. Subscribe to Realtime Messages
+        // Subscribe to changes (INSERT for new messages, UPDATE for read receipts)
         const channel = supabase
             .channel(`chat_${chatId}`)
             .on(
@@ -67,7 +70,28 @@ const ChatRoom = () => {
                     filter: `conversation_id=eq.${chatId}`
                 },
                 (payload) => {
-                    setMessages((prev) => [...prev, payload.new]);
+                    const newMsg = payload.new;
+                    setMessages((prev) => [...prev, newMsg]);
+
+                    // If message is from someone else, mark as read immediately
+                    if (newMsg.sender_id !== user.id) {
+                        chatService.markAsRead(chatId, user.id);
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `conversation_id=eq.${chatId}`
+                },
+                (payload) => {
+                    const updatedMsg = payload.new;
+                    setMessages((prev) =>
+                        prev.map(m => m.id === updatedMsg.id ? updatedMsg : m)
+                    );
                 }
             )
             .subscribe();
@@ -332,7 +356,14 @@ const ChatRoom = () => {
                                         }}>
                                             {timeString}
                                             {isMe && (
-                                                <span style={{ color: '#53bdeb', fontSize: '10px', marginLeft: '2px' }}>✓✓</span>
+                                                <span style={{
+                                                    color: msg.read ? '#53bdeb' : '#9ca3af',
+                                                    fontSize: '10px',
+                                                    fontWeight: 'bold',
+                                                    marginLeft: '4px'
+                                                }}>
+                                                    {msg.read ? '✓✓' : '✓'}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
