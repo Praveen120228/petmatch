@@ -1279,7 +1279,7 @@ const Profile = () => {
 
                             {/* DATES TAB - Organized by Pet */}
                             {activeTab === 'dates' && !isPublic && (
-                                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
+                                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', gridColumn: '1 / -1' }}>
                                     {userPets.length === 0 ? (
                                         <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '24px', border: '1px solid #e5e7eb' }}>
                                             <PawPrint size={48} weight="duotone" color="#9ca3af" style={{ marginBottom: '1rem' }} />
