@@ -248,17 +248,23 @@ const Profile = () => {
                 if (myPets && myPets.length > 0) {
                     const myPetIds = myPets.map(p => p.id);
                     const requests = await dateService.getIncomingRequests(myPetIds);
-                    setDateRequests(requests);
+                    if (isMounted) setDateRequests(requests);
 
-                    // Get active relationships
-                    const relationships = [];
-                    for (const pet of myPets) {
-                        const d = await dateService.getDateInfo(pet.id);
-                        if (d?.partner) {
-                            relationships.push({ myPet: pet, partner: d.partner });
-                        }
+                    // Get active relationships (Optimized: Fetch partners in bulk)
+                    const petsWithPartners = myPets.filter(p => p.partner_pet_id);
+                    const partnerIds = petsWithPartners.map(p => p.partner_pet_id).filter((id): id is number => !!id);
+
+                    if (partnerIds.length > 0 && isMounted) {
+                        const partners = await petService.getPetsByIds(partnerIds);
+                        const relationships = petsWithPartners.map(pet => ({
+                            myPet: pet,
+                            partner: partners.find(p => p.id === pet.partner_pet_id)
+                        })).filter(rel => !!rel.partner); // Ensure partner was found
+
+                        setMyRelationships(relationships);
+                    } else if (isMounted) {
+                        setMyRelationships([]);
                     }
-                    setMyRelationships(relationships);
                 }
             } catch (err) {
                 console.error("Dating data error", err);
@@ -876,7 +882,7 @@ const Profile = () => {
                                         >
                                             {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
                                             <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
-                                                {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
+                                                {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : tab === 'dates' ? (dateRequests.length + myRelationships.length) : collections.length}
                                             </span>
                                         </button>
                                     )))

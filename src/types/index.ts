@@ -12,6 +12,7 @@ export interface Pet {
     owner_id: string; // Changed from ownerId to match DB column name
     distance: string;
     likes: number;
+    partner_pet_id?: number | null;
     owner_profile?: {
         name: string;
         location: string;
