@@ -39,7 +39,7 @@ export const petService = {
             .from('pets')
             .select(`
                 id, name, image, breed, age, gender, type, distance, owner_id, partner_pet_id,
-                owner_profile:profiles!owner_id(location, country, state, latitude, longitude, show_location, username, avatar_url)
+                owner_profile:profiles!owner_id!inner(location, country, state, latitude, longitude, show_location, username, avatar_url)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
             .range(from, to);
@@ -66,17 +66,17 @@ export const petService = {
         }
 
         if (filters?.location) {
-            query = query.filter('owner_profile.location', 'ilike', `%${filters.location}%`);
+            query = query.ilike('owner_profile.location', `%${filters.location}%`);
         }
 
         if (filters?.country) {
-            // Filter by dedicated country column
-            query = query.filter('owner_profile.country', 'ilike', `%${filters.country}%`);
+            // Filter by dedicated country column OR fallback to location string
+            query = query.or(`country.ilike.%${filters.country}%,location.ilike.%${filters.country}%`, { foreignTable: 'profiles' });
         }
 
         if (filters?.state) {
-            // Filter by dedicated state column
-            query = query.filter('owner_profile.state', 'ilike', `%${filters.state}%`);
+            // Filter by dedicated state column OR fallback to location string
+            query = query.or(`state.ilike.%${filters.state}%,location.ilike.%${filters.state}%`, { foreignTable: 'profiles' });
         }
 
         const { data, error, count } = await query;
