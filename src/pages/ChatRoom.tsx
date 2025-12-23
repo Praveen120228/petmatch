@@ -222,13 +222,12 @@ const ChatRoom = () => {
             {/* Messages Area */}
             <div style={{
                 flex: 1,
-                padding: '1.5rem 1rem',
+                padding: '2rem',
                 overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px', // Smaller gap for WhatsApp style
-                background: '#e5ddd5', // Classic WhatsApp beige background
-                // Optional: Add a subtle pattern if you want to go the extra mile
+                gap: '1.25rem',
+                background: 'var(--gray-50)'
             }}>
                 {messages.map((msg, index) => {
                     const isMe = msg.sender_id === user?.id;
@@ -279,43 +278,20 @@ const ChatRoom = () => {
                                 }}
                             >
                                 <div
-                                    className={isMe ? 'message-bubble-me' : 'message-bubble-other'}
                                     style={{
-                                        padding: '6px 7px 8px 9px',
-                                        background: isMe ? '#dcf8c6' : '#ffffff',
-                                        color: '#111b21',
-                                        borderRadius: '8px',
-                                        boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)',
-                                        fontSize: '0.9rem',
-                                        lineHeight: 1.4,
-                                        position: 'relative',
-                                        minWidth: '60px'
+                                        padding: '0.75rem 1rem',
+                                        background: isMe
+                                            ? 'linear-gradient(135deg, #a78bfa, #8b5cf6)' // Lighter purple (Violet-400 to Violet-500)
+                                            : 'white',
+                                        color: isMe ? 'white' : 'var(--gray-800)',
+                                        borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                                        boxShadow: isMe ? 'var(--shadow-colored)' : 'var(--shadow-sm)',
+                                        border: isMe ? 'none' : '1px solid var(--gray-200)',
+                                        fontSize: '1rem',
+                                        lineHeight: 1.5,
+                                        position: 'relative'
                                     }}
                                 >
-                                    {/* Tail for "Me" */}
-                                    {isMe && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            right: '-8px',
-                                            top: 0,
-                                            width: '12px',
-                                            height: '13px',
-                                            background: '#dcf8c6',
-                                            clipPath: 'polygon(0 0, 0 100%, 100% 0)'
-                                        }} />
-                                    )}
-                                    {/* Tail for "Other" */}
-                                    {!isMe && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            left: '-8px',
-                                            top: 0,
-                                            width: '12px',
-                                            height: '13px',
-                                            background: '#ffffff',
-                                            clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
-                                        }} />
-                                    )}
                                     {msg.image && (
                                         <div style={{ marginBottom: msg.text ? '4px' : 0 }}>
                                             <img
@@ -347,17 +323,18 @@ const ChatRoom = () => {
                                         )}
                                         <div style={{
                                             fontSize: '0.65rem',
-                                            color: '#667781',
+                                            color: isMe ? 'rgba(255,255,255,0.8)' : 'var(--gray-400)',
                                             paddingTop: '4px',
                                             userSelect: 'none',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: '2px'
+                                            gap: '2px',
+                                            justifyContent: 'flex-end'
                                         }}>
                                             {timeString}
                                             {isMe && (
                                                 <span style={{
-                                                    color: msg.read ? '#53bdeb' : '#9ca3af',
+                                                    color: msg.read ? '#fff' : 'rgba(255,255,255,0.5)',
                                                     fontSize: '10px',
                                                     fontWeight: 'bold',
                                                     marginLeft: '4px'
@@ -376,7 +353,8 @@ const ChatRoom = () => {
             </div>
 
             {/* Input Area */}
-            <div style={{ background: '#f0f2f5', borderTop: '1px solid var(--gray-200)', padding: '0.5rem 0.5rem 1rem' }}>
+            <div style={{ background: 'white', borderTop: '1px solid var(--gray-200)' }}>
+
                 {/* Image Preview */}
                 {selectedImage && (
                     <div style={{ padding: '0.5rem 1rem', display: 'flex' }}>
@@ -406,13 +384,10 @@ const ChatRoom = () => {
                 <form
                     onSubmit={handleSend}
                     style={{
-                        padding: '0.5rem',
+                        padding: '1rem',
                         display: 'flex',
                         gap: '0.5rem',
-                        alignItems: 'center',
-                        maxWidth: '1000px',
-                        margin: '0 auto',
-                        width: '100%'
+                        alignItems: 'center'
                     }}
                 >
                     <input
@@ -423,62 +398,57 @@ const ChatRoom = () => {
                         style={{ display: 'none' }}
                     />
 
-                    <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: 'white',
-                        borderRadius: '24px',
-                        padding: '0.25rem 0.5rem',
-                        boxShadow: '0 1px 1px rgba(0,0,0,0.1)'
-                    }}>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => imageInputRef.current?.click()}
-                            style={{ padding: '0.6rem', borderRadius: '50%', color: '#54656f' }}
-                        >
-                            <ImageSquare size={24} weight="regular" />
-                        </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => imageInputRef.current?.click()}
+                        style={{ padding: '1rem', borderRadius: '50%', color: 'var(--gray-500)' }}
+                    >
+                        <ImageSquare size={24} />
+                    </Button>
 
-                        <input
-                            type="text"
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            placeholder="Type a message"
-                            style={{
-                                flex: 1,
-                                padding: '0.6rem 0.5rem',
-                                border: 'none',
-                                background: 'transparent',
-                                fontSize: '1rem',
-                                outline: 'none',
-                                color: '#111b21',
-                                minWidth: 0
-                            }}
-                        />
-                    </div>
-
+                    <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Type your message..."
+                        style={{
+                            flex: 1,
+                            padding: '1rem 1.5rem',
+                            borderRadius: 'var(--radius-full)',
+                            border: '1px solid var(--gray-200)',
+                            background: 'var(--gray-50)',
+                            fontSize: '1rem',
+                            outline: 'none',
+                            transition: 'all 0.2s',
+                            color: 'var(--gray-900)'
+                        }}
+                        onFocus={e => {
+                            e.target.style.background = 'white';
+                            e.target.style.borderColor = 'var(--primary-400)';
+                            e.target.style.boxShadow = '0 0 0 4px var(--primary-50)';
+                        }}
+                        onBlur={e => {
+                            e.target.style.background = 'var(--gray-50)';
+                            e.target.style.borderColor = 'var(--gray-200)';
+                            e.target.style.boxShadow = 'none';
+                        }}
+                    />
                     <Button
                         type="submit"
                         variant="primary"
                         disabled={!inputText.trim() && !selectedImage}
                         style={{
-                            padding: '0',
+                            padding: '1rem',
                             borderRadius: '50%',
-                            width: '45px',
-                            height: '45px',
+                            width: '54px',
+                            height: '54px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            background: '#00a884', // WhatsApp green
-                            border: 'none',
-                            color: 'white',
-                            flexShrink: 0,
-                            boxShadow: '0 1px 1px rgba(0,0,0,0.1)'
+                            justifyContent: 'center'
                         }}
                     >
-                        <PaperPlaneRight size={22} weight="fill" />
+                        <PaperPlaneRight size={24} weight="fill" />
                     </Button>
                 </form>
             </div>

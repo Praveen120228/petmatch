@@ -305,7 +305,7 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                 }}>{name}</h3>
                                                 <span style={{
                                                     fontSize: '0.7rem',
-                                                    color: hasUnread ? '#00a884' : 'var(--gray-500)',
+                                                    color: hasUnread ? 'var(--primary-600)' : 'var(--gray-500)',
                                                     fontWeight: hasUnread ? 700 : 400
                                                 }}>
                                                     {formatTime(chat.last_message_time)}
@@ -317,7 +317,7 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                     {chat.last_message && chat.last_sender_id === user?.id && (
                                                         <span style={{
                                                             fontSize: '12px',
-                                                            color: '#9ca3af',
+                                                            color: 'var(--gray-400)',
                                                             lineHeight: 1
                                                         }}>✓</span>
                                                     )}
@@ -335,7 +335,7 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                 </div>
                                                 {hasUnread && (
                                                     <div style={{
-                                                        background: '#00a884',
+                                                        background: 'var(--primary-600)',
                                                         color: 'white',
                                                         fontSize: '0.7rem',
                                                         fontWeight: 700,
