@@ -407,6 +407,27 @@ const MatchFeed = () => {
                                                 </span>
                                             </div>
 
+                                            {/* Top Left: Dating Badge */}
+                                            {pet.partner_pet_id && (
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: '52px',
+                                                    left: '12px',
+                                                    background: '#ffe4e6',
+                                                    padding: '4px 10px',
+                                                    borderRadius: '12px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px',
+                                                    boxShadow: '0 2px 8px rgba(225, 29, 72, 0.2)',
+                                                    zIndex: 10,
+                                                    border: '1px solid #fda4af'
+                                                }}>
+                                                    <Heart weight="fill" size={12} color="#e11d48" className="pulse-animation" />
+                                                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#e11d48', textTransform: 'uppercase' }}>Dating</span>
+                                                </div>
+                                            )}
+
                                             {/* Top Right: Like Button */}
                                             <Button
                                                 onClick={(e) => handleLike(e, pet)}
