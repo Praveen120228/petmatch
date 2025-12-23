@@ -371,7 +371,9 @@ const PetProfile = () => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', borderTop: '1px solid #f3f4f6', borderBottom: '1px solid #f3f4f6', padding: '1.5rem 0' }}>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Age</span>
-                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>{pet.age}</span>
+                                <span style={{ fontSize: '1.125rem', fontWeight: 600 }}>
+                                    {/^\d+$/.test(pet.age?.toString()) ? `${pet.age} yrs` : pet.age}
+                                </span>
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>Location</span>

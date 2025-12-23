@@ -341,9 +341,14 @@ const AddPet = () => {
                                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Age</label>
                                 <input
                                     type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                     value={petForm.age}
-                                    onChange={e => setPetForm({ ...petForm, age: e.target.value })}
-                                    placeholder="2 yrs"
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/[^0-9]/g, '');
+                                        setPetForm({ ...petForm, age: val });
+                                    }}
+                                    placeholder="2"
                                     style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb' }}
                                 />
                             </div>

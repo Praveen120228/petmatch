@@ -463,7 +463,7 @@ const MatchFeed = () => {
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
                                                     <span>{pet.breed}</span>
                                                     <span style={{ opacity: 0.6 }}>•</span>
-                                                    <span>{pet.age}</span>
+                                                    <span>{/^\d+$/.test(pet.age?.toString()) ? `${pet.age} yrs` : pet.age}</span>
                                                 </div>
                                             </div>
                                         </Card>
