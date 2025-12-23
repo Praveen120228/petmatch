@@ -16,6 +16,8 @@ export interface Pet {
     owner_profile?: {
         name: string;
         location: string;
+        country?: string;
+        state?: string;
         avatar_url?: string;
         username?: string;
     };

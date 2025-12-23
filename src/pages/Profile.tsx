@@ -33,6 +33,8 @@ const Profile = () => {
         name: user?.name || '',
         username: user?.username || '',
         location: '',
+        country: '',
+        state: '', // Added state
         bio: '',
         image: user?.image || '',
         latitude: null as number | null,
@@ -115,14 +117,16 @@ const Profile = () => {
 
                 let city = '';
                 let state = '';
+                let countryName = '';
 
                 if (data.address) {
                     city = data.address.city || data.address.town || data.address.village || data.address.county || '';
-                    state = data.address.state || data.address.country || '';
+                    state = data.address.state || '';
+                    countryName = data.address.country || '';
                 }
 
                 const locString = city ? (state ? `${city}, ${state}` : city) : `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
-                setEditForm(prev => ({ ...prev, location: locString, latitude, longitude }));
+                setEditForm(prev => ({ ...prev, location: locString, country: countryName, state: state, latitude, longitude }));
 
             } catch (err) {
                 console.error("Geocoding failed", err);
@@ -188,6 +192,8 @@ const Profile = () => {
                                 name: userProfile.name || '',
                                 username: userProfile.username || '',
                                 location: userProfile.location || '',
+                                country: userProfile.country || '',
+                                state: userProfile.state || '', // Load state,
                                 bio: userProfile.bio || '',
                                 image: userProfile.avatar_url || '',
                                 latitude: userProfile.latitude || null,
@@ -332,6 +338,8 @@ const Profile = () => {
                 username: editForm.username,
                 avatar_url: avatarUrl, // Ensure mapping matches DB column 'avatar_url'
                 location: editForm.location,
+                country: editForm.country,
+                state: editForm.state, // Added state
                 bio: editForm.bio,
                 latitude: editForm.latitude || undefined,
                 longitude: editForm.longitude || undefined,

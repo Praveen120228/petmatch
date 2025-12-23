@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Input from '../components/Input';
@@ -14,6 +14,8 @@ const Onboarding = () => {
 
     const [username, setUsername] = useState('');
     const [location, setLocation] = useState('');
+    const [country, setCountry] = useState('');
+    const [state, setState] = useState(''); // Added state
     const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [image, setImage] = useState<string | null>(null);
     const [croppingImage, setCroppingImage] = useState<string | null>(null);
@@ -21,6 +23,22 @@ const Onboarding = () => {
 
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Load existing profile if available
+    useEffect(() => {
+        if (user) {
+            userService.getProfile(user.id).then(p => {
+                if (p) {
+                    setUsername(p.username || '');
+                    setLocation(p.location || '');
+                    setCountry(p.country || '');
+                    setState(p.state || ''); // Load state
+                    if (p.avatar_url) setImage(p.avatar_url);
+                    if (p.latitude && p.longitude) setCoords({ lat: p.latitude, lng: p.longitude });
+                }
+            });
+        }
+    }, [user]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -54,11 +72,16 @@ const Onboarding = () => {
 
                 let city = '';
                 let state = '';
+                let countryName = '';
 
                 if (data.address) {
                     city = data.address.city || data.address.town || data.address.village || data.address.county || '';
-                    state = data.address.state || data.address.country || '';
+                    state = data.address.state || '';
+                    countryName = data.address.country || '';
                 }
+
+                if (countryName) setCountry(countryName);
+                if (state) setState(state); // Set state
 
                 if (city) {
                     setLocation(state ? `${city}, ${state}` : city);
@@ -93,11 +116,12 @@ const Onboarding = () => {
                 setIsSubmitting(false);
                 return;
             }
-
             // Update Profile
             await userService.updateProfile(user.id, {
                 username: username,
                 location: location,
+                country: country,
+                state: state, // Save state
                 latitude: coords?.lat,
                 longitude: coords?.lng,
                 avatar_url: image || undefined

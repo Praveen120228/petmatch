@@ -11,6 +11,8 @@ export interface UserProfile {
     longitude?: number;
     show_location?: boolean;
     username?: string;
+    country?: string;
+    state?: string; // Added state
 }
 
 export const userService = {

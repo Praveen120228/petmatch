@@ -27,7 +27,8 @@ export const petService = {
             distance?: number;
             userLocation?: { lat: number; lng: number } | null;
             location?: string;
-            country?: string; // Added country filter
+            country?: string;
+            state?: string; // Added state filter
             gender?: string;
         }
     ): Promise<{ data: Pet[]; count: number }> {
@@ -38,7 +39,7 @@ export const petService = {
             .from('pets')
             .select(`
                 id, name, image, breed, age, gender, type, distance, owner_id, partner_pet_id,
-                owner_profile:profiles!owner_id(location, latitude, longitude, show_location, username, avatar_url)
+                owner_profile:profiles!owner_id(location, country, state, latitude, longitude, show_location, username, avatar_url)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
             .range(from, to);
@@ -69,7 +70,13 @@ export const petService = {
         }
 
         if (filters?.country) {
-            query = query.filter('owner_profile.location', 'ilike', `%${filters.country}%`);
+            // Filter by dedicated country column
+            query = query.filter('owner_profile.country', 'ilike', `%${filters.country}%`);
+        }
+
+        if (filters?.state) {
+            // Filter by dedicated state column
+            query = query.filter('owner_profile.state', 'ilike', `%${filters.state}%`);
         }
 
         const { data, error, count } = await query;
