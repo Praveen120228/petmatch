@@ -1309,33 +1309,33 @@ const Profile = () => {
                                                                     {/* Decorative background heart */}
                                                                     <Heart weight="fill" size={120} color="#e11d48" style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.04, transform: 'rotate(-15deg)' }} />
 
-                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', width: '100%', position: 'relative', zIndex: 1 }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', width: '100%', position: 'relative', zIndex: 1 }}>
                                                                         {/* My Pet */}
-                                                                        <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                            <img src={pet.image} style={{ width: '84px', height: '84px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                                                                            <div style={{ fontWeight: 800, marginTop: '0.75rem', fontSize: '1rem', color: '#111827' }}>{pet.name}</div>
+                                                                        <div style={{ textAlign: 'center', flex: '1 1 0', minWidth: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <img src={pet.image} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                                                            <div style={{ fontWeight: 800, marginTop: '0.75rem', fontSize: '1rem', color: '#111827', width: '100%', wordBreak: 'break-word' }}>{pet.name}</div>
                                                                         </div>
 
                                                                         {/* Center Heart Badge */}
-                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
                                                                             <div style={{
                                                                                 background: 'white',
-                                                                                padding: '12px',
+                                                                                padding: '10px',
                                                                                 borderRadius: '50%',
                                                                                 boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
                                                                                 display: 'flex',
                                                                                 alignItems: 'center',
                                                                                 justifyContent: 'center'
                                                                             }}>
-                                                                                <Heart weight="fill" size={28} color="#e11d48" className="pulse-animation" />
+                                                                                <Heart weight="fill" size={24} color="#e11d48" className="pulse-animation" />
                                                                             </div>
-                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#e11d48', letterSpacing: '0.12em', textTransform: 'uppercase' }}>DATING</span>
+                                                                            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#e11d48', letterSpacing: '0.12em', textTransform: 'uppercase' }}>DATING</span>
                                                                         </div>
 
                                                                         {/* Partner */}
-                                                                        <Link to={`/pet/${relationship.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                            <img src={relationship.partner.image} style={{ width: '84px', height: '84px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                                                                            <div style={{ fontWeight: 800, marginTop: '0.75rem', fontSize: '1rem', color: '#111827' }}>{relationship.partner.name}</div>
+                                                                        <Link to={`/pet/${relationship.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center', flex: '1 1 0', minWidth: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <img src={relationship.partner.image} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                                                            <div style={{ fontWeight: 800, marginTop: '0.75rem', fontSize: '1rem', color: '#111827', width: '100%', wordBreak: 'break-word' }}>{relationship.partner.name}</div>
                                                                         </Link>
                                                                     </div>
 
