@@ -350,89 +350,102 @@ const Profile = () => {
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)' }}>
 
             {/* Minimalist Header */}
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
 
-                    {/* Back Button (Public Only) */}
-                    {isPublic && (
-                        <div
-                            onClick={() => navigate(-1)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                boxShadow: 'var(--shadow-sm)',
-                                cursor: 'pointer',
-                                marginRight: '1rem',
-                                color: 'var(--color-text-primary)'
-                            }}
-                        >
-                            <CaretLeft size={24} weight="bold" />
-                        </div>
-                    )}
-
-                    {/* User Info */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                        <div
-                            onClick={!isPublic ? () => setIsEditing(true) : undefined}
-                            style={{
-                                width: '80px', // Smaller on mobile check might be better but this is safe
-                                height: '80px',
-                                borderRadius: '50%',
-                                background: '#f3f4f6',
-                                overflow: 'hidden',
-                                position: 'relative',
-                                cursor: !isPublic ? 'pointer' : 'default',
-                                flexShrink: 0
-                            }}
-                            onMouseEnter={(e) => { if (!isPublic) e.currentTarget.style.opacity = '0.9'; }}
-                            onMouseLeave={(e) => { if (!isPublic) e.currentTarget.style.opacity = '1'; }}
-                        >
-                            <img
-                                src={profileUser.image || `https://ui-avatars.com/api/?name=${profileUser.name || 'User'}&background=${isPublic ? 'random' : '0D8ABC'}&size=128`}
-                                alt="Profile"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                            {
-                                !isPublic && (
-                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
-                                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                        onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
-                                    >
-                                        <PencilSimple color="white" weight="bold" size={20} />
-                                    </div>
-                                )
-                            }
-                        </div>
-
-                        <div>
-                            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2, color: '#111827' }}>{profileUser.name}</h1>
-                            {profileUser.username && <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>@{profileUser.username}</p>}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.875rem' }}>
-                                <MapPin weight="fill" color="#9ca3af" size={16} />
-                                <span>{isPublic && !(profileUser as any).show_location ? 'Hidden' : (profileUser as any).location}</span>
+                    {/* Left: Back Button & User Info */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        {/* Back Button (Public Only) */}
+                        {isPublic && (
+                            <div
+                                onClick={() => navigate(-1)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    background: 'white',
+                                    boxShadow: 'var(--shadow-sm)',
+                                    cursor: 'pointer',
+                                    color: 'var(--color-text-primary)'
+                                }}
+                            >
+                                <CaretLeft size={24} weight="bold" />
                             </div>
-                            <p style={{ marginTop: '0.5rem', color: '#4b5563', maxWidth: '400px', lineHeight: 1.4, fontSize: '0.9rem' }}>{(profileUser as any).bio}</p>
-                        </div>
-                    </div >
+                        )}
 
-                    {/* Actions */}
-                    {
-                        !isPublic && (
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                    <PencilSimple size={18} weight="bold" /> Edit Profile
-                                </Button>
-                                <Button variant="ghost" size="sm" onClick={logout} style={{ color: '#ef4444' }}>
-                                    <SignOut size={18} weight="bold" /> Logout
-                                </Button>
+                        {/* User Info */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                            <div
+                                onClick={!isPublic ? () => setIsEditing(true) : undefined}
+                                style={{
+                                    width: '80px', // Smaller on mobile check might be better but this is safe
+                                    height: '80px',
+                                    borderRadius: '50%',
+                                    background: '#f3f4f6',
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                    cursor: !isPublic ? 'pointer' : 'default',
+                                    flexShrink: 0
+                                }}
+                                onMouseEnter={(e) => { if (!isPublic) e.currentTarget.style.opacity = '0.9'; }}
+                                onMouseLeave={(e) => { if (!isPublic) e.currentTarget.style.opacity = '1'; }}
+                            >
+                                <img
+                                    src={profileUser.image || `https://ui-avatars.com/api/?name=${profileUser.name || 'User'}&background=${isPublic ? 'random' : '0D8ABC'}&size=128`}
+                                    alt="Profile"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                                {
+                                    !isPublic && (
+                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
+                                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                                        >
+                                            <PencilSimple color="white" weight="bold" size={20} />
+                                        </div>
+                                    )
+                                }
                             </div>
-                        )
-                    }
+
+                            <div>
+                                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2, color: '#111827' }}>{profileUser.name}</h1>
+                                {profileUser.username && <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>@{profileUser.username}</p>}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', color: '#6b7280', fontSize: '0.875rem' }}>
+                                    <MapPin weight="fill" color="#9ca3af" size={16} />
+                                    <span>{isPublic && !(profileUser as any).show_location ? 'Hidden' : (profileUser as any).location}</span>
+                                </div>
+                                <p style={{ marginTop: '0.5rem', color: '#4b5563', maxWidth: '400px', lineHeight: 1.4, fontSize: '0.9rem' }}>{(profileUser as any).bio}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Actions */}
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        {
+                            !isPublic && (
+                                <>
+                                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                                        <PencilSimple size={18} weight="bold" /> Edit Profile
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={logout} style={{ color: '#ef4444' }}>
+                                        <SignOut size={18} weight="bold" /> Logout
+                                    </Button>
+                                </>
+                            )
+                        }
+                        {
+                            isPublic && (
+                                <Link to="/messages">
+                                    <Button variant="primary" size="sm">
+                                        <ChatCircle size={18} weight="bold" /> Message
+                                    </Button>
+                                </Link>
+                            )
+                        }
+                    </div>
 
 
                     {/* Edit Profile Modal */}
@@ -740,16 +753,7 @@ const Profile = () => {
                         )
                     }
 
-                    {/* Optional: Message button for Public Profile */}
-                    {
-                        isPublic && (
-                            <Link to="/messages">
-                                <Button variant="primary" size="sm">
-                                    <ChatCircle size={18} weight="bold" /> Message
-                                </Button>
-                            </Link>
-                        )
-                    }
+
 
 
                     {/* End of Header Flex */}
