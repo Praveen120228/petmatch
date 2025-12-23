@@ -341,8 +341,8 @@ const Profile = () => {
             setPets(prev => prev.map(p => p.id === editingPet.id ? updatedPet : p));
             setEditingPet(null);
         } catch (err) {
-            console.error("Failed to update pet", err);
-            alert("Failed to update pet details");
+            console.error("Failed to update pet", JSON.stringify(err, null, 2));
+            alert(`Failed to update pet: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
     };
 
