@@ -1,0 +1,256 @@
+export const DOG_BREEDS = [
+    "Labrador Retriever",
+    "German Shepherd",
+    "Golden Retriever",
+    "French Bulldog",
+    "Bulldog",
+    "Poodle",
+    "Beagle",
+    "Rottweiler",
+    "German Shorthaired Pointer",
+    "Dachshund",
+    "Pembroke Welsh Corgi",
+    "Australian Shepherd",
+    "Yorkshire Terrier",
+    "Boxer",
+    "Cavalier King Charles Spaniel",
+    "Doberman Pinscher",
+    "Great Dane",
+    "Miniature Schnauzer",
+    "Siberian Husky",
+    "Bernese Mountain Dog",
+    "Cane Corso",
+    "Shih Tzu",
+    "Boston Terrier",
+    "Pomeranian",
+    "Havanese",
+    "English Springer Spaniel",
+    "Brittany",
+    "Shetland Sheepdog",
+    "Cocker Spaniel",
+    "Border Collie",
+    "Miniature American Shepherd",
+    "Belgian Malinois",
+    "Vizsla",
+    "Chihuahua",
+    "Pug",
+    "Basset Hound",
+    "Mastiff",
+    "Maltese",
+    "Collie",
+    "English Cocker Spaniel",
+    "Rhodesian Ridgeback",
+    "Newfoundland",
+    "Shiba Inu",
+    "Weimaraner",
+    "West Highland White Terrier",
+    "Bichon Frise",
+    "Bloodhound",
+    "Akita",
+    "St. Bernard",
+    "Bullmastiff",
+    "Alaskan Malamute",
+    "Portuguese Water Dog",
+    "Australian Cattle Dog",
+    "Airedale Terrier",
+    "Chesapeake Bay Retriever",
+    "Dalmatian",
+    "Whippet",
+    "Samoyed",
+    "German Wirehaired Pointer",
+    "Bull Terrier",
+    "Border Terrier",
+    "Wirehaired Pointing Griffon",
+    "Great Pyrenees",
+    "Chinese Shar-Pei",
+    "Papillon",
+    "Cardigan Welsh Corgi",
+    "Staffordshire Bull Terrier",
+    "Giant Schnauzer",
+    "Old English Sheepdog",
+    "Italian Greyhound",
+    "Chow Chow",
+    "Irish Setter",
+    "Basenji",
+    "Brussels Griffon",
+    "Soft Coated Wheaten Terrier",
+    "Tibetan Terrier",
+    "Standard Schnauzer",
+    "Japanese Chin",
+    "English Setter",
+    "Irish Wolfhound",
+    "Norwich Terrier",
+    "Rat Terrier",
+    "Other"
+];
+
+export const CAT_BREEDS = [
+    "Abyssinian",
+    "American Bobtail",
+    "American Curl",
+    "American Shorthair",
+    "American Wirehair",
+    "Balinese",
+    "Bengal",
+    "Birman",
+    "Bombay",
+    "British Shorthair",
+    "Burmese",
+    "Chartreux",
+    "Cornish Rex",
+    "Devon Rex",
+    "Egyptian Mau",
+    "Exotic Shorthair",
+    "Havana Brown",
+    "Himalayan",
+    "Japanese Bobtail",
+    "Javanese",
+    "Korat",
+    "LaPerm",
+    "Maine Coon",
+    "Manx",
+    "Munchkin",
+    "Norwegian Forest Cat",
+    "Ocicat",
+    "Oriental",
+    "Persian",
+    "Peterbald",
+    "Pixiebob",
+    "Ragamuffin",
+    "Ragdoll",
+    "Russian Blue",
+    "Savannah",
+    "Scottish Fold",
+    "Selkirk Rex",
+    "Siamese",
+    "Siberian",
+    "Singapura",
+    "Snowshoe",
+    "Somali",
+    "Sphynx",
+    "Tonkinese",
+    "Toyger",
+    "Turkish Angora",
+    "Turkish Van",
+    "Other"
+];
+
+export const OTHER_PET_TYPES = [
+    "Bird",
+    "Rabbit",
+    "Hamster",
+    "Guinea Pig",
+    "Ferret",
+    "Reptile",
+    "Fish",
+    "Other"
+];
+
+
+
+export const BIRD_BREEDS = [
+    "Parrot",
+    "Canary",
+    "Finch",
+    "Cockatiel",
+    "Budgerigar",
+    "Lovebird",
+    "Cockatoo",
+    "Macaw",
+    "Conure",
+    "Parakeet",
+    "African Grey",
+    "Amazon Parrot",
+    "Dove",
+    "Pigeon",
+    "Other"
+];
+
+export const RABBIT_BREEDS = [
+    "Holland Lop",
+    "Netherland Dwarf",
+    "Lionhead",
+    "Mini Rex",
+    "Dutch",
+    "Flemish Giant",
+    "Mini Lop",
+    "English Angora",
+    "Rex",
+    "Himalayan",
+    "Other"
+];
+
+export const HAMSTER_BREEDS = [
+    "Syrian",
+    "Dwarf Campbell Russian",
+    "Dwarf Winter White Russian",
+    "Roborovski Dwarf",
+    "Chinese",
+    "Other"
+];
+
+export const GUINEA_PIG_BREEDS = [
+    "American",
+    "Abyssinian",
+    "Peruvian",
+    "Silkie",
+    "Teddy",
+    "Texel",
+    "Skinny Pig",
+    "Other"
+];
+
+export const FERRET_BREEDS = [
+    "Standard",
+    "Angora",
+    "Other"
+];
+
+export const REPTILE_TYPES = [
+    "Bearded Dragon",
+    "Leopard Gecko",
+    "Ball Python",
+    "Corn Snake",
+    "Red-Eared Slider",
+    "Tortoise",
+    "Chameleon",
+    "Iguana",
+    "Crested Gecko",
+    "Blue-Tongued Skink",
+    "Other"
+];
+
+export const FISH_TYPES = [
+    "Betta",
+    "Goldfish",
+    "Guppy",
+    "Tetra",
+    "Angelfish",
+    "Cichlid",
+    "Molly",
+    "Platy",
+    "Swordtail",
+    "Oscar",
+    "Discus",
+    "Other"
+];
+
+export const PET_TYPES = [
+    "Dog",
+    "Cat",
+    ...OTHER_PET_TYPES
+];
+
+export const BREEDS_BY_TYPE: Record<string, string[]> = {
+    dog: DOG_BREEDS,
+    cat: CAT_BREEDS,
+    bird: BIRD_BREEDS,
+    rabbit: RABBIT_BREEDS,
+    hamster: HAMSTER_BREEDS,
+    'guinea pig': GUINEA_PIG_BREEDS,
+    ferret: FERRET_BREEDS,
+    reptile: REPTILE_TYPES,
+    fish: FISH_TYPES,
+    other: ["Other"]
+};
+

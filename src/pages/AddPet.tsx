@@ -5,6 +5,8 @@ import { petService } from '../lib/petService';
 import Button from '../components/Button';
 import { Camera, X, CaretLeft } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
+import SearchableSelect from '../components/SearchableSelect';
+import { PET_TYPES, BREEDS_BY_TYPE } from '../lib/petBreeds';
 
 const AddPet = () => {
     const navigate = useNavigate();
@@ -143,34 +145,17 @@ const AddPet = () => {
                         </div>
 
                         {/* Toggles Row: Type & Gender */}
-                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', zIndex: 20 }}>
                             {/* Type Toggle */}
+                            {/* Type Selection */}
                             <div style={{ flex: 1, minWidth: '140px' }}>
-                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
-                                <div style={{ display: 'flex', background: '#f3f4f6', padding: '4px', borderRadius: '12px' }}>
-                                    {(['dog', 'cat', 'other'] as const).map(type => (
-                                        <button
-                                            key={type}
-                                            onClick={() => setPetForm({ ...petForm, type })}
-                                            style={{
-                                                flex: 1,
-                                                padding: '0.5rem',
-                                                borderRadius: '8px',
-                                                border: 'none',
-                                                background: petForm.type === type ? 'white' : 'transparent',
-                                                color: petForm.type === type ? 'var(--primary-700)' : '#6b7280',
-                                                fontWeight: 600,
-                                                fontSize: '0.875rem',
-                                                boxShadow: petForm.type === type ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                                                cursor: 'pointer',
-                                                textTransform: 'capitalize',
-                                                transition: 'all 0.2s'
-                                            }}
-                                        >
-                                            {type}
-                                        </button>
-                                    ))}
-                                </div>
+                                <SearchableSelect
+                                    label="TYPE"
+                                    options={PET_TYPES}
+                                    value={petForm.type.charAt(0).toUpperCase() + petForm.type.slice(1)}
+                                    onChange={(val) => setPetForm({ ...petForm, type: val.toLowerCase() })}
+                                    placeholder="Select Type"
+                                />
                             </div>
 
                             {/* Gender Toggle */}
@@ -206,14 +191,24 @@ const AddPet = () => {
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             <div style={{ flex: 2 }}>
                                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Breed</label>
-                                <input
-                                    type="text"
-                                    value={petForm.breed}
-                                    onChange={e => setPetForm({ ...petForm, breed: e.target.value })}
-                                    placeholder="Brief Breed"
-                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb' }}
-                                />
+                                {BREEDS_BY_TYPE[petForm.type] ? (
+                                    <SearchableSelect
+                                        options={BREEDS_BY_TYPE[petForm.type]}
+                                        value={petForm.breed}
+                                        onChange={(val) => setPetForm({ ...petForm, breed: val })}
+                                        placeholder={`Select ${petForm.type} breed`}
+                                    />
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={petForm.breed}
+                                        onChange={e => setPetForm({ ...petForm, breed: e.target.value })}
+                                        placeholder="Brief Breed"
+                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '1rem', background: '#f9fafb' }}
+                                    />
+                                )}
                             </div>
+
                             <div style={{ flex: 1 }}>
                                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Age</label>
                                 <input
