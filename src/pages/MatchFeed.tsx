@@ -12,11 +12,7 @@ import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
 
-const AGES = [
-    '< 1 yr',
-    ...Array.from({ length: 20 }, (_, i) => `${i + 1} yr${i === 0 ? '' : 's'}`),
-    '20+ yrs'
-];
+
 
 const MatchFeed = () => {
     const { user } = useAuth();
@@ -41,8 +37,9 @@ const MatchFeed = () => {
     const [selectedType, setSelectedType] = useState<string>('all');
     const [selectedGender, setSelectedGender] = useState<string>('all');
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
-    // Age Slider State: [min, max] indices into AGES array
-    const [ageRange, setAgeRange] = useState<[number, number]>([0, AGES.length - 1]);
+    // Age Slider State: [min, max] indices
+    // Default 22 items (0 to 20+), so max index is 21
+    const [ageRange, setAgeRange] = useState<[number, number]>([0, 21]);
     const [selectedAges, setSelectedAges] = useState<string[]>([]); // Derived from range for API
     const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
     const [locationQuery, setLocationQuery] = useState('');
@@ -116,21 +113,75 @@ const MatchFeed = () => {
         return () => clearTimeout(timer);
     }, [user, selectedType, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
 
+    // Derived Age Options based on Max Lifespan
+    const ageOptions = useMemo(() => {
+        let maxAge = 20; // Default (All)
+
+        if (selectedType !== 'all') {
+            const typeInfo = PET_TYPES.find(t => t.id === selectedType);
+            if (typeInfo?.maxLifespan) {
+                maxAge = typeInfo.maxLifespan + 5; // Lifespan + 5 buffer
+            }
+        }
+
+        return [
+            '< 1 yr',
+            ...Array.from({ length: maxAge }, (_, i) => `${i + 1} yr${i === 0 ? '' : 's'}`),
+            `${maxAge}+ yrs`
+        ];
+    }, [selectedType]);
+
+    // Reset or Clamp Age Range when options change
+    useEffect(() => {
+        setAgeRange(prev => {
+            // If previous max was at the end, keep it at the end of new range
+            // Otherwise ensure it fits within new length
+            const newMaxIndex = ageOptions.length - 1;
+
+            // If "All" ages was selected (full range), reset to new full range
+            // This is a heuristic to keep "view all" behavior consistent when switching types
+            // checking if the old range was effectively the "whole bar"
+            // We can't strictly know the previous length here without extra state, 
+            // but we can assume if max index was high, we probably want to keep it high.
+            // Safe bet: just clamp.
+
+            const newStart = Math.min(prev[0], newMaxIndex);
+            // If the user had the slider all the way to the right, keep it all the way to the right.
+            // Otherwise clamp.
+            // Actually, simpler: just reset to full checks if type changes? 
+            // The user might be annoyed if they filtered to "2 years" and switching type resets it.
+            // So clamping is better.
+
+            let newEnd = Math.min(prev[1], newMaxIndex);
+            if (prev[1] >= 20 && newMaxIndex > 20) {
+                // If they had it maxed out before, likely want it maxed out now
+                newEnd = newMaxIndex;
+            }
+
+            return [newStart, newEnd];
+        });
+    }, [ageOptions]);
+
     // Update selectedAges when range changes
     useEffect(() => {
         // Map range indices to query values
         // We select from index ageRange[0] to ageRange[1]
         const queryValues: string[] = [];
+        const maxIndex = ageOptions.length - 1;
 
         for (let i = ageRange[0]; i <= ageRange[1]; i++) {
             if (i === 0) {
                 // < 1 yr
                 queryValues.push('0', '< 1 yr', '0 yr', '0 yrs', '0 year', '0 years');
-            } else if (i === AGES.length - 1) {
-                // 20+ yrs
+            } else if (i === maxIndex) {
+                // Max+ yrs
                 // Add variants and some logical upper bound numbers
-                queryValues.push('20', '20+', '20 yrs', '20 years');
-                for (let j = 21; j <= 30; j++) queryValues.push(j.toString());
+                // Extract number from string like "25+ yrs" -> 25
+                const maxNum = parseInt(ageOptions[maxIndex]) || 20;
+
+                queryValues.push(maxNum.toString(), `${maxNum}+`, `${maxNum} yrs`, `${maxNum} years`);
+                // Add buffer numbers above max
+                for (let j = maxNum + 1; j <= maxNum + 10; j++) queryValues.push(j.toString());
             } else {
                 // Standard years (index matches year number)
                 // index matches the year number directly because index 1 is '1 yr'
@@ -139,13 +190,13 @@ const MatchFeed = () => {
             }
         }
 
-        // If range covers full spectrum, send empty to mean "all" (optional, but specific filter is safer)
-        if (ageRange[0] === 0 && ageRange[1] === AGES.length - 1) {
+        // If range covers full spectrum, empty means "all"
+        if (ageRange[0] === 0 && ageRange[1] === maxIndex) {
             setSelectedAges([]);
         } else {
             setSelectedAges([...new Set(queryValues)]);
         }
-    }, [ageRange]);
+    }, [ageRange, ageOptions]);
 
     // Derived Filter Options (Breeds)
     const availableBreeds = useMemo(() => {
@@ -163,7 +214,8 @@ const MatchFeed = () => {
         setSelectedType('all');
         setSelectedGender('all');
         setSelectedBreeds([]);
-        setAgeRange([0, AGES.length - 1]);
+        // Default max age is 20, plus <1 and 20+, so 22 items. Max index 21.
+        setAgeRange([0, 21]);
         setLocationQuery('');
         showToast('Filters cleared', 'info');
     };
@@ -351,7 +403,7 @@ const MatchFeed = () => {
                             {/* Age Range Slider */}
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>
-                                    Age Range: <span style={{ color: 'var(--primary-600)' }}>{AGES[ageRange[0]]} - {AGES[ageRange[1]]}</span>
+                                    Age Range: <span style={{ color: 'var(--primary-600)' }}>{ageOptions[ageRange[0]]} - {ageOptions[ageRange[1]]}</span>
                                 </h3>
                                 <div style={{ padding: '0 0.5rem' }}>
                                     {/* Simple Dual Slider Implementation combining two range inputs */}
@@ -362,8 +414,8 @@ const MatchFeed = () => {
                                         <div style={{
                                             position: 'absolute',
                                             top: '9px',
-                                            left: `${(ageRange[0] / (AGES.length - 1)) * 100}%`,
-                                            right: `${100 - (ageRange[1] / (AGES.length - 1)) * 100}%`,
+                                            left: `${(ageRange[0] / (ageOptions.length - 1)) * 100}%`,
+                                            right: `${100 - (ageRange[1] / (ageOptions.length - 1)) * 100}%`,
                                             height: '2px',
                                             background: 'var(--primary-600)',
                                             borderRadius: '1px'
@@ -373,7 +425,7 @@ const MatchFeed = () => {
                                         <input
                                             type="range"
                                             min={0}
-                                            max={AGES.length - 1}
+                                            max={ageOptions.length - 1}
                                             value={ageRange[0]}
                                             onChange={(e) => {
                                                 const val = Number(e.target.value);
@@ -396,7 +448,7 @@ const MatchFeed = () => {
                                         <input
                                             type="range"
                                             min={0}
-                                            max={AGES.length - 1}
+                                            max={ageOptions.length - 1}
                                             value={ageRange[1]}
                                             onChange={(e) => {
                                                 const val = Number(e.target.value);
