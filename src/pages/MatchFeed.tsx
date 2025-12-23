@@ -43,6 +43,7 @@ const MatchFeed = () => {
     const [selectedAges, setSelectedAges] = useState<string[]>([]); // Derived from range for API
     const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
     const [locationQuery, setLocationQuery] = useState('');
+    const [breedSearchQuery, setBreedSearchQuery] = useState(''); // New state for breed search
 
     // Load Likes (Once)
     useEffect(() => {
@@ -198,11 +199,18 @@ const MatchFeed = () => {
         }
     }, [ageRange, ageOptions]);
 
-    // Derived Filter Options (Breeds)
+    // Derived Filter Options (Breeds) based on Type AND Search
     const availableBreeds = useMemo(() => {
         if (selectedType === 'all') return [];
-        return BREEDS[selectedType] || [];
-    }, [selectedType]);
+        let breeds = BREEDS[selectedType] || [];
+
+        // Filter by breed search query
+        if (breedSearchQuery) {
+            breeds = breeds.filter(b => b.toLowerCase().includes(breedSearchQuery.toLowerCase()));
+        }
+
+        return breeds;
+    }, [selectedType, breedSearchQuery]);
 
     // Handlers
     const toggleBreed = (breed: string) => {
@@ -214,6 +222,7 @@ const MatchFeed = () => {
         setSelectedType('all');
         setSelectedGender('all');
         setSelectedBreeds([]);
+        setBreedSearchQuery(''); // Reset breed search
         // Default max age is 20, plus <1 and 20+, so 22 items. Max index 21.
         setAgeRange([0, 21]);
         setLocationQuery('');
@@ -504,17 +513,54 @@ const MatchFeed = () => {
                                     <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>Select a category to filter breeds</p>
                                 ) : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                        {availableBreeds.map(breed => (
-                                            <label key={breed} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedBreeds.includes(breed)}
-                                                    onChange={() => toggleBreed(breed)}
-                                                    style={{ width: '18px', height: '18px', accentColor: 'var(--primary-600)', borderRadius: '4px' }}
-                                                />
-                                                {breed}
-                                            </label>
-                                        ))}
+                                        {/* Breed Search Input */}
+                                        <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+                                            <MagnifyingGlass
+                                                size={14}
+                                                style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Search breeds..."
+                                                value={breedSearchQuery}
+                                                onChange={(e) => setBreedSearchQuery(e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.5rem 0.5rem 0.5rem 2rem',
+                                                    borderRadius: 'var(--radius-md)',
+                                                    border: '1px solid var(--color-border)',
+                                                    fontSize: '0.875rem',
+                                                    background: 'var(--color-bg-subtle)',
+                                                    outline: 'none'
+                                                }}
+                                            />
+                                        </div>
+
+                                        {/* Scrollable Breed List */}
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '0.75rem',
+                                            maxHeight: '200px', // Limit height
+                                            overflowY: 'auto', // Enable scrolling
+                                            paddingRight: '4px' // Space for scrollbar
+                                        }}>
+                                            {availableBreeds.length > 0 ? (
+                                                availableBreeds.map(breed => (
+                                                    <label key={breed} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBreeds.includes(breed)}
+                                                            onChange={() => toggleBreed(breed)}
+                                                            style={{ width: '18px', height: '18px', accentColor: 'var(--primary-600)', borderRadius: '4px', flexShrink: 0 }}
+                                                        />
+                                                        {breed}
+                                                    </label>
+                                                ))
+                                            ) : (
+                                                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>No breeds found.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
