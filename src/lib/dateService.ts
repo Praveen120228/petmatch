@@ -125,18 +125,24 @@ export const dateService = {
     },
 
     async getDateInfo(petId: number) {
-        const { data, error } = await supabase
+        // Step 1: Get the pet's partner ID
+        const { data: pet, error: petError } = await supabase
             .from('pets')
-            .select(`
-                partner_pet_id,
-                partner:pets!pets_partner_pet_id_fkey (
-                    id, name, image, breed, owner_id
-                )
-            `)
+            .select('partner_pet_id')
             .eq('id', petId)
             .single();
 
-        if (error) return null;
-        return data;
+        if (petError || !pet?.partner_pet_id) return null;
+
+        // Step 2: Fetch partner details
+        const { data: partner, error: partnerError } = await supabase
+            .from('pets')
+            .select('id, name, image, breed, owner_id')
+            .eq('id', pet.partner_pet_id)
+            .single();
+
+        if (partnerError) return null;
+
+        return { partner };
     }
 };
