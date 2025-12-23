@@ -118,16 +118,32 @@ const MatchFeed = () => {
 
     // Update selectedAges when range changes
     useEffect(() => {
-        // Map range indices to AGES strings
-        const selected = AGES.slice(ageRange[0], ageRange[1] + 1);
-        // If full range is selected, maybe treat as empty for "all"? 
-        // Or just send all. Sending all is safer for strict "in" query.
-        // Actually, if we send ALL ages, it might be a long list. 
-        // If range covers everything, we can send empty array to imply "no filter" (all).
+        // Map range indices to query values
+        // We select from index ageRange[0] to ageRange[1]
+        const queryValues: string[] = [];
+
+        for (let i = ageRange[0]; i <= ageRange[1]; i++) {
+            if (i === 0) {
+                // < 1 yr
+                queryValues.push('0', '< 1 yr', '0 yr', '0 yrs', '0 year', '0 years');
+            } else if (i === AGES.length - 1) {
+                // 20+ yrs
+                // Add variants and some logical upper bound numbers
+                queryValues.push('20', '20+', '20 yrs', '20 years');
+                for (let j = 21; j <= 30; j++) queryValues.push(j.toString());
+            } else {
+                // Standard years (index matches year number)
+                // index matches the year number directly because index 1 is '1 yr'
+                const year = i.toString();
+                queryValues.push(year, `${year} yr`, `${year} yrs`, `${year} year`, `${year} years`);
+            }
+        }
+
+        // If range covers full spectrum, send empty to mean "all" (optional, but specific filter is safer)
         if (ageRange[0] === 0 && ageRange[1] === AGES.length - 1) {
             setSelectedAges([]);
         } else {
-            setSelectedAges(selected);
+            setSelectedAges([...new Set(queryValues)]);
         }
     }, [ageRange]);
 
