@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { CaretLeft, PaperPlaneRight, DotsThreeVertical, ImageSquare, X, DownloadSimple } from '@phosphor-icons/react';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
@@ -11,9 +11,11 @@ const ChatRoom = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { id } = useParams<{ id: string }>();
+    const location = useLocation();
     const chatId = Number(id);
     const bottomRef = useRef<HTMLDivElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const autoSentRef = useRef(false);
 
     const [messages, setMessages] = useState<any[]>([]);
     const [chatInfo, setChatInfo] = useState<any | null>(null);
@@ -69,6 +71,15 @@ const ChatRoom = () => {
                 }
             )
             .subscribe();
+
+        useEffect(() => {
+            if (!loading && messages.length === 0 && location.state?.prefill && !autoSentRef.current && user) {
+                autoSentRef.current = true;
+                chatService.sendMessage(chatId, user.id, location.state.prefill);
+                // Clear location state so refresh doesn't resend
+                window.history.replaceState({}, document.title);
+            }
+        }, [loading, messages, location.state, user, chatId]);
 
         return () => {
             supabase.removeChannel(channel);
