@@ -411,9 +411,9 @@ const PetProfile = () => {
                                 <h2 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{pet.name}</h2>
                                 {datingInfo?.partner ? (
                                     <Link to={`/pet/${datingInfo.partner.id}`} style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
                                         marginTop: '0.75rem', background: '#fff1f2', color: '#e11d48',
-                                        padding: '6px 14px', borderRadius: '16px', fontSize: '0.9rem', fontWeight: 800,
+                                        padding: '4px 12px 4px 6px', borderRadius: '20px', fontSize: '0.9rem', fontWeight: 800,
                                         textDecoration: 'none', border: '1px solid #fecdd3',
                                         transition: 'all 0.2s ease',
                                         boxShadow: '0 2px 4px rgba(225, 29, 72, 0.05)'
@@ -421,7 +421,13 @@ const PetProfile = () => {
                                         onMouseEnter={(e) => { e.currentTarget.style.background = '#ffe4e6'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                                         onMouseLeave={(e) => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.transform = 'translateY(0)'; }}
                                     >
-                                        <Heart weight="fill" size={16} /> Dating {datingInfo.partner.name}
+                                        <img
+                                            src={datingInfo.partner.image}
+                                            alt={datingInfo.partner.name}
+                                            style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid white' }}
+                                        />
+                                        <span>Dating {datingInfo.partner.name}</span>
+                                        <Heart weight="fill" size={14} style={{ marginLeft: '2px', flexShrink: 0 }} />
                                     </Link>
                                 ) : pet.partner_pet_id && (
                                     <div style={{
