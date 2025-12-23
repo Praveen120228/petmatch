@@ -13,6 +13,7 @@ import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { storageService } from '../lib/storageService';
 import { dateService } from '../lib/dateService';
+import { chatService } from '../lib/chatService';
 
 const Profile = () => {
     const { user, logout, updateUser } = useAuth();
@@ -414,6 +415,21 @@ const Profile = () => {
         }
     };
 
+    const handleMessage = async () => {
+        if (!user) return alert("Please login to message");
+        // Ensure we have the target user's ID. 
+        // profileData comes from DB, so it has the UUID 'id'.
+        if (!profileData || !profileData.id) return alert("Cannot message this user");
+
+        try {
+            const chatId = await chatService.createConversation(user.id, profileData.id);
+            navigate(`/messages/${chatId}`);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to start chat");
+        }
+    };
+
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)' }}>
 
@@ -506,11 +522,9 @@ const Profile = () => {
                         }
                         {
                             isPublic && (
-                                <Link to="/messages">
-                                    <Button variant="primary" size="sm">
-                                        <ChatCircle size={18} weight="bold" /> Message
-                                    </Button>
-                                </Link>
+                                <Button variant="primary" size="sm" onClick={handleMessage}>
+                                    <ChatCircle size={18} weight="bold" /> Message
+                                </Button>
                             )
                         }
                     </div>
