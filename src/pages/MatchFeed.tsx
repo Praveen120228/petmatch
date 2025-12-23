@@ -458,14 +458,11 @@ const MatchFeed = () => {
                                                     </div>
                                                 </div>
 
-                                                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                                                    {pet.gender || 'Unknown Gender'}
-                                                </div>
                                                 <h3 style={{
                                                     fontSize: '1.75rem',
                                                     fontWeight: 800,
                                                     color: 'white',
-                                                    marginBottom: '8px',
+                                                    marginBottom: '4px',
                                                     textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                                                     fontFamily: '"Outfit", sans-serif',
                                                     letterSpacing: '-0.02em',
@@ -473,6 +470,9 @@ const MatchFeed = () => {
                                                 }}>
                                                     {pet.name}
                                                 </h3>
+                                                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                                    {pet.gender || 'Unknown Gender'}
+                                                </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
                                                     <span>{pet.breed}</span>
                                                     <span style={{ opacity: 0.6 }}>•</span>
