@@ -162,7 +162,7 @@ const PetProfile = () => {
             const ownerId = pet.ownerId || pet.owner_id;
 
             const chatId = await chatService.createConversation(user.id, ownerId, pet.id);
-            navigate(`/messages/${chatId}`);
+            navigate(`/messages/${chatId}`, { state: { prefill: `Hi! I'm interested in ${pet.name}.` } });
         } catch (err) {
             console.error(err);
             showToast("Failed to start chat", "error");

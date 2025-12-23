@@ -72,19 +72,20 @@ const ChatRoom = () => {
             )
             .subscribe();
 
-        useEffect(() => {
-            if (!loading && messages.length === 0 && location.state?.prefill && !autoSentRef.current && user) {
-                autoSentRef.current = true;
-                chatService.sendMessage(chatId, user.id, location.state.prefill);
-                // Clear location state so refresh doesn't resend
-                window.history.replaceState({}, document.title);
-            }
-        }, [loading, messages, location.state, user, chatId]);
-
         return () => {
             supabase.removeChannel(channel);
         };
     }, [chatId, user]);
+
+    // Handle initial pet interest message (moved to top level)
+    useEffect(() => {
+        if (!loading && messages.length === 0 && location.state?.prefill && !autoSentRef.current && user) {
+            autoSentRef.current = true;
+            chatService.sendMessage(chatId, user.id, location.state.prefill);
+            // Clear location state so refresh doesn't resend
+            window.history.replaceState({}, document.title);
+        }
+    }, [loading, messages, location.state, user, chatId]);
 
     // Scroll to bottom
     const scrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
