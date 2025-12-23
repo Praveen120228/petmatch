@@ -445,6 +445,19 @@ const MatchFeed = () => {
                                                 zIndex: 10,
                                                 pointerEvents: 'none'
                                             }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', overflow: 'hidden', border: '1px solid white' }}>
+                                                        <img
+                                                            src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'User'}&background=random`}
+                                                            alt="Owner"
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', fontWeight: 600 }}>
+                                                        {pet.owner_profile?.username || 'Owner'}
+                                                    </div>
+                                                </div>
+
                                                 <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                                                     {pet.gender || 'Unknown Gender'}
                                                 </div>
