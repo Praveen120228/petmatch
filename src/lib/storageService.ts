@@ -24,7 +24,6 @@ export const storageService = {
             .from(bucket)
             .upload(fullPath, file, {
                 cacheControl: '3600',
-                upsert: true,
                 contentType: file.type // Explicitly set content type to avoid 400 errors
             });
 
