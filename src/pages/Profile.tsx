@@ -1259,62 +1259,91 @@ const Profile = () => {
 
                             {/* DATES TAB */}
                             {activeTab === 'dates' && !isPublic && (
-                                <div className="fade-in">
+                                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     {/* Requests Section */}
-                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '2rem 0 1rem' }}>Date Requests</h3>
-                                    {dateRequests.length === 0 ? (
-                                        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>No pending requests.</p>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
-                                            {dateRequests.map(req => (
-                                                <Card key={req.id} style={{ padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                        {/* Requester Info */}
-                                                        <Link to={`/pet/${req.requester.id}`} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
-                                                            <img src={req.requester.image} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
-                                                            <div>
-                                                                <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{req.requester.name}</div>
-                                                                <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>wants to date your pet</div>
-                                                            </div>
-                                                        </Link>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <Button size="sm" variant="primary" onClick={() => handleAcceptDate(req.id)}>Accept</Button>
-                                                        <Button size="sm" variant="outline" onClick={() => handleRejectDate(req.id)}>Reject</Button>
-                                                    </div>
-                                                </Card>
-                                            ))}
+                                    <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Date Requests</h3>
+                                            {dateRequests.length > 0 && (
+                                                <span style={{ background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                    {dateRequests.length}
+                                                </span>
+                                            )}
                                         </div>
-                                    )}
+
+                                        {dateRequests.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280', background: '#f9fafb', borderRadius: '12px' }}>
+                                                <p>No pending requests.</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {dateRequests.map(req => (
+                                                    <div key={req.id} style={{ padding: '1rem', border: '1px solid #f3f4f6', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#f9fafb' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                            {/* Requester Info */}
+                                                            <Link to={`/pet/${req.requester.id}`} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
+                                                                <img src={req.requester.image} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
+                                                                <div>
+                                                                    <div style={{ fontWeight: 700 }}>{req.requester.name}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>wants to date your pet</div>
+                                                                </div>
+                                                            </Link>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <Button size="sm" variant="primary" onClick={() => handleAcceptDate(req.id)}>Accept</Button>
+                                                            <Button size="sm" variant="outline" onClick={() => handleRejectDate(req.id)}>Reject</Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Active Relationships Section */}
-                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '2rem 0 1rem' }}>Active Relationships</h3>
-                                    {myRelationships.length === 0 ? (
-                                        <p style={{ color: '#6b7280' }}>No active relationships.</p>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {myRelationships.map((rel: any) => (
-                                                <Card key={rel.myPet.id} style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                                                        {/* My Pet */}
-                                                        <div style={{ textAlign: 'center' }}>
-                                                            <img src={rel.myPet.image} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem' }} />
-                                                            <div style={{ fontWeight: 600 }}>{rel.myPet.name}</div>
+                                    <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <Heart weight="fill" color="#e11d48" size={24} />
+                                            Active Relationships
+                                        </h3>
+
+                                        {myRelationships.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280', background: '#f9fafb', borderRadius: '12px' }}>
+                                                <p>No active relationships.</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {myRelationships.map((rel: any) => (
+                                                    <div key={rel.myPet.id} style={{ padding: '1.5rem', border: '1px solid #fecdd3', background: '#fff1f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flex: 1, justifyContent: 'center' }}>
+                                                            {/* My Pet */}
+                                                            <div style={{ textAlign: 'center' }}>
+                                                                <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                                    <img src={rel.myPet.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }} />
+                                                                </div>
+                                                                <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '1rem' }}>{rel.myPet.name}</div>
+                                                            </div>
+
+                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                                                                <Heart weight="fill" size={32} color="#e11d48" className="pulse-animation" />
+                                                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e11d48', letterSpacing: '0.05em' }}>DATING</span>
+                                                            </div>
+
+                                                            {/* Partner */}
+                                                            <Link to={`/pet/${rel.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                                                                <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                                    <img src={rel.partner.image} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }} />
+                                                                </div>
+                                                                <div style={{ fontWeight: 700, marginTop: '0.5rem', fontSize: '1rem' }}>{rel.partner.name}</div>
+                                                            </Link>
                                                         </div>
-
-                                                        <Heart weight="fill" size={32} color="#e11d48" />
-
-                                                        {/* Partner */}
-                                                        <Link to={`/pet/${rel.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                                                            <img src={rel.partner.image} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem' }} />
-                                                            <div style={{ fontWeight: 600 }}>{rel.partner.name}</div>
-                                                        </Link>
+                                                        <div style={{ paddingLeft: '2rem', borderLeft: '1px solid #fecdd3' }}>
+                                                            <Button variant="outline" style={{ borderColor: '#ef4444', color: '#ef4444', background: 'white' }} onClick={() => handleBreakUp(rel.myPet.id)}>Break Up</Button>
+                                                        </div>
                                                     </div>
-                                                    <Button variant="outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleBreakUp(rel.myPet.id)}>Break Up</Button>
-                                                </Card>
-                                            ))}
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
