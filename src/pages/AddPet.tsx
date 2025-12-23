@@ -29,14 +29,48 @@ const AddPet = () => {
     const [traitInput, setTraitInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = () => {
-                setCropImage(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const files = Array.from(e.target.files);
+            const remainingSlots = 5 - petForm.images.length;
+
+            if (remainingSlots <= 0) {
+                alert("You can only add up to 5 photos.");
+                e.target.value = '';
+                return;
+            }
+
+            // If user selects more than fits, just take what fits or all if fits
+            const filesToProcess = files.slice(0, remainingSlots);
+
+            if (filesToProcess.length === 1) {
+                // Single file: Enable cropping flow for better UX on single uploads
+                const reader = new FileReader();
+                reader.onload = () => {
+                    setCropImage(reader.result as string);
+                };
+                reader.readAsDataURL(filesToProcess[0]);
+            } else {
+                // Bulk upload: Skip cropper, add all directly
+                const promises = filesToProcess.map(file => {
+                    return new Promise<string>((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result as string);
+                        reader.readAsDataURL(file);
+                    });
+                });
+
+                const newBase64Images = await Promise.all(promises);
+
+                setPetForm(prev => {
+                    const updatedImages = [...prev.images, ...newBase64Images];
+                    return {
+                        ...prev,
+                        images: updatedImages,
+                        image: updatedImages[0]
+                    };
+                });
+            }
             e.target.value = '';
         }
     };
@@ -177,7 +211,7 @@ const AddPet = () => {
                                 </div>
                             )}
                         </div>
-                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" style={{ display: 'none' }} />
+                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" multiple style={{ display: 'none' }} />
                         <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.5rem', textAlign: 'center' }}>
                             Add up to 5 photos. The first one will be the cover.
                         </p>
