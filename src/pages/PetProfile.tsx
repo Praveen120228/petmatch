@@ -242,12 +242,26 @@ const PetProfile = () => {
     };
 
     const handleSendDateRequest = async (myPetId: number) => {
+        if (!confirm("Send a date request?")) return;
         try {
             await dateService.sendRequest(myPetId, pet.id);
             showToast("Date request sent!", "success");
             setShowDateModal(false);
         } catch (err: any) {
             showToast(err.message, "error");
+        }
+    };
+
+    const handleBreakUp = async () => {
+        if (!confirm("Are you sure you want to break up? This will end the relationship for both pets.")) return;
+        try {
+            await dateService.breakUp(pet.id);
+            showToast("Relationship ended.", "success");
+            // Refresh local state
+            setDatingInfo(null);
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to break up", "error");
         }
     };
 
@@ -484,7 +498,7 @@ const PetProfile = () => {
                             </div>
 
                             {/* Dating Button (Only if not owner and not already partnered) */}
-                            {user && user.id !== (pet.ownerId || pet.owner_id) && !datingInfo?.partner_pet_id && (
+                            {user && user.id !== (pet.ownerId || pet.owner_id) && !datingInfo?.partner && (
                                 <Button
                                     onClick={handleOpenDateModal}
                                     style={{
@@ -493,6 +507,19 @@ const PetProfile = () => {
                                     }}
                                 >
                                     <Sparkle size={20} weight="fill" /> Ask for a Date
+                                </Button>
+                            )}
+
+                            {/* Break Up Button (Only for owner if partnered) */}
+                            {user && user.id === (pet.ownerId || pet.owner_id) && datingInfo?.partner && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleBreakUp}
+                                    style={{
+                                        borderColor: '#ef4444', color: '#ef4444'
+                                    }}
+                                >
+                                    <Heart weight="bold" size={20} /> Break Up
                                 </Button>
                             )}
                         </div>
@@ -542,6 +569,11 @@ const PetProfile = () => {
                 <Button variant="outline" style={{ flex: 1 }} onClick={handleMessage}>
                     Message
                 </Button>
+                {user && user.id === (pet.ownerId || pet.owner_id) && datingInfo?.partner && (
+                    <Button variant="outline" style={{ flex: 1, borderColor: '#ef4444', color: '#ef4444' }} onClick={handleBreakUp}>
+                        Break Up
+                    </Button>
+                )}
             </div>
 
             {/* Collection Modal */}
