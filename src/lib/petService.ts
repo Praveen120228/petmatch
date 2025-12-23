@@ -26,6 +26,7 @@ export const petService = {
             search?: string;
             distance?: number;
             userLocation?: { lat: number; lng: number } | null;
+            location?: string;
         }
     ): Promise<{ data: Pet[]; count: number }> {
         const from = (page - 1) * limit;
@@ -53,25 +54,11 @@ export const petService = {
         }
 
         if (filters?.search) {
-            // "search" matches name OR breed OR owner username.
-            // Note: Referencing the foreign table alias for filtering requires Supabase support.
-            // If direct alias reference fails, we might need a separate filter or raw PostgREST syntax.
-            // Trying standard embedded filter syntax:
             query = query.or(`name.ilike.%${filters.search}%,breed.ilike.%${filters.search}%`);
-            // TODO: Deep filtering in OR is complex in Supabase JS. For now, let's keep it simple.
-            // To properly support username search, we might need to filter the embedded resource.
-            // query = query.filter('owner_profile.username', 'ilike', `%${filters.search}%`); // This ANDs it.
+        }
 
-            // To do OR across tables, we really need a View or Search Index. 
-            // For now, I will NOT break the query with an invalid OR. 
-            // I will add the column to select, so at least client-side filtering could work if we fetched all, 
-            // but for pagination we rely on DB. 
-            // Let's rely on name/breed for now to be safe, unless valid syntax is confirmed.
-            // Actually, let's try to pass it if the user explicitly typed @username?
-            if (filters.search.startsWith('@')) {
-                // precise username search on foreign table? 
-                // It's hard to mix "OR name OR username" without !inner join impacting results.
-            }
+        if (filters?.location) {
+            query = query.filter('owner_profile.location', 'ilike', `%${filters.location}%`);
         }
 
         const { data, error, count } = await query;
@@ -83,11 +70,9 @@ export const petService = {
 
         let result = data as unknown as Pet[];
 
-        // Post-filter by distance if user location is available
-        // Note: For large datasets, this should be done in DB (PostGIS/Haversine)
         if (filters?.distance && filters?.userLocation && filters.userLocation.lat && filters.userLocation.lng) {
             const getDist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-                const R = 6371; // Radius of the earth in km
+                const R = 6371;
                 const dLat = (lat2 - lat1) * (Math.PI / 180);
                 const dLon = (lon2 - lon1) * (Math.PI / 180);
                 const a =
@@ -95,16 +80,14 @@ export const petService = {
                     Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                const d = R * c; // Distance in km
-                return d;
+                return R * c;
             };
 
             result = result.filter(pet => {
                 const owner = (pet as any).owner_profile;
                 if (!owner || !owner.latitude || !owner.longitude) return false;
                 const d = getDist(filters.userLocation!.lat, filters.userLocation!.lng, owner.latitude, owner.longitude);
-                // Attach distance for display if needed
-                (pet as any).distance = `${Math.round(d)}km`; // Update display string
+                (pet as any).distance = `${Math.round(d)}km`;
                 return d <= filters.distance!;
             });
         }

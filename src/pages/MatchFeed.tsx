@@ -38,6 +38,7 @@ const MatchFeed = () => {
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
     const [selectedAges, setSelectedAges] = useState<string[]>([]);
     const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
+    const [locationQuery, setLocationQuery] = useState('');
 
     // Load Likes (Once)
     useEffect(() => {
@@ -69,7 +70,8 @@ const MatchFeed = () => {
                     ages: selectedAges,
                     search: searchQuery,
                     distance: maxDistance,
-                    userLocation: userLoc
+                    userLocation: userLoc,
+                    location: locationQuery
                 }
             );
 
@@ -104,7 +106,7 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedType, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc]);
+    }, [user, selectedType, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
 
     // Derived Filter Options (Breeds)
     // Note: Ideally fetching available breeds from server would be better than just from loaded pets
@@ -136,6 +138,7 @@ const MatchFeed = () => {
         setSelectedType('all');
         setSelectedBreeds([]);
         setSelectedAges([]);
+        setLocationQuery('');
         showToast('Filters cleared', 'info');
     };
 
@@ -334,6 +337,29 @@ const MatchFeed = () => {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Location Search */}
+                            <div>
+                                <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Location</h3>
+                                <div style={{ position: 'relative' }}>
+                                    <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
+                                    <input
+                                        type="text"
+                                        placeholder="City, state..."
+                                        value={locationQuery}
+                                        onChange={(e) => setLocationQuery(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem 1rem 0.75rem 2.5rem',
+                                            borderRadius: 'var(--radius-md)',
+                                            border: '1px solid var(--color-border)',
+                                            fontSize: '0.95rem',
+                                            background: 'var(--color-bg-app)',
+                                            color: 'var(--color-text-primary)'
+                                        }}
+                                    />
+                                </div>
                             </div>
 
                             {/* Distance */}
