@@ -422,18 +422,21 @@ const MatchFeed = () => {
                                                     width: '36px',
                                                     height: '36px',
                                                     padding: 0,
-                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                                    boxShadow: likes.includes(pet.id)
+                                                        ? '0 0 15px rgba(239, 68, 68, 0.6), 0 2px 8px rgba(0,0,0,0.15)'
+                                                        : '0 2px 8px rgba(0,0,0,0.15)',
                                                     zIndex: 10,
                                                     border: 'none',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    cursor: 'pointer'
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.3s ease'
                                                 }}
                                             >
                                                 <Heart
                                                     weight="fill"
-                                                    color={likes.includes(pet.id) ? 'var(--gray-900)' : 'var(--gray-900)'}
+                                                    color={likes.includes(pet.id) ? '#ef4444' : 'var(--gray-900)'}
                                                     size={18}
                                                 />
                                             </Button>
