@@ -8,10 +8,11 @@ import { userService } from '../lib/userService';
 import { supabase } from '../lib/supabase';
 import Button from '../components/Button';
 import Card from '../components/Card';
-import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash } from '@phosphor-icons/react';
+import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash, Sparkle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { getDistance } from '../utils/distance';
 import { useToast } from '../context/ToastContext';
+import { dateService } from '../lib/dateService';
 
 const PetProfile = () => {
     const { id } = useParams<{ id: string }>();
@@ -27,6 +28,11 @@ const PetProfile = () => {
     const [isMatched, setIsMatched] = useState(false);
     const [collections, setCollections] = useState<Collection[]>([]);
     const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
+
+    // Dating State
+    const [datingInfo, setDatingInfo] = useState<any>(null); // Active Partner info
+    const [showDateModal, setShowDateModal] = useState(false);
+    const [myPetsForDate, setMyPetsForDate] = useState<any[]>([]); // Pets I can select to ask
 
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
@@ -46,14 +52,23 @@ const PetProfile = () => {
                     featureService.getLikes(user.id),
                     featureService.getMatches(user.id),
                     featureService.getCollections(user.id),
-                    userService.getProfile(user.id)
+                    userService.getProfile(user.id),
+                    dateService.getDateInfo(petId)
                 ]);
-                setIsLiked(likes.includes(petId));
-                setIsMatched(matches.includes(petId));
+                // Safely handle potential string/number mismatches in IDs
+                setIsLiked(likes.some((l: any) => Number(l) === petId));
+                setIsMatched(matches.some((m: any) => Number(m) === petId));
                 setCollections(cols);
                 if (userProfile?.latitude && userProfile?.longitude) {
                     setUserLoc({ lat: userProfile.latitude, lng: userProfile.longitude });
                 }
+                // Dating info comes from the Promise.all result at index 4, but let's re-fetch or assume it returns separate
+                const petDateInfo = await dateService.getDateInfo(petId);
+                setDatingInfo(petDateInfo);
+            } else {
+                // Public view also needs date info
+                const petDateInfo = await dateService.getDateInfo(petId);
+                setDatingInfo(petDateInfo);
             }
 
             setLoading(false);
@@ -206,6 +221,36 @@ const PetProfile = () => {
         }
     };
 
+    const handleOpenDateModal = async () => {
+        if (!user) return showToast("Please login", "error");
+
+        try {
+            // Fetch my pets to choose from
+            const myPets = await petService.getUserPets(user.id);
+            // Filter: Must not be already dating
+            // We need to check their status. Ideally getUserPets returns it, or we fetch details.
+            // For now assuming getUserPets doesn't include partner_pet_id, we might need to enrich.
+            // But let's check one by one or trust the error handling. 
+            // Better UX: Show only available ones.
+            // Let's filter client side if we have the data, or just show all and error if taken.
+            setMyPetsForDate(myPets);
+            setShowDateModal(true);
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to load your pets", "error");
+        }
+    };
+
+    const handleSendDateRequest = async (myPetId: number) => {
+        try {
+            await dateService.sendRequest(myPetId, pet.id);
+            showToast("Date request sent!", "success");
+            setShowDateModal(false);
+        } catch (err: any) {
+            showToast(err.message, "error");
+        }
+    };
+
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'white' }}>
             {/* CSS for Responsiveness */}
@@ -291,6 +336,8 @@ const PetProfile = () => {
                                         padding: '0.5rem',
                                         borderRadius: '50%',
                                         background: isLiked ? '#ffe4e6' : '#f3f4f6',
+                                        boxShadow: isLiked ? '0 0 12px rgba(225, 29, 72, 0.5)' : 'none', // Glow effect
+                                        transition: 'all 0.3s ease',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center'
                                     }}
                                 >
@@ -323,6 +370,15 @@ const PetProfile = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.5rem' }}>
                             <div>
                                 <h2 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{pet.name}</h2>
+                                {datingInfo?.partner && (
+                                    <div style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                        marginTop: '0.5rem', background: '#ffe4e6', color: '#e11d48',
+                                        padding: '4px 10px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700
+                                    }}>
+                                        <Heart weight="fill" size={14} /> Dating {datingInfo.partner.name}
+                                    </div>
+                                )}
                                 <p style={{ color: '#6b7280', fontSize: '1.1rem', marginTop: '0.25rem' }}>{pet.breed}</p>
                             </div>
 
@@ -332,18 +388,19 @@ const PetProfile = () => {
                                     onClick={handleLike}
                                     style={{
                                         cursor: 'pointer',
-                                        transition: 'transform 0.1s',
+                                        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '0.25rem',
                                         padding: '0.5rem',
-                                        borderRadius: '8px',
-                                        border: '1px solid transparent',
+                                        borderRadius: '12px',
+                                        border: `1px solid ${isLiked ? '#ffe4e6' : 'transparent'}`,
+                                        backgroundColor: isLiked ? '#fff1f2' : 'transparent',
+                                        boxShadow: isLiked ? '0 0 15px rgba(225, 29, 72, 0.3)' : 'none', // The Glow
+                                        transform: isLiked ? 'scale(1.05)' : 'scale(1)'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                    onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-                                    onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    onMouseEnter={(e) => { if (!isLiked) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+                                    onMouseLeave={(e) => { if (!isLiked) e.currentTarget.style.backgroundColor = 'transparent'; }}
                                 >
                                     <Heart weight={isLiked ? "fill" : "regular"} size={28} color={isLiked ? '#e11d48' : '#374151'} />
                                 </div>
@@ -425,6 +482,19 @@ const PetProfile = () => {
                                     <ShareNetwork size={20} weight="bold" />
                                 </Button>
                             </div>
+
+                            {/* Dating Button (Only if not owner and not already partnered) */}
+                            {user && user.id !== (pet.ownerId || pet.owner_id) && !datingInfo?.partner_pet_id && (
+                                <Button
+                                    onClick={handleOpenDateModal}
+                                    style={{
+                                        background: 'linear-gradient(to right, #ec4899, #8b5cf6)',
+                                        border: 'none', color: 'white', fontWeight: 700
+                                    }}
+                                >
+                                    <Sparkle size={20} weight="fill" /> Ask for a Date
+                                </Button>
+                            )}
                         </div>
                     </Card>
 
@@ -635,7 +705,38 @@ const PetProfile = () => {
                     </div>
                 </>
             )}
-        </div>
+
+            {/* Date Request Modal */}
+            {showDateModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+                    <div style={{ background: 'white', padding: '2rem', borderRadius: '24px', width: '90%', maxWidth: '400px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Pick your pet</h3>
+                            <button onClick={() => setShowDateModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={24} /></button>
+                        </div>
+                        <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Which of your pets would like to ask <strong>{pet.name}</strong> on a date?</p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
+                            {myPetsForDate.map(p => (
+                                <div key={p.id}
+                                    onClick={() => handleSendDateRequest(p.id)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
+                                        border: '1px solid #e5e7eb', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                                >
+                                    <img src={p.image} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                    <span style={{ fontWeight: 600 }}>{p.name}</span>
+                                </div>
+                            ))}
+                            {myPetsForDate.length === 0 && <p>You have no pets!</p>}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div >
     );
 };
 

@@ -12,6 +12,7 @@ import type { Collection } from '../lib/featureService';
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { storageService } from '../lib/storageService';
+import { dateService } from '../lib/dateService';
 
 const Profile = () => {
     const { user, logout, updateUser } = useAuth();
@@ -156,6 +157,10 @@ const Profile = () => {
     const [collectionPets, setCollectionPets] = useState<any[]>([]);
     const [collections, setCollections] = useState<Collection[]>([]);
 
+    // Dating State
+    const [dateRequests, setDateRequests] = useState<any[]>([]);
+    const [myRelationships, setMyRelationships] = useState<any[]>([]);
+
     useEffect(() => {
         let isMounted = true;
 
@@ -232,9 +237,36 @@ const Profile = () => {
                 console.error("Profile load error:", err);
                 // Do not reset profileData to null here to prevent flashing fallback
             }
+        }
+
+
+        const loadDatingData = async () => {
+            if (isPublic || !user) return;
+            try {
+                // Get my pets
+                const myPets = await petService.getUserPets(user.id);
+                if (myPets && myPets.length > 0) {
+                    const myPetIds = myPets.map(p => p.id);
+                    const requests = await dateService.getIncomingRequests(myPetIds);
+                    setDateRequests(requests);
+
+                    // Get active relationships
+                    const relationships = [];
+                    for (const pet of myPets) {
+                        const d = await dateService.getDateInfo(pet.id);
+                        if (d?.partner) {
+                            relationships.push({ myPet: pet, partner: d.partner });
+                        }
+                    }
+                    setMyRelationships(relationships);
+                }
+            } catch (err) {
+                console.error("Dating data error", err);
+            }
         };
 
         loadData();
+        loadDatingData();
 
         return () => { isMounted = false; };
     }, [user?.id, isPublic, id]); // Only depend on ID, not the whole user object to prevent spurious refetches
@@ -343,6 +375,36 @@ const Profile = () => {
         } catch (err) {
             console.error("Failed to update pet", JSON.stringify(err, null, 2));
             alert(`Failed to update pet: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        }
+    };
+
+    // Dating Handlers
+    const handleAcceptDate = async (reqId: number) => {
+        try {
+            await dateService.acceptRequest(reqId);
+            // Refresh
+            window.location.reload();
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    const handleRejectDate = async (reqId: number) => {
+        try {
+            await dateService.rejectRequest(reqId);
+            setDateRequests(prev => prev.filter(r => r.id !== reqId));
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleBreakUp = async (myPetId: number) => {
+        if (!confirm("Are you sure you want to break up?")) return;
+        try {
+            await dateService.breakUp(myPetId);
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -792,31 +854,32 @@ const Profile = () => {
                     }}>
                         <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px', paddingRight: '1rem', flex: 1 }}>
                             {
-                                ['pets', 'matches', 'likes', 'collections'].map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setSearchParams({ tab })}
-                                        style={{
-                                            padding: '0.75rem 0',
-                                            background: 'none',
-                                            border: 'none',
-                                            borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
-                                            color: activeTab === tab ? '#111827' : '#9ca3af',
-                                            fontSize: '1rem',
-                                            fontWeight: activeTab === tab ? 600 : 500,
-                                            cursor: 'pointer',
-                                            textTransform: 'capitalize',
-                                            transition: 'color 0.2s',
-                                            whiteSpace: 'nowrap',
-                                            flexShrink: 0
-                                        }}
-                                    >
-                                        {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
-                                        <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
-                                            {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
-                                        </span>
-                                    </button>
-                                ))
+                                ['pets', 'matches', 'likes', 'collections', 'dates'].map((tab) => (
+                                    (!isPublic || (tab !== 'matches' && tab !== 'likes' && tab !== 'dates')) && ( // Hide private tabs on public profile
+                                        <button
+                                            key={tab}
+                                            onClick={() => setSearchParams({ tab })}
+                                            style={{
+                                                padding: '0.75rem 0',
+                                                background: 'none',
+                                                border: 'none',
+                                                borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
+                                                color: activeTab === tab ? '#111827' : '#9ca3af',
+                                                fontSize: '1rem',
+                                                fontWeight: activeTab === tab ? 600 : 500,
+                                                cursor: 'pointer',
+                                                textTransform: 'capitalize',
+                                                transition: 'color 0.2s',
+                                                whiteSpace: 'nowrap',
+                                                flexShrink: 0
+                                            }}
+                                        >
+                                            {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
+                                            <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
+                                                {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : collections.length}
+                                            </span>
+                                        </button>
+                                    )))
                             }
                         </div>
 
@@ -1192,7 +1255,70 @@ const Profile = () => {
                                 );
                             })()}
 
+
+
+                            {/* DATES TAB */}
+                            {activeTab === 'dates' && !isPublic && (
+                                <div className="fade-in">
+                                    {/* Requests Section */}
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '2rem 0 1rem' }}>Date Requests</h3>
+                                    {dateRequests.length === 0 ? (
+                                        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>No pending requests.</p>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
+                                            {dateRequests.map(req => (
+                                                <Card key={req.id} style={{ padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                        {/* Requester Info */}
+                                                        <Link to={`/pet/${req.requester.id}`} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
+                                                            <img src={req.requester.image} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                            <div>
+                                                                <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{req.requester.name}</div>
+                                                                <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>wants to date your pet</div>
+                                                            </div>
+                                                        </Link>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <Button size="sm" variant="primary" onClick={() => handleAcceptDate(req.id)}>Accept</Button>
+                                                        <Button size="sm" variant="outline" onClick={() => handleRejectDate(req.id)}>Reject</Button>
+                                                    </div>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Active Relationships Section */}
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '2rem 0 1rem' }}>Active Relationships</h3>
+                                    {myRelationships.length === 0 ? (
+                                        <p style={{ color: '#6b7280' }}>No active relationships.</p>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {myRelationships.map((rel: any) => (
+                                                <Card key={rel.myPet.id} style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                                                        {/* My Pet */}
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <img src={rel.myPet.image} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem' }} />
+                                                            <div style={{ fontWeight: 600 }}>{rel.myPet.name}</div>
+                                                        </div>
+
+                                                        <Heart weight="fill" size={32} color="#e11d48" />
+
+                                                        {/* Partner */}
+                                                        <Link to={`/pet/${rel.partner.id}`} style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                                                            <img src={rel.partner.image} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem' }} />
+                                                            <div style={{ fontWeight: 600 }}>{rel.partner.name}</div>
+                                                        </Link>
+                                                    </div>
+                                                    <Button variant="outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleBreakUp(rel.myPet.id)}>Break Up</Button>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
+
                         {cropImage && (
                             <ImageCropper
                                 imageSrc={cropImage}
