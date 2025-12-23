@@ -21,6 +21,7 @@ const AddPet = () => {
         traits: [] as string[],
         bio: '',
         image: '',
+        images: [] as string[],
         type: 'dog' // Default
     });
 
@@ -41,8 +42,26 @@ const AddPet = () => {
     };
 
     const handleCropComplete = (croppedBase64: string) => {
-        setPetForm(prev => ({ ...prev, image: croppedBase64 }));
+        setPetForm(prev => {
+            const newImages = [...prev.images, croppedBase64];
+            return {
+                ...prev,
+                images: newImages,
+                image: newImages[0] // Primary is always first
+            };
+        });
         setCropImage(null);
+    };
+
+    const handleRemoveImage = (index: number) => {
+        setPetForm(prev => {
+            const newImages = prev.images.filter((_, i) => i !== index);
+            return {
+                ...prev,
+                images: newImages,
+                image: newImages.length > 0 ? newImages[0] : ''
+            };
+        });
     };
 
     const handleAddTrait = () => {
@@ -102,30 +121,66 @@ const AddPet = () => {
                 <div style={{ background: 'white', borderRadius: '24px', padding: '1.5rem', boxShadow: 'var(--shadow-md)' }}>
 
                     {/* Image Upload - Centered & Compact */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <div
-                            onClick={() => fileInputRef.current?.click()}
-                            style={{
-                                position: 'relative', width: '100px', height: '100px', cursor: 'pointer',
-                                transition: 'transform 0.2s',
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                        >
-                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#f3f4f6', border: '3px solid white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-                                <img src={petForm.image || `https://ui-avatars.com/api/?name=${petForm.name || 'Pet'}`} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                            <div style={{
-                                position: 'absolute', bottom: 0, right: 0,
-                                background: 'var(--primary-600)', color: 'white',
-                                borderRadius: '50%', width: '30px', height: '30px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}>
-                                <Camera size={14} weight="bold" />
-                            </div>
+                    {/* Image Gallery */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px' }}>
+                            {/* Existing Images */}
+                            {petForm.images.map((img, index) => (
+                                <div key={index} style={{ position: 'relative', aspectRatio: '1', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                                    <img src={img} alt={`Pet ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <button
+                                        onClick={() => handleRemoveImage(index)}
+                                        style={{
+                                            position: 'absolute', top: '4px', right: '4px',
+                                            background: 'rgba(0,0,0,0.6)', color: 'white',
+                                            borderRadius: '50%', width: '20px', height: '20px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            border: 'none', cursor: 'pointer'
+                                        }}
+                                    >
+                                        <X size={12} weight="bold" />
+                                    </button>
+                                    {index === 0 && (
+                                        <div style={{
+                                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                                            background: 'rgba(0,0,0,0.6)', color: 'white',
+                                            fontSize: '0.65rem', padding: '2px', textAlign: 'center', fontWeight: 600
+                                        }}>
+                                            COVER
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+
+                            {/* Add Button */}
+                            {petForm.images.length < 5 && (
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    style={{
+                                        aspectRatio: '1',
+                                        borderRadius: '12px',
+                                        border: '2px dashed #e5e7eb',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        color: '#6b7280',
+                                        background: '#f9fafb',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary-400)'; e.currentTarget.style.color = 'var(--primary-600)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.color = '#6b7280'; }}
+                                >
+                                    <Camera size={24} />
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '4px' }}>Add Photo</span>
+                                </div>
+                            )}
                         </div>
                         <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" style={{ display: 'none' }} />
+                        <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.5rem', textAlign: 'center' }}>
+                            Add up to 5 photos. The first one will be the cover.
+                        </p>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

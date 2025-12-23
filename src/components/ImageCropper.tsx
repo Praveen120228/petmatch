@@ -14,6 +14,7 @@ interface ImageCropperProps {
 const ImageCropper = ({ imageSrc, onCropComplete, onCancel, aspectRatio = 1 }: ImageCropperProps) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
+    const [aspect, setAspect] = useState(aspectRatio);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
     const onCropChange = (crop: { x: number; y: number }) => {
@@ -64,7 +65,7 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel, aspectRatio = 1 }: I
                     image={imageSrc}
                     crop={crop}
                     zoom={zoom}
-                    aspect={aspectRatio}
+                    aspect={aspect}
                     onCropChange={onCropChange}
                     onCropComplete={onCropCompleteCallback}
                     onZoomChange={onZoomChange}
@@ -82,6 +83,30 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel, aspectRatio = 1 }: I
                 padding: '1rem',
                 borderRadius: '16px'
             }}>
+                {/* Aspect Ratio Controls */}
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                    {[1, 4 / 3, 16 / 9].map((ratio) => (
+                        <button
+                            key={ratio}
+                            onClick={() => setAspect(ratio)}
+                            style={{
+                                flex: 1,
+                                padding: '0.5rem',
+                                borderRadius: '8px',
+                                border: '1px solid #e5e7eb',
+                                background: aspect === ratio ? 'var(--primary-50)' : 'white',
+                                color: aspect === ratio ? 'var(--primary-700)' : '#4b5563',
+                                fontWeight: 600,
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {ratio === 1 ? 'Square' : ratio === 4 / 3 ? '4:3' : '16:9'}
+                        </button>
+                    ))}
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#4b5563' }}>Zoom</span>
                     <input
@@ -96,12 +121,15 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel, aspectRatio = 1 }: I
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     <Button variant="outline" onClick={onCancel} style={{ flex: 1 }}>
                         <X size={20} /> Cancel
                     </Button>
+                    <Button variant="secondary" onClick={() => onCropComplete(imageSrc)} style={{ flex: 1 }}>
+                        Use Original
+                    </Button>
                     <Button variant="primary" onClick={handleSave} style={{ flex: 1 }}>
-                        <Check size={20} /> Save Photo
+                        <Check size={20} /> Save Crop
                     </Button>
                 </div>
             </div>
