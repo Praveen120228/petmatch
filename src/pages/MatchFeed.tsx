@@ -12,7 +12,11 @@ import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
 
-const AGES = ['1 yr', '2 yrs', '3 yrs', '4 yrs', '5 yrs'];
+const AGES = [
+    '< 1 yr',
+    ...Array.from({ length: 20 }, (_, i) => `${i + 1} yr${i === 0 ? '' : 's'}`),
+    '20+ yrs'
+];
 
 const MatchFeed = () => {
     const { user } = useAuth();
