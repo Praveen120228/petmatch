@@ -41,7 +41,9 @@ const MatchFeed = () => {
     const [selectedType, setSelectedType] = useState<string>('all');
     const [selectedGender, setSelectedGender] = useState<string>('all');
     const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
-    const [selectedAges, setSelectedAges] = useState<string[]>([]);
+    // Age Slider State: [min, max] indices into AGES array
+    const [ageRange, setAgeRange] = useState<[number, number]>([0, AGES.length - 1]);
+    const [selectedAges, setSelectedAges] = useState<string[]>([]); // Derived from range for API
     const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
     const [locationQuery, setLocationQuery] = useState('');
 
@@ -114,6 +116,21 @@ const MatchFeed = () => {
         return () => clearTimeout(timer);
     }, [user, selectedType, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery]);
 
+    // Update selectedAges when range changes
+    useEffect(() => {
+        // Map range indices to AGES strings
+        const selected = AGES.slice(ageRange[0], ageRange[1] + 1);
+        // If full range is selected, maybe treat as empty for "all"? 
+        // Or just send all. Sending all is safer for strict "in" query.
+        // Actually, if we send ALL ages, it might be a long list. 
+        // If range covers everything, we can send empty array to imply "no filter" (all).
+        if (ageRange[0] === 0 && ageRange[1] === AGES.length - 1) {
+            setSelectedAges([]);
+        } else {
+            setSelectedAges(selected);
+        }
+    }, [ageRange]);
+
     // Derived Filter Options (Breeds)
     const availableBreeds = useMemo(() => {
         if (selectedType === 'all') return [];
@@ -125,16 +142,12 @@ const MatchFeed = () => {
         setSelectedBreeds(prev => prev.includes(breed) ? prev.filter(b => b !== breed) : [...prev, breed]);
     };
 
-    const toggleAge = (age: string) => {
-        setSelectedAges(prev => prev.includes(age) ? prev.filter(a => a !== age) : [...prev, age]);
-    };
-
     const clearFilters = () => {
         setSearchQuery('');
         setSelectedType('all');
         setSelectedGender('all');
         setSelectedBreeds([]);
-        setSelectedAges([]);
+        setAgeRange([0, AGES.length - 1]);
         setLocationQuery('');
         showToast('Filters cleared', 'info');
     };
@@ -319,29 +332,100 @@ const MatchFeed = () => {
                                 </div>
                             </div>
 
-                            {/* Age */}
+                            {/* Age Range Slider */}
                             <div>
-                                <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Age</h3>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    {AGES.map((age) => (
-                                        <button
-                                            key={age}
-                                            onClick={() => toggleAge(age)}
-                                            style={{
-                                                padding: '6px 12px',
-                                                borderRadius: 'var(--radius-full)',
-                                                border: `1px solid ${selectedAges.includes(age) ? 'var(--primary-600)' : 'var(--color-border)'}`,
-                                                background: selectedAges.includes(age) ? 'var(--primary-50)' : 'white',
-                                                color: selectedAges.includes(age) ? 'var(--primary-700)' : 'var(--color-text-secondary)',
-                                                fontSize: '0.875rem',
-                                                cursor: 'pointer',
-                                                fontWeight: 500,
-                                                transition: 'all 0.2s'
+                                <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>
+                                    Age Range: <span style={{ color: 'var(--primary-600)' }}>{AGES[ageRange[0]]} - {AGES[ageRange[1]]}</span>
+                                </h3>
+                                <div style={{ padding: '0 0.5rem' }}>
+                                    {/* Simple Dual Slider Implementation combining two range inputs */}
+                                    <div style={{ position: 'relative', height: '20px' }}>
+                                        {/* Track */}
+                                        <div style={{ position: 'absolute', top: '9px', left: 0, right: 0, height: '2px', background: 'var(--color-border)', borderRadius: '1px' }}></div>
+                                        {/* Highlight Track */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '9px',
+                                            left: `${(ageRange[0] / (AGES.length - 1)) * 100}%`,
+                                            right: `${100 - (ageRange[1] / (AGES.length - 1)) * 100}%`,
+                                            height: '2px',
+                                            background: 'var(--primary-600)',
+                                            borderRadius: '1px'
+                                        }}></div>
+
+                                        {/* Min Thumb */}
+                                        <input
+                                            type="range"
+                                            min={0}
+                                            max={AGES.length - 1}
+                                            value={ageRange[0]}
+                                            onChange={(e) => {
+                                                const val = Number(e.target.value);
+                                                setAgeRange([Math.min(val, ageRange[1]), ageRange[1]]);
                                             }}
-                                        >
-                                            {age}
-                                        </button>
-                                    ))}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '20px',
+                                                appearance: 'none',
+                                                background: 'transparent',
+                                                pointerEvents: 'none',
+                                                zIndex: 3
+                                            }}
+                                        />
+
+                                        {/* Max Thumb */}
+                                        <input
+                                            type="range"
+                                            min={0}
+                                            max={AGES.length - 1}
+                                            value={ageRange[1]}
+                                            onChange={(e) => {
+                                                const val = Number(e.target.value);
+                                                setAgeRange([ageRange[0], Math.max(val, ageRange[0])]);
+                                            }}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '20px',
+                                                appearance: 'none',
+                                                background: 'transparent',
+                                                pointerEvents: 'none',
+                                                zIndex: 4,
+                                            }}
+                                        />
+
+                                        {/* CSS to make thumbs clickable */}
+                                        <style>{`
+                                            input[type=range]::-webkit-slider-thumb {
+                                                pointer-events: auto; /* Enable pointer events on thumb */
+                                                appearance: none;
+                                                width: 16px;
+                                                height: 16px;
+                                                border-radius: 50%;
+                                                background: var(--primary-600);
+                                                border: 2px solid white;
+                                                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                                                cursor: pointer;
+                                                margin-top: -7px; /* Align vertical */
+                                            }
+                                            input[type=range]::-moz-range-thumb {
+                                                pointer-events: auto;
+                                                appearance: none;
+                                                width: 16px;
+                                                height: 16px;
+                                                border-radius: 50%;
+                                                background: var(--primary-600);
+                                                border: 2px solid white;
+                                                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                                                cursor: pointer;
+                                            }
+                                        `}</style>
+                                    </div>
                                 </div>
                             </div>
 
