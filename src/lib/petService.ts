@@ -61,8 +61,29 @@ export const petService = {
         }
 
         if (filters?.search) {
-            // "search" matches name, breed, location, gender, type, username, or owner name
-            query = query.or(`name.ilike.%${filters.search}%,breed.ilike.%${filters.search}%,owner_profile.location.ilike.%${filters.search}%,gender.ilike.%${filters.search}%,type.ilike.%${filters.search}%,owner_profile.username.ilike.%${filters.search}%,owner_profile.name.ilike.%${filters.search}%`);
+            const searchTerm = filters.search;
+            let searchConditions = [
+                `name.ilike.%${searchTerm}%`,
+                `breed.ilike.%${searchTerm}%`,
+                `owner_profile.location.ilike.%${searchTerm}%`,
+                `gender.ilike.%${searchTerm}%`,
+                `type.ilike.%${searchTerm}%`
+            ];
+
+            // Step 1: Find users matching the search term
+            const { data: matchingOwners } = await supabase
+                .from('profiles')
+                .select('id')
+                .or(`username.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`);
+
+            if (matchingOwners && matchingOwners.length > 0) {
+                const ownerIds = matchingOwners.map(u => u.id).join(',');
+                if (ownerIds) {
+                    searchConditions.push(`owner_id.in.(${ownerIds})`);
+                }
+            }
+
+            query = query.or(searchConditions.join(','));
         }
 
         if (filters?.location) {
