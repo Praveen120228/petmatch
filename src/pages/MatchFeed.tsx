@@ -12,6 +12,27 @@ import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
 
+const useWindowSize = () => {
+    const [windowSize, setWindowSize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+    });
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return windowSize;
+};
+
 
 
 const MatchFeed = () => {
@@ -27,7 +48,9 @@ const MatchFeed = () => {
     const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
 
 
-    const [hoveredId, setHoveredId] = useState<number | null>(null);
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const { width: windowWidth } = useWindowSize();
+    const isMobile = windowWidth <= 768;
 
     // Filter Controls
     const [showFilters, setShowFilters] = useState(false);
@@ -372,24 +395,25 @@ const MatchFeed = () => {
 
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
-                    position: window.innerWidth <= 768 ? 'fixed' : 'sticky',
-                    top: window.innerWidth <= 768 ? '72px' : '145px', // Below nav
+                    position: isMobile ? 'fixed' : 'fixed', // Fixed for both, but different coordinates
+                    top: isMobile ? '72px' : '145px', // Below nav and search bar
                     left: 0,
-                    right: 0,
+                    right: isMobile ? 0 : 'auto',
                     bottom: 0,
                     zIndex: 40,
                     background: 'var(--color-bg-card)',
-                    width: window.innerWidth <= 768 ? '100%' : (showFilters ? '300px' : '0px'),
+                    width: isMobile ? '100%' : (showFilters ? '300px' : '0px'),
                     opacity: showFilters ? 1 : 0,
                     pointerEvents: showFilters ? 'auto' : 'none',
                     borderRight: '1px solid var(--color-border)',
-                    height: window.innerWidth <= 768 ? 'calc(100vh - 72px)' : 'calc(100vh - 145px)',
+                    height: isMobile ? 'calc(100vh - 72px)' : 'calc(100vh - 145px)',
                     overflowY: 'auto',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    boxShadow: isMobile ? 'none' : '2px 0 10px rgba(0,0,0,0.05)'
                 }}>
-                    <div style={{ width: window.innerWidth <= 768 ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ width: isMobile ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Filters</h2>
                             {(selectedTypes.length > 0 || selectedBreeds.length > 0 || selectedAges.length > 0) && (
@@ -702,7 +726,7 @@ const MatchFeed = () => {
                         </div>
 
                         {/* Mobile Apply Button */}
-                        {window.innerWidth <= 768 && (
+                        {isMobile && (
                             <div style={{ padding: '1rem', borderTop: '1px solid var(--color-border)', marginTop: 'auto' }}>
                                 <Button fullWidth onClick={() => setShowFilters(false)} variant="primary">View {pets.length} Results</Button>
                             </div>
@@ -711,7 +735,12 @@ const MatchFeed = () => {
                 </aside>
 
                 {/* Main Content Grid */}
-                <main style={{ flex: 1, padding: '1.5rem' }}>
+                <main style={{
+                    flex: 1,
+                    padding: '1.5rem',
+                    marginLeft: !isMobile && showFilters ? '300px' : '0',
+                    transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
                             {pets.length} <span style={{ fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets</span>
