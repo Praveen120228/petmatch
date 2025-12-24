@@ -396,7 +396,7 @@ const MatchFeed = () => {
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
                     position: isMobile ? 'fixed' : 'fixed', // Fixed for both, but different coordinates
-                    top: isMobile ? '72px' : '145px', // Below nav and search bar
+                    top: isMobile ? '72px' : '136px', // Below nav and search bar
                     left: 0,
                     right: isMobile ? 0 : 'auto',
                     bottom: 0,
@@ -406,7 +406,7 @@ const MatchFeed = () => {
                     opacity: showFilters ? 1 : 0,
                     pointerEvents: showFilters ? 'auto' : 'none',
                     borderRight: '1px solid var(--color-border)',
-                    height: isMobile ? 'calc(100vh - 72px)' : 'calc(100vh - 145px)',
+                    height: isMobile ? 'calc(100vh - 72px)' : 'calc(100vh - 136px)',
                     overflowY: 'auto',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     display: 'flex',
