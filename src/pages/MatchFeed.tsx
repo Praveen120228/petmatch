@@ -413,7 +413,6 @@ const MatchFeed = () => {
             <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1, position: 'relative' }}>
 
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
-                {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
                     position: isMobile ? 'fixed' : 'sticky', // Sticky for desktop to stay in flow but stick
                     top: isMobile ? `${NAVBAR_HEIGHT}px` : `${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT - 1}px`, // Precisely attached with 1px overlap
