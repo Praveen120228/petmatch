@@ -51,6 +51,7 @@ const MatchFeed = () => {
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const { width: windowWidth } = useWindowSize();
     const isMobile = windowWidth <= 768;
+    const observerRef = useRef<HTMLDivElement | null>(null); // Ref for infinite scroll
 
     // Filter Controls
     const [showFilters, setShowFilters] = useState(false);
@@ -82,10 +83,9 @@ const MatchFeed = () => {
     }, [user]);
 
     // Load Pets (Paginated)
-    const loadPets = async (reset = false) => {
+    const loadPets = useCallback(async (reset = false) => {
         if (!user) return;
         setLoading(true);
-
 
         const currentPage = reset ? 1 : page;
 
@@ -130,7 +130,27 @@ const MatchFeed = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, page, selectedTypes, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery, countryQuery, stateQuery, selectedGender, showToast]);
+
+    // Infinite Scroll Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting && hasMore && !loading) {
+                    loadPets(false);
+                }
+            },
+            { threshold: 1.0 }
+        );
+
+        if (observerRef.current) {
+            observer.observe(observerRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) observer.unobserve(observerRef.current);
+        };
+    }, [hasMore, loading, loadPets]);
 
     // Trigger load when filters change
     useEffect(() => {
@@ -139,7 +159,7 @@ const MatchFeed = () => {
             loadPets(true);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user, selectedTypes, selectedGender, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery, countryQuery, stateQuery]);
+    }, [loadPets]);
 
 
 
@@ -321,20 +341,7 @@ const MatchFeed = () => {
         }
     };
 
-    // Infinite Scroll Observer
-    const observer = useRef<IntersectionObserver | null>(null);
-    const observerRef = useCallback((node: HTMLDivElement) => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
 
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                loadPets(false);
-            }
-        }, { threshold: 0.1, rootMargin: '100px' });
-
-        if (node) observer.current.observe(node);
-    }, [loading, hasMore]);
 
     const NAVBAR_HEIGHT = 72;
     const SEARCH_BAR_HEIGHT = 72; // Reduced height for tighter fit
@@ -933,22 +940,24 @@ const MatchFeed = () => {
                             )
                         )}
 
+                        {/* Infinite Scroll Skeletons */}
+                        {pets.length > 0 && loading && (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <PetCardSkeleton key={`more-skeleton-${i}`} />
+                            ))
+                        )}
+
                         {/* Infinite Scroll Sentinel */}
                         {pets.length > 0 && hasMore && (
                             <div
                                 ref={observerRef}
                                 style={{
                                     gridColumn: '1 / -1',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    padding: '2rem 0',
-                                    minHeight: '80px'
+                                    height: '20px',
+                                    marginTop: '1rem',
+                                    visibility: 'hidden'
                                 }}
-                            >
-                                {loading && (
-                                    <div className="skeleton-pulse" style={{ width: '150px', height: '40px', borderRadius: '20px' }}></div>
-                                )}
-                            </div>
+                            />
                         )}
                     </div>
                 </main>
