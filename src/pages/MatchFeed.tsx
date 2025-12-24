@@ -415,7 +415,7 @@ const MatchFeed = () => {
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
                     position: isMobile ? 'fixed' : 'fixed', // Fixed for both, but different coordinates
-                    top: isMobile ? `${NAVBAR_HEIGHT}px` : `${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT}px`, // Precisely attached
+                    top: isMobile ? `${NAVBAR_HEIGHT}px` : `${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT - 1}px`, // Precisely attached with 1px overlap
                     left: 0,
                     right: isMobile ? 0 : 'auto',
                     bottom: 0,
@@ -425,7 +425,7 @@ const MatchFeed = () => {
                     opacity: showFilters ? 1 : 0,
                     pointerEvents: showFilters ? 'auto' : 'none',
                     borderRight: '1px solid var(--color-border)',
-                    height: isMobile ? `calc(100vh - ${NAVBAR_HEIGHT}px)` : `calc(100vh - ${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT}px)`,
+                    height: isMobile ? `calc(100vh - ${NAVBAR_HEIGHT}px)` : `calc(100vh - ${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT - 1}px)`,
                     overflowY: 'auto',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     display: 'flex',
@@ -433,7 +433,7 @@ const MatchFeed = () => {
                     boxShadow: isMobile ? 'none' : '2px 0 10px rgba(0,0,0,0.05)'
                 }}>
                     <div style={{ width: isMobile ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Filters</h2>
                             {(selectedTypes.length > 0 || selectedBreeds.length > 0 || selectedAges.length > 0) && (
                                 <button onClick={clearFilters} style={{ fontSize: '0.875rem', color: 'var(--primary-600)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>CLEAR</button>
