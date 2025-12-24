@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { chatService } from '../lib/chatService';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,7 @@ interface ChatListProps {
 
 const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
     const navigate = useNavigate();
+    const { id: activeChatId } = useParams();
     const { user } = useAuth();
     const [chats, setChats] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -264,7 +265,8 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                         {filteredChats.map(chat => {
                             const name = chat.other_user?.name || 'Unknown';
                             const avatar = chat.other_user?.avatar_url || `https://ui-avatars.com/api/?name=${name}&background=random`;
-                            const hasUnread = chat.unread_count > 0;
+                            const isActiveChat = Number(activeChatId) === chat.id;
+                            const hasUnread = chat.unread_count > 0 && !isActiveChat;
 
                             return (
                                 <NavLink
@@ -326,8 +328,8 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                     )}
                                                     <p style={{
                                                         fontSize: '0.825rem',
-                                                        color: !chat.last_message_read ? 'var(--gray-900)' : 'var(--gray-500)',
-                                                        fontWeight: !chat.last_message_read ? 600 : 400,
+                                                        color: hasUnread ? 'var(--gray-900)' : 'var(--gray-500)',
+                                                        fontWeight: hasUnread ? 600 : 400,
                                                         whiteSpace: 'nowrap',
                                                         overflow: 'hidden',
                                                         textOverflow: 'ellipsis',
