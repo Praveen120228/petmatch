@@ -336,12 +336,25 @@ const MatchFeed = () => {
         if (node) observer.current.observe(node);
     }, [loading, hasMore]);
 
+    const NAVBAR_HEIGHT = 72;
+    const SEARCH_BAR_HEIGHT = 82; // Explicit height to prevent gaps
+
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', display: 'flex', flexDirection: 'column' }}>
 
             {/* Top Search Bar (Global) */}
-            <div style={{ background: 'var(--color-bg-card)', borderBottom: '1px solid var(--color-border)', padding: '1rem', position: 'sticky', top: 72, zIndex: 30 }}>
-                <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{
+                background: 'var(--color-bg-card)',
+                borderBottom: '1px solid var(--color-border)',
+                height: `${SEARCH_BAR_HEIGHT}px`, // Enforce height
+                display: 'flex',
+                alignItems: 'center', // Center content vertically
+                padding: '0 1rem', // Remove vertical padding, let flex align
+                position: 'sticky',
+                top: NAVBAR_HEIGHT,
+                zIndex: 30
+            }}>
+                <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '1rem', alignItems: 'center', width: '100%' }}>
 
                     {/* Toggle Sidebar Button */}
                     <Button
@@ -396,7 +409,7 @@ const MatchFeed = () => {
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
                     position: isMobile ? 'fixed' : 'fixed', // Fixed for both, but different coordinates
-                    top: isMobile ? '72px' : '136px', // Below nav and search bar
+                    top: isMobile ? `${NAVBAR_HEIGHT}px` : `${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT}px`, // Precisely attached
                     left: 0,
                     right: isMobile ? 0 : 'auto',
                     bottom: 0,
@@ -406,7 +419,7 @@ const MatchFeed = () => {
                     opacity: showFilters ? 1 : 0,
                     pointerEvents: showFilters ? 'auto' : 'none',
                     borderRight: '1px solid var(--color-border)',
-                    height: isMobile ? 'calc(100vh - 72px)' : 'calc(100vh - 136px)',
+                    height: isMobile ? `calc(100vh - ${NAVBAR_HEIGHT}px)` : `calc(100vh - ${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT}px)`,
                     overflowY: 'auto',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     display: 'flex',
