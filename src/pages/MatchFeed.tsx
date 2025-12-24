@@ -413,12 +413,13 @@ const MatchFeed = () => {
             <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1, position: 'relative' }}>
 
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
+                {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
-                    position: isMobile ? 'fixed' : 'fixed', // Fixed for both, but different coordinates
+                    position: isMobile ? 'fixed' : 'sticky', // Sticky for desktop to stay in flow but stick
                     top: isMobile ? `${NAVBAR_HEIGHT}px` : `${NAVBAR_HEIGHT + SEARCH_BAR_HEIGHT - 1}px`, // Precisely attached with 1px overlap
-                    left: 0,
+                    left: isMobile ? 0 : 'auto', // Auto for sticky (flex item)
                     right: isMobile ? 0 : 'auto',
-                    bottom: 0,
+                    bottom: isMobile ? 0 : 'auto',
                     zIndex: 40,
                     background: 'var(--color-bg-card)',
                     width: isMobile ? '100%' : (showFilters ? '300px' : '0px'),
@@ -430,7 +431,8 @@ const MatchFeed = () => {
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     display: 'flex',
                     flexDirection: 'column',
-                    boxShadow: isMobile ? 'none' : '2px 0 10px rgba(0,0,0,0.05)'
+                    boxShadow: isMobile ? 'none' : '2px 0 10px rgba(0,0,0,0.05)',
+                    alignSelf: 'flex-start' // Ensure it sticks at the top
                 }}>
                     <div style={{ width: isMobile ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -757,7 +759,7 @@ const MatchFeed = () => {
                 <main style={{
                     flex: 1,
                     padding: '1.5rem',
-                    marginLeft: !isMobile && showFilters ? '300px' : '0',
+                    marginLeft: 0, // Flexbox handles the spacing now
                     transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
 
