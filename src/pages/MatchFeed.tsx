@@ -337,7 +337,7 @@ const MatchFeed = () => {
     }, [loading, hasMore]);
 
     const NAVBAR_HEIGHT = 72;
-    const SEARCH_BAR_HEIGHT = 82; // Explicit height to prevent gaps
+    const SEARCH_BAR_HEIGHT = 72; // Reduced height for tighter fit
 
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', display: 'flex', flexDirection: 'column' }}>
@@ -427,14 +427,14 @@ const MatchFeed = () => {
                     boxShadow: isMobile ? 'none' : '2px 0 10px rgba(0,0,0,0.05)'
                 }}>
                     <div style={{ width: isMobile ? '100%' : '300px', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Filters</h2>
                             {(selectedTypes.length > 0 || selectedBreeds.length > 0 || selectedAges.length > 0) && (
                                 <button onClick={clearFilters} style={{ fontSize: '0.875rem', color: 'var(--primary-600)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>CLEAR</button>
                             )}
                         </div>
 
-                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto', flex: 1 }}>
+                        <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto', flex: 1 }}>
                             {/* Categories */}
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em' }}>Pet Type</h3>
