@@ -401,6 +401,12 @@ const MatchFeed = () => {
                             }}
                         />
                     </div>
+
+                    {/* Pet Count - Moved to Right of Search Bar */}
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{pets.length}</span>
+                        <span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets</span>
+                    </div>
                 </div>
             </div>
 
@@ -754,11 +760,6 @@ const MatchFeed = () => {
                     marginLeft: !isMobile && showFilters ? '300px' : '0',
                     transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                            {pets.length} <span style={{ fontWeight: 500, color: 'var(--color-text-secondary)' }}>pets</span>
-                        </h1>
-                    </div>
 
                     <div style={{
                         display: 'grid',
