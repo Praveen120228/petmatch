@@ -278,6 +278,8 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                         setChats(prev => prev.map(c =>
                                             c.id === chat.id ? { ...c, unread_count: 0 } : c
                                         ));
+                                        // Server update: Mark as read immediately to ensure persistence if navigating away
+                                        if (user) chatService.markAsRead(chat.id, user.id);
                                     }}
                                     style={({ isActive }) => ({
                                         textDecoration: 'none',
