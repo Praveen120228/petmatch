@@ -334,7 +334,7 @@ const ChatRoom = () => {
                                             {timeString}
                                             {isMe && (
                                                 <span style={{
-                                                    color: msg.read ? '#fff' : 'rgba(255,255,255,0.5)',
+                                                    color: msg.read ? '#60a5fa' : 'rgba(255,255,255,0.5)',
                                                     fontSize: '10px',
                                                     fontWeight: 'bold',
                                                     marginLeft: '4px'

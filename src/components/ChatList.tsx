@@ -272,7 +272,13 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                 <NavLink
                                     key={chat.id}
                                     to={`/messages/${chat.id}`}
-                                    onClick={onSelectChat}
+                                    onClick={() => {
+                                        if (onSelectChat) onSelectChat();
+                                        // Optimistic update: Mark locally as read immediately
+                                        setChats(prev => prev.map(c =>
+                                            c.id === chat.id ? { ...c, unread_count: 0 } : c
+                                        ));
+                                    }}
                                     style={({ isActive }) => ({
                                         textDecoration: 'none',
                                         color: 'inherit',
@@ -319,7 +325,7 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                                                     {chat.last_message && chat.last_sender_id === user?.id && (
                                                         <span style={{
                                                             fontSize: '12px',
-                                                            color: chat.last_message_read ? 'var(--primary-400)' : 'var(--gray-400)',
+                                                            color: chat.last_message_read ? '#60a5fa' : 'var(--gray-400)',
                                                             lineHeight: 1,
                                                             marginRight: '2px'
                                                         }}>
@@ -365,7 +371,7 @@ const ChatList = ({ onSelectChat, className, style }: ChatListProps) => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
