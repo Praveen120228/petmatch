@@ -65,16 +65,15 @@ export const petService = {
             let searchConditions = [
                 `name.ilike.%${searchTerm}%`,
                 `breed.ilike.%${searchTerm}%`,
-                `owner_profile.location.ilike.%${searchTerm}%`,
                 `gender.ilike.%${searchTerm}%`,
                 `type.ilike.%${searchTerm}%`
             ];
 
-            // Step 1: Find users matching the search term
+            // Step 1: Find users matching the search term (name, username, or location)
             const { data: matchingOwners } = await supabase
                 .from('profiles')
                 .select('id')
-                .or(`username.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`);
+                .or(`username.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
 
             if (matchingOwners && matchingOwners.length > 0) {
                 const ownerIds = matchingOwners.map(u => u.id).join(',');
