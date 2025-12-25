@@ -617,13 +617,14 @@ const PetProfile = () => {
             {/* Mobile Sticky Action Footer */}
             <div className="show-on-mobile" style={{
                 position: 'fixed', bottom: 0, left: 0, right: 0,
-                background: 'white', padding: '1rem',
+                background: 'white', padding: '0.75rem', // Reduced padding
                 boxShadow: '0 -4px 6px -1px rgba(0,0,0,0.1)',
                 zIndex: 50,
-                display: 'flex', gap: '1rem'
+                display: 'flex', gap: '0.5rem', // Reduced gap
+                justifyContent: 'space-between', alignItems: 'center'
             }}>
-                <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleCreateCollection}>
-                    <BookmarkSimple size={24} weight="bold" />
+                <Button variant="outline" style={{ padding: '0.5rem' }} onClick={handleCreateCollection}>
+                    <BookmarkSimple size={20} weight="bold" />
                 </Button>
                 <Button
                     variant="primary"
@@ -633,13 +634,15 @@ const PetProfile = () => {
                         color: 'white',
                         border: 'none',
                         transition: 'background 0.2s',
-                        opacity: 1
+                        opacity: 1,
+                        fontSize: '0.875rem', // Smaller text
+                        padding: '0.5rem'
                     }}
                     onClick={handleMatch}
                 >
-                    <Handshake size={20} weight="bold" /> {isMatched ? 'Matched' : 'Match'}
+                    {isMatched ? 'Matched' : 'Match'}
                 </Button>
-                <Button variant="outline" style={{ flex: 1 }} onClick={handleMessage}>
+                <Button variant="outline" style={{ flex: 1, fontSize: '0.875rem', padding: '0.5rem' }} onClick={handleMessage}>
                     Message
                 </Button>
                 {/* Mobile Date Button */}
