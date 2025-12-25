@@ -13,6 +13,7 @@ const Onboarding = () => {
     const { user } = useAuth();
 
     const [username, setUsername] = useState('');
+    const [name, setName] = useState(''); // Added name state
     const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
     const [state, setState] = useState(''); // Added state
@@ -30,6 +31,7 @@ const Onboarding = () => {
             userService.getProfile(user.id).then(p => {
                 if (p) {
                     setUsername(p.username || '');
+                    setName(p.name || ''); // Load name
                     setLocation(p.location || '');
                     setCountry(p.country || '');
                     setState(p.state || ''); // Load state
@@ -104,6 +106,7 @@ const Onboarding = () => {
     const handleFinish = async () => {
         if (!user) return alert("Please login first");
         if (!username.trim()) return alert("Please choose a username");
+        if (!name.trim()) return alert("Please enter your name");
         if (!location.trim()) return alert("Please enter your location");
 
         setIsSubmitting(true);
@@ -119,6 +122,7 @@ const Onboarding = () => {
             // Update Profile
             await userService.updateProfile(user.id, {
                 username: username,
+                name: name,
                 location: location,
                 country: country,
                 state: state, // Save state
@@ -235,6 +239,15 @@ const Onboarding = () => {
                 </div>
 
                 <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
+                    <Input
+                        label="Name"
+                        placeholder="Your Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        fullWidth
+                        required
+                    />
+
                     <Input
                         label="Username"
                         placeholder="@username"

@@ -12,7 +12,8 @@ export interface UserProfile {
     show_location?: boolean;
     username?: string;
     country?: string;
-    state?: string; // Added state
+    state?: string;
+    phone_number?: string; // Added phone_number
 }
 
 export const userService = {

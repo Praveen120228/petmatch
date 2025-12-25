@@ -39,7 +39,8 @@ const Profile = () => {
         image: user?.image || '',
         latitude: null as number | null,
         longitude: null as number | null,
-        show_location: true
+        show_location: true,
+        phone_number: '' // Added phone_number
     });
 
     const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
@@ -198,7 +199,8 @@ const Profile = () => {
                                 image: userProfile.avatar_url || '',
                                 latitude: userProfile.latitude || null,
                                 longitude: userProfile.longitude || null,
-                                show_location: userProfile.show_location !== false
+                                show_location: userProfile.show_location !== false,
+                                phone_number: userProfile.phone_number || '' // Load phone_number
                             });
                         }
                     }
@@ -314,7 +316,11 @@ const Profile = () => {
 
     const handleSaveProfile = async () => {
         if (!user) return;
-        if (!editForm.username) return alert("Username cannot be empty");
+        if (!user) return;
+        if (!editForm.name.trim()) return alert("Name cannot be empty");
+        if (!editForm.username.trim()) return alert("Username cannot be empty");
+        if (!editForm.location.trim()) return alert("Location cannot be empty");
+        if (!editForm.phone_number.trim()) return alert("Phone number is required");
 
         try {
             // Check uniqueness if username changed
@@ -343,7 +349,8 @@ const Profile = () => {
                 bio: editForm.bio,
                 latitude: editForm.latitude || undefined,
                 longitude: editForm.longitude || undefined,
-                show_location: editForm.show_location
+                show_location: editForm.show_location,
+                phone_number: editForm.phone_number // Save phone_number
             });
 
             // Update Auth Context (for app-wide name/image)
@@ -626,6 +633,20 @@ const Profile = () => {
                                                             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }}
                                                         />
                                                     </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Phone Number <span style={{ color: 'red' }}>*</span></label>
+                                                        <input
+                                                            type="tel"
+                                                            value={editForm.phone_number}
+                                                            onChange={e => setEditForm({ ...editForm, phone_number: e.target.value })}
+                                                            placeholder="+1234567890"
+                                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Row 3: Location */}
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
                                                     <div style={{ flex: 1 }}>
                                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Location</label>
                                                         <div style={{ position: 'relative' }}>
