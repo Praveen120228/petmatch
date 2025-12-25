@@ -49,7 +49,7 @@ const Signup = () => {
             <Card style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div style={{ textAlign: 'center' }}>
                     <PawPrint size={48} weight="fill" color="var(--color-secondary)" style={{ marginBottom: '1rem' }} />
-                    <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Join PetMatch</h2>
+                    <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Join Specyf</h2>
                     <p style={{ color: 'var(--color-text-secondary)' }}>Create an account to get started.</p>
                 </div>
 

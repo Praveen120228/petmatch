@@ -16,7 +16,7 @@ const Support = () => {
                 <h2 style={{ marginBottom: '2rem' }}>Frequently Asked Questions</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {[
-                        { q: "Is PetMatch free to use?", a: "Yes! Creating a profile and matching with other pets is completely free." },
+                        { q: "Is Specyf free to use?", a: "Yes! Creating a profile and matching with other pets is completely free." },
                         { q: "How do I verify my account?", a: "Go to your profile settings and upload a photo of you with your pet. Our team will review it within 24 hours." },
                         { q: "Can I delete my account?", a: "Yes, you can permanently delete your account and data from the Settings page." },
                         { q: "What if I have a bad experience?", a: "Please report any negative experiences immediately through the user's profile or our contact form." }
@@ -36,7 +36,7 @@ const Support = () => {
                 <Envelope size={48} color="var(--primary-600)" weight="duotone" style={{ marginBottom: '1rem' }} />
                 <h2 style={{ marginBottom: '1rem' }}>Still need help?</h2>
                 <p style={{ color: 'var(--gray-600)', marginBottom: '2rem' }}>Our support team is available Mon-Fri, 9am - 5pm EST.</p>
-                <Button variant="primary" size="lg" onClick={() => window.location.href = 'mailto:support@petmatch.com'}>
+                <Button variant="primary" size="lg" onClick={() => window.location.href = 'mailto:support@specyf.online'}>
                     Contact Support
                 </Button>
             </Card>

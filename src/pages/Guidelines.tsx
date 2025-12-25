@@ -7,7 +7,7 @@ const Guidelines = () => {
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                 <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Community Guidelines</h1>
                 <p style={{ fontSize: '1.25rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>
-                    To enhance the PetMatch experience, we ask all members to follow these simple guidelines.
+                    To enhance the Specyf experience, we ask all members to follow these simple guidelines.
                 </p>
             </div>
 

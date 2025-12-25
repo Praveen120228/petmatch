@@ -100,7 +100,7 @@ const LandingPage = () => {
 
             {/* Features Section */}
             <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem 8rem' }}>
-                <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Why PetMatch?</h2>
+                <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Why Specyf?</h2>
                 <p style={{ textAlign: 'center', color: 'var(--gray-500)', fontSize: '1.125rem', marginBottom: '5rem', maxWidth: '600px', margin: '0 auto 5rem' }}>We've built a platform specifically designed for the unique needs of pets and their owners.</p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
@@ -164,7 +164,7 @@ const LandingPage = () => {
                     <div style={{ padding: '8px', background: 'var(--primary-600)', borderRadius: '8px', display: 'flex' }}>
                         <PawPrint weight="fill" color="white" size={24} />
                     </div>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>PetMatch</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>Specyf</span>
                 </div>
                 <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '2rem', fontSize: '0.9rem', color: 'var(--gray-600)' }}>
                     <Link to="/about" style={{ textDecoration: 'none', fontWeight: 500 }}>About</Link>
@@ -172,7 +172,7 @@ const LandingPage = () => {
                     <Link to="/guidelines" style={{ textDecoration: 'none', fontWeight: 500 }}>Guidelines</Link>
                     <Link to="/support" style={{ textDecoration: 'none', fontWeight: 500 }}>Support</Link>
                 </div>
-                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} PetMatch. All rights reserved.</p>
+                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} Specyf. All rights reserved.</p>
             </footer>
         </div>
     );

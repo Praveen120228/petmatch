@@ -92,7 +92,7 @@ const Navbar = () => {
             <nav style={navStyle}>
                 {isAuthenticated ? (
                     <Link to="/match" style={logoStyle} onClick={() => setMobileMenuOpen(false)}>
-                        <PawPrint weight="fill" color="currentColor" /> PetMatch
+                        <PawPrint weight="fill" color="currentColor" /> Specyf
                     </Link>
                 ) : (
                     <Link
@@ -100,7 +100,7 @@ const Navbar = () => {
                         style={{ ...logoStyle, textDecoration: 'none', cursor: 'pointer' }}
                         onClick={() => setMobileMenuOpen(false)}
                     >
-                        <PawPrint weight="fill" color="currentColor" /> PetMatch
+                        <PawPrint weight="fill" color="currentColor" /> Specyf
                     </Link>
                 )}
 

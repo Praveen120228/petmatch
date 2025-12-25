@@ -7,7 +7,7 @@ const Safety = () => {
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                 <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Safety Center</h1>
                 <p style={{ fontSize: '1.25rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>
-                    Your safety and your pet's well-being are our highest priorities. Here's how to stay safe on PetMatch.
+                    Your safety and your pet's well-being are our highest priorities. Here's how to stay safe on Specyf.
                 </p>
             </div>
 
