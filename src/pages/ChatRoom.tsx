@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { CaretLeft, PaperPlaneRight, DotsThreeVertical, ImageSquare, X, DownloadSimple } from '@phosphor-icons/react';
 import { chatService } from '../lib/chatService';
@@ -17,12 +18,9 @@ const ChatRoom = () => {
     const imageInputRef = useRef<HTMLInputElement>(null);
     const autoSentRef = useRef(false);
 
-    const [messages, setMessages] = useState<any[]>([]);
-    const [chatInfo, setChatInfo] = useState<any | null>(null);
     const [inputText, setInputText] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [viewingImage, setViewingImage] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
 
     const downloadImage = (base64Str: string) => {
         const link = document.createElement('a');
@@ -33,32 +31,43 @@ const ChatRoom = () => {
         document.body.removeChild(link);
     };
 
+    const queryClient = useQueryClient();
+
+    // 1. Fetch Chat Info
+    const { data: chatInfo, isLoading: isChatLoading } = useQuery({
+        queryKey: ['chat', chatId], // simple key for info
+        queryFn: async () => {
+            if (!user) return null;
+            return await chatService.getConversation(chatId, user.id);
+        },
+        enabled: !!user && !!chatId
+    });
+
+    // 2. Fetch Messages
+    const { data: messages = [], isLoading: isMsgsLoading } = useQuery({
+        queryKey: ['messages', chatId],
+        queryFn: async () => {
+            const msgs = await chatService.getMessages(chatId);
+            return msgs || [];
+        },
+        enabled: !!chatId,
+        staleTime: Infinity, // Rely on realtime updates
+    });
+
+    // Side effect: Mark as read when messages load
+    useEffect(() => {
+        if (user && chatId && messages.length > 0) {
+            // Check if last message is unread and from other? 
+            // Or just mark read. Service handles logic usually.
+            chatService.markAsRead(chatId, user.id);
+        }
+    }, [chatId, user, messages.length]);
+
+
+    // Realtime Subscription
     useEffect(() => {
         if (!chatId || !user) return;
 
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                // 1. Fetch Chat Info
-                const chat = await chatService.getConversation(chatId, user.id);
-                setChatInfo(chat);
-
-                // 2. Fetch Messages
-                const msgs = await chatService.getMessages(chatId);
-                setMessages(msgs || []);
-
-                // 3. Mark as Read
-                await chatService.markAsRead(chatId, user.id);
-            } catch (err) {
-                console.error("Failed to load chat", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-
-        // Subscribe to changes (INSERT for new messages, UPDATE for read receipts)
         const channel = supabase
             .channel(`chat_${chatId}`)
             .on(
@@ -71,7 +80,14 @@ const ChatRoom = () => {
                 },
                 (payload) => {
                     const newMsg = payload.new;
-                    setMessages((prev) => [...prev, newMsg]);
+
+                    // Update Cache
+                    queryClient.setQueryData(['messages', chatId], (old: any[] | undefined) => {
+                        const prev = old || [];
+                        // Deduplicate
+                        if (prev.find(m => m.id === newMsg.id)) return prev;
+                        return [...prev, newMsg];
+                    });
 
                     // If message is from someone else, mark as read immediately
                     if (newMsg.sender_id !== user.id) {
@@ -89,9 +105,12 @@ const ChatRoom = () => {
                 },
                 (payload) => {
                     const updatedMsg = payload.new;
-                    setMessages((prev) =>
-                        prev.map(m => m.id === updatedMsg.id ? updatedMsg : m)
-                    );
+
+                    // Update Cache
+                    queryClient.setQueryData(['messages', chatId], (old: any[] | undefined) => {
+                        const prev = old || [];
+                        return prev.map(m => m.id === updatedMsg.id ? updatedMsg : m);
+                    });
                 }
             )
             .subscribe();
@@ -99,17 +118,17 @@ const ChatRoom = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [chatId, user]);
+    }, [chatId, user, queryClient]);
 
     // Handle initial pet interest message (moved to top level)
     useEffect(() => {
-        if (!loading && messages.length === 0 && location.state?.prefill && !autoSentRef.current && user) {
+        if (!isMsgsLoading && messages.length === 0 && location.state?.prefill && !autoSentRef.current && user) {
             autoSentRef.current = true;
             chatService.sendMessage(chatId, user.id, location.state.prefill);
             // Clear location state so refresh doesn't resend
             window.history.replaceState({}, document.title);
         }
-    }, [loading, messages, location.state, user, chatId]);
+    }, [isMsgsLoading, messages, location.state, user, chatId]);
 
     // Scroll to bottom
     const scrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
@@ -194,7 +213,7 @@ const ChatRoom = () => {
         }
     };
 
-    if (loading || !chatInfo) return (
+    if (isChatLoading || !chatInfo) return (
         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: 'var(--gray-500)' }}>Loading chat...</span>
         </div>
@@ -265,7 +284,7 @@ const ChatRoom = () => {
                 gap: '1.25rem',
                 background: 'var(--gray-50)'
             }}>
-                {messages.map((msg, index) => {
+                {messages.map((msg: any, index) => {
                     const isMe = msg.sender_id === user?.id;
                     const date = new Date(msg.created_at);
                     const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

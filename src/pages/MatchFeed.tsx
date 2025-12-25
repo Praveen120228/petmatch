@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -40,36 +41,28 @@ const MatchFeed = () => {
     const { showToast } = useToast();
 
     // State
-    const [pets, setPets] = useState<any[]>([]);
     const [likes, setLikes] = useState<number[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
     const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
-
-
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const { width: windowWidth } = useWindowSize();
     const isMobile = windowWidth <= 768;
-    const observerRef = useRef<HTMLDivElement | null>(null); // Ref for infinite scroll
+    const observerRef = useRef<HTMLDivElement | null>(null);
 
     // Filter Controls
     const [showFilters, setShowFilters] = useState(false);
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedTypes, setSelectedTypes] = useState<string[]>([]); // Multi-select array
+    const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
     const [selectedGender, setSelectedGender] = useState<string>('all');
-    const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]); // Keep as array
-    // Age Slider State: [min, max] indices
-    // Default 22 items (0 to 20+), so max index is 21
+    const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
     const [ageRange, setAgeRange] = useState<[number, number]>([0, 21]);
-    const [selectedAges, setSelectedAges] = useState<string[]>([]); // Derived from range for API
-    const [maxDistance, setMaxDistance] = useState<number>(50); // Default 50km
+    const [selectedAges, setSelectedAges] = useState<string[]>([]);
+    const [maxDistance, setMaxDistance] = useState<number>(50);
     const [locationQuery, setLocationQuery] = useState('');
-    const [countryQuery, setCountryQuery] = useState(''); // New Country State
-    const [stateQuery, setStateQuery] = useState(''); // New State filter
-    const [breedSearchQuery, setBreedSearchQuery] = useState(''); // New state for breed search
+    const [countryQuery, setCountryQuery] = useState('');
+    const [stateQuery, setStateQuery] = useState('');
+    const [breedSearchQuery, setBreedSearchQuery] = useState('');
 
     // Load Likes (Once)
     useEffect(() => {
@@ -82,20 +75,34 @@ const MatchFeed = () => {
         });
     }, [user]);
 
-    // Load Pets (Paginated)
-    const loadPets = useCallback(async (reset = false) => {
-        if (!user) return;
-        setLoading(true);
-
-        const currentPage = reset ? 1 : page;
-
-        try {
+    // React Query for Infinite Scroll
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading
+    } = useInfiniteQuery({
+        queryKey: ['pets', {
+            types: selectedTypes,
+            breeds: selectedBreeds,
+            ages: selectedAges,
+            search: searchQuery,
+            distance: maxDistance,
+            userLoc, // Careful with object stability if not memoized, but state update ensures referential stability usually
+            location: locationQuery,
+            country: countryQuery,
+            state: stateQuery,
+            gender: selectedGender
+        }],
+        queryFn: async ({ pageParam = 1 }) => {
+            if (!user) return [];
             const { data } = await petService.getPetsPaginated(
                 user.id,
-                currentPage,
+                pageParam,
                 20,
                 {
-                    type: selectedTypes, // Pass array directly
+                    type: selectedTypes,
                     breeds: selectedBreeds,
                     ages: selectedAges,
                     search: searchQuery,
@@ -103,41 +110,30 @@ const MatchFeed = () => {
                     userLocation: userLoc,
                     location: locationQuery,
                     country: countryQuery,
-                    state: stateQuery, // Pass state
+                    state: stateQuery,
                     gender: selectedGender
                 }
             );
+            return data;
+        },
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage.length === 20 ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
+        enabled: !!user,
+        staleTime: 1000 * 60 * 5, // 5 minutes cache
+    });
 
-            if (reset) {
-                setPets(data);
-                setPage(2); // Next page will be 2
-            } else {
-                setPets(prev => {
-                    // Deduplicate just in case
-                    const existingIds = new Set(prev.map(p => p.id));
-                    const newPets = data.filter(p => !existingIds.has(p.id));
-                    return [...prev, ...newPets];
-                });
-                setPage(prev => prev + 1);
-            }
-
-            // If we got fewer than requested or hit total count, no more
-            setHasMore(data.length === 20);
-
-        } catch (err) {
-            console.error(err);
-            showToast("Failed to load pets", "error");
-        } finally {
-            setLoading(false);
-        }
-    }, [user, page, selectedTypes, selectedBreeds, selectedAges, searchQuery, maxDistance, userLoc, locationQuery, countryQuery, stateQuery, selectedGender, showToast]);
+    const pets = useMemo(() => {
+        return (data?.pages.flat() || []) as any[];
+    }, [data]);
 
     // Infinite Scroll Observer
     useEffect(() => {
         const observer = new IntersectionObserver(
             entries => {
-                if (entries[0].isIntersecting && hasMore && !loading) {
-                    loadPets(false);
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
                 }
             },
             { threshold: 1.0 }
@@ -150,18 +146,7 @@ const MatchFeed = () => {
         return () => {
             if (observerRef.current) observer.unobserve(observerRef.current);
         };
-    }, [hasMore, loading, loadPets]);
-
-    // Trigger load when filters change
-    useEffect(() => {
-        // Debounce search slightly if typing fast, but for now simple effect
-        const timer = setTimeout(() => {
-            loadPets(true);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [loadPets]);
-
-
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
@@ -775,11 +760,12 @@ const MatchFeed = () => {
                         gap: '1rem',
                         paddingBottom: '2rem'
                     }}>
-                        {loading && pets.length === 0 ? (
+                        {isLoading && (
                             Array.from({ length: 8 }).map((_, i) => (
                                 <PetCardSkeleton key={i} />
                             ))
-                        ) : pets.length > 0 ? (
+                        )}
+                        {!isLoading && pets.length > 0 && (
                             <>
                                 {pets.map(pet => (
                                     <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
@@ -798,157 +784,118 @@ const MatchFeed = () => {
                                                 display: 'block'
                                             }}
                                         >
-                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
-                                                {/* Full Height Image */}
-                                                <img
-                                                    src={pet.image}
-                                                    alt={pet.name}
-                                                    loading="lazy"
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover',
-                                                        transition: 'transform 0.5s ease',
-                                                        transform: hoveredId === pet.id ? 'scale(1.05)' : 'scale(1)'
-                                                    }}
-                                                />
-
-                                                {/* Gradient Overlay */}
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    height: '60%',
-                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
-                                                    pointerEvents: 'none'
-                                                }} />
+                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
+                                                <div style={{ position: 'relative', height: '100%' }}>
+                                                    <img
+                                                        src={pet.images?.[0] || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'}
+                                                        alt={pet.name}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    />
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        padding: '1.5rem',
+                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)',
+                                                        color: 'white',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        justifyContent: 'flex-end',
+                                                        height: '60%' // Gradient height
+                                                    }}>
+                                                        <div style={{ transform: 'translateY(0)', transition: 'transform 0.3s' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.25rem' }}>
+                                                                <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>
+                                                                    {pet.name}, <span style={{ fontWeight: 400, fontSize: '1.25rem' }}>{pet.age}</span>
+                                                                </h3>
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem', fontWeight: 500 }}>
+                                                                <MapPin size={16} weight="fill" color="#e11d48" />
+                                                                {userLoc && pet.latitude && pet.longitude ? (
+                                                                    <span>{getDistance(userLoc.lat, userLoc.lng, Number(pet.latitude), Number(pet.longitude))} away</span>
+                                                                ) : (
+                                                                    <span>{pet.location}</span>
+                                                                )}
+                                                            </div>
+                                                            <p style={{
+                                                                fontSize: '0.875rem',
+                                                                lineHeight: 1.4,
+                                                                opacity: 0.8,
+                                                                margin: 0,
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 2,
+                                                                WebkitBoxOrient: 'vertical',
+                                                                overflow: 'hidden'
+                                                            }}>
+                                                                {pet.bio}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </Link>
-
-                                            {/* Top Left: Distance Badge */}
-                                            <div style={{
-                                                position: 'absolute',
-                                                top: '12px',
-                                                left: '12px',
-                                                background: 'rgba(255, 255, 255, 0.95)',
-                                                backdropFilter: 'blur(4px)',
-                                                padding: '6px 12px',
-                                                borderRadius: '20px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                                                zIndex: 10
-                                            }}>
-                                                <MapPin weight="fill" size={14} color="var(--primary-600)" />
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
-                                                    {pet.owner_profile?.show_location === false ? 'Hidden' : (getDistance(userLoc?.lat, userLoc?.lng, pet.owner_profile?.latitude, pet.owner_profile?.longitude) || 'Unknown')}
-                                                </span>
-                                            </div>
-
-
-
-                                            {/* Top Right: Like Button */}
-                                            <Button
+                                            <button
+                                                className="like-button"
                                                 onClick={(e) => handleLike(e, pet)}
                                                 style={{
                                                     position: 'absolute',
-                                                    top: '12px',
-                                                    right: '12px',
-                                                    background: 'rgba(255, 255, 255, 0.95)',
-                                                    backdropFilter: 'blur(4px)',
+                                                    top: '1rem',
+                                                    right: '1rem',
+                                                    background: 'rgba(255, 255, 255, 0.2)',
+                                                    backdropFilter: 'blur(8px)',
+                                                    border: '1px solid rgba(255,255,255,0.3)',
                                                     borderRadius: '50%',
-                                                    width: '36px',
-                                                    height: '36px',
-                                                    padding: 0,
-                                                    boxShadow: likes.includes(pet.id)
-                                                        ? '0 0 15px rgba(239, 68, 68, 0.6), 0 2px 8px rgba(0,0,0,0.15)'
-                                                        : '0 2px 8px rgba(0,0,0,0.15)',
-                                                    zIndex: 10,
-                                                    border: 'none',
+                                                    width: '44px',
+                                                    height: '44px',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     cursor: 'pointer',
-                                                    transition: 'all 0.3s ease'
+                                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                    zIndex: 10,
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                                 }}
                                             >
                                                 <Heart
-                                                    weight="fill"
-                                                    color={likes.includes(pet.id) ? '#ef4444' : 'var(--gray-900)'}
-                                                    size={18}
+                                                    size={24}
+                                                    weight={likes.includes(pet.id) ? "fill" : "bold"}
+                                                    color={likes.includes(pet.id) ? "#ef4444" : "white"}
+                                                    style={{
+                                                        filter: likes.includes(pet.id) ? 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                                                        transform: likes.includes(pet.id) ? 'scale(1.1)' : 'scale(1)'
+                                                    }}
                                                 />
-                                            </Button>
-
-                                            {/* Bottom Left: Info Overlay */}
-                                            <div style={{
-                                                position: 'absolute',
-                                                bottom: '24px',
-                                                left: '24px',
-                                                right: '24px',
-                                                zIndex: 10,
-                                                pointerEvents: 'none'
-                                            }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', overflow: 'hidden', border: '1px solid white' }}>
-                                                        <img
-                                                            src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'User'}&background=random`}
-                                                            alt="Owner"
-                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                        />
-                                                    </div>
-                                                    <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', fontWeight: 600 }}>
-                                                        {pet.owner_profile?.username || 'Owner'}
-                                                    </div>
-                                                </div>
-
-                                                <h3 style={{
-                                                    fontSize: '1.75rem',
-                                                    fontWeight: 800,
-                                                    color: 'white',
-                                                    marginBottom: '4px',
-                                                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                                                    fontFamily: '"Outfit", sans-serif',
-                                                    letterSpacing: '-0.02em',
-                                                    lineHeight: 1.1
-                                                }}>
-                                                    {pet.name}
-                                                </h3>
-                                                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
-                                                    {pet.gender || 'Unknown Gender'}
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontWeight: 500 }}>
-                                                    <span>{pet.breed}</span>
-                                                    <span style={{ opacity: 0.6 }}>•</span>
-                                                    <span>{/^\d+$/.test(pet.age?.toString()) ? `${pet.age} yrs` : pet.age}</span>
-                                                </div>
-                                            </div>
+                                            </button>
                                         </Card>
                                     </div>
                                 ))}
+                                {isFetchingNextPage && (
+                                    Array.from({ length: 4 }).map((_, i) => (
+                                        <PetCardSkeleton key={`loading-${i}`} />
+                                    ))
+                                )}
                             </>
-                        ) : (
-                            !loading && (
-                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
-                                    <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                                        <PawPrint size={32} weight="duotone" />
-                                    </div>
-                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
-                                    <p style={{ fontSize: '1rem' }}>Try adjusting your search or filters.</p>
-                                    <Button variant="outline" onClick={clearFilters} style={{ marginTop: '1.5rem' }}>Clear Filters</Button>
+                        )}
+                        {!isLoading && pets.length === 0 && (
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
+                                <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                    <PawPrint size={32} weight="duotone" />
                                 </div>
-                            )
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
+                                <p style={{ fontSize: '1rem' }}>Try adjusting your search or filters.</p>
+                                <Button variant="outline" onClick={clearFilters} style={{ marginTop: '1.5rem' }}>Clear Filters</Button>
+                            </div>
                         )}
 
                         {/* Infinite Scroll Skeletons */}
-                        {pets.length > 0 && loading && (
+                        {isFetchingNextPage && (
                             Array.from({ length: 4 }).map((_, i) => (
                                 <PetCardSkeleton key={`more-skeleton-${i}`} />
                             ))
                         )}
 
                         {/* Infinite Scroll Sentinel */}
-                        {pets.length > 0 && hasMore && (
+                        {hasNextPage && (
                             <div
                                 ref={observerRef}
                                 style={{
