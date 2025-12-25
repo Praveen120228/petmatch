@@ -642,6 +642,20 @@ const PetProfile = () => {
                 <Button variant="outline" style={{ flex: 1 }} onClick={handleMessage}>
                     Message
                 </Button>
+                {/* Mobile Date Button */}
+                {user && user.id !== (pet.ownerId || pet.owner_id) && !datingInfo?.partner && (
+                    <Button
+                        onClick={handleOpenDateModal}
+                        style={{
+                            padding: '0.75rem',
+                            background: 'linear-gradient(to right, #ec4899, #8b5cf6)',
+                            border: 'none', color: 'white', borderRadius: '12px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}
+                    >
+                        <Sparkle size={24} weight="fill" />
+                    </Button>
+                )}
                 {user && user.id === (pet.ownerId || pet.owner_id) && datingInfo?.partner && (
                     <Button variant="outline" style={{ flex: 1, borderColor: '#ef4444', color: '#ef4444' }} onClick={handleBreakUp}>
                         Break Up

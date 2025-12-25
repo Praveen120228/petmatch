@@ -15,6 +15,20 @@ import { storageService } from '../lib/storageService';
 import { dateService } from '../lib/dateService';
 import { chatService } from '../lib/chatService';
 
+const COUNTRY_CODES = [
+    { code: '+1', country: 'US/CA' },
+    { code: '+44', country: 'UK' },
+    { code: '+91', country: 'IN' },
+    { code: '+61', country: 'AU' },
+    { code: '+81', country: 'JP' },
+    { code: '+49', country: 'DE' },
+    { code: '+33', country: 'FR' },
+    { code: '+86', country: 'CN' },
+    { code: '+971', country: 'UAE' },
+    { code: '+65', country: 'SG' },
+    // Add more as needed
+];
+
 const Profile = () => {
     const { user, logout, updateUser } = useAuth();
     const navigate = useNavigate();
@@ -40,7 +54,8 @@ const Profile = () => {
         latitude: null as number | null,
         longitude: null as number | null,
         show_location: true,
-        phone_number: '' // Added phone_number
+        phone_number: '',
+        country_code: '+1' // Default
     });
 
     const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
@@ -189,18 +204,31 @@ const Profile = () => {
                             setProfileData(userProfile);
 
                             // Initialize form with fresh data
+                            // Parse phone number
+                            const rawPhone = userProfile.phone_number || '';
+                            let initialCode = '+1';
+                            let initialNum = rawPhone;
+                            for (const c of COUNTRY_CODES) {
+                                if (rawPhone.startsWith(c.code)) {
+                                    initialCode = c.code;
+                                    initialNum = rawPhone.slice(c.code.length);
+                                    break;
+                                }
+                            }
+
                             setEditForm({
                                 name: userProfile.name || '',
                                 username: userProfile.username || '',
                                 location: userProfile.location || '',
                                 country: userProfile.country || '',
-                                state: userProfile.state || '', // Load state,
+                                state: userProfile.state || '',
                                 bio: userProfile.bio || '',
                                 image: userProfile.avatar_url || '',
                                 latitude: userProfile.latitude || null,
                                 longitude: userProfile.longitude || null,
                                 show_location: userProfile.show_location !== false,
-                                phone_number: userProfile.phone_number || '' // Load phone_number
+                                country_code: initialCode,
+                                phone_number: initialNum
                             });
                         }
                     }
@@ -350,7 +378,7 @@ const Profile = () => {
                 latitude: editForm.latitude || undefined,
                 longitude: editForm.longitude || undefined,
                 show_location: editForm.show_location,
-                phone_number: editForm.phone_number // Save phone_number
+                phone_number: `${editForm.country_code}${editForm.phone_number}` // Combine
             });
 
             // Update Auth Context (for app-wide name/image)
@@ -635,13 +663,24 @@ const Profile = () => {
                                                     </div>
                                                     <div style={{ flex: 1 }}>
                                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Phone Number <span style={{ color: 'red' }}>*</span></label>
-                                                        <input
-                                                            type="tel"
-                                                            value={editForm.phone_number}
-                                                            onChange={e => setEditForm({ ...editForm, phone_number: e.target.value })}
-                                                            placeholder="+1234567890"
-                                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
-                                                        />
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <select
+                                                                value={editForm.country_code}
+                                                                onChange={e => setEditForm({ ...editForm, country_code: e.target.value })}
+                                                                style={{ width: '80px', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: 'white' }}
+                                                            >
+                                                                {COUNTRY_CODES.map(c => (
+                                                                    <option key={c.code} value={c.code}>{c.code} ({c.country})</option>
+                                                                ))}
+                                                            </select>
+                                                            <input
+                                                                type="tel"
+                                                                value={editForm.phone_number}
+                                                                onChange={e => setEditForm({ ...editForm, phone_number: e.target.value })}
+                                                                placeholder="1234567890"
+                                                                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
 
