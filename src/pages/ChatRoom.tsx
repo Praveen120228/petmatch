@@ -138,6 +138,35 @@ const ChatRoom = () => {
         }
     };
 
+    const renderContentWithLinks = (text: string) => {
+        if (!text) return null;
+
+        // Regex to find URLs (starting with http://, https://, or www.)
+        const urlRegex = /((?:https?:\/\/|www\.)[^\s]+)/g;
+
+        return text.split(urlRegex).map((part, index) => {
+            if (part.match(urlRegex)) {
+                let href = part;
+                if (!href.startsWith('http')) {
+                    href = `https://${href}`;
+                }
+                return (
+                    <a
+                        key={index}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: 'inherit', textDecoration: 'underline', fontWeight: 600 }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return part; // Return text as is
+        });
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if ((!inputText.trim() && !selectedImage) || !user) return;
@@ -180,6 +209,12 @@ const ChatRoom = () => {
     return (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
 
+            <style>{`
+                @media (min-width: 768px) {
+                    .hide-on-desktop { display: none !important; }
+                }
+            `}</style>
+
             {/* Header */}
             <div style={{
                 padding: '0.75rem 1rem', // Reduced padding for mobile
@@ -196,6 +231,7 @@ const ChatRoom = () => {
                 <Button
                     variant="ghost"
                     onClick={() => navigate('/messages')}
+                    className="hide-on-desktop"
                     style={{ padding: '0.5rem', borderRadius: '50%' }}
                 >
                     <CaretLeft size={24} weight="bold" />
@@ -316,9 +352,10 @@ const ChatRoom = () => {
                                                 flex: 1,
                                                 minWidth: '50px',
                                                 alignSelf: 'flex-start',
-                                                paddingBottom: '2px'
+                                                paddingBottom: '2px',
+                                                wordBreak: 'break-word' // Ensure long links wrap
                                             }}>
-                                                {msg.text}
+                                                {renderContentWithLinks(msg.text)}
                                             </div>
                                         )}
                                         <div style={{
