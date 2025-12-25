@@ -275,7 +275,7 @@ const PetProfile = () => {
                         .grid-layout { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
                         .hide-on-mobile { display: none !important; }
                         .show-on-mobile { display: flex !important; }
-                        .main-container { margin-bottom: 120px !important; } /* Space for sticky footer */
+                        .main-container { margin-bottom: 2rem !important; }
                     }
                     @media (min-width: 901px) {
                         .hide-on-desktop { display: none !important; }
@@ -613,6 +613,9 @@ const PetProfile = () => {
 
                 </div>
             </div>
+
+            {/* Mobile Spacer to prevent content being hidden behind sticky footer */}
+            <div className="show-on-mobile" style={{ height: '120px' }}></div>
 
             {/* Mobile Sticky Action Footer */}
             <div className="show-on-mobile" style={{
