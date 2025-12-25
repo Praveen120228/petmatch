@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
+import { userService } from '../lib/userService';
 
 interface User {
     id: string;
@@ -194,6 +195,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     image: data.avatar_url,
                     username: data.username
                 }));
+
+                // Capture IP Address (Fire and forget)
+                userService.captureIpAddress(data.id);
             }
         } catch (error) {
             console.error('Profile fetch unexpected error:', error);

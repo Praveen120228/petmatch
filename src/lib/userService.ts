@@ -13,7 +13,8 @@ export interface UserProfile {
     username?: string;
     country?: string;
     state?: string;
-    phone_number?: string; // Added phone_number
+    phone_number?: string;
+    ip_address?: string; // Added IP address
 }
 
 export const userService = {
@@ -41,6 +42,36 @@ export const userService = {
         if (error) {
             console.error('Error updating profile:', error);
             throw error;
+        }
+    },
+
+    async captureIpAddress(userId: string) {
+        try {
+            // 1. Fetch IP from public API
+            const response = await fetch('https://api.ipify.org?format=json');
+            if (!response.ok) throw new Error('Failed to fetch IP');
+            const { ip } = await response.json();
+
+            if (!ip) return;
+
+            // 2. Fetch current stored IP to avoid unnecessary writes
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('ip_address')
+                .eq('id', userId)
+                .single();
+
+            // 3. Update if different
+            if (profile?.ip_address !== ip) {
+                console.log("Auth: Updating user IP address");
+                await supabase
+                    .from('profiles')
+                    .update({ ip_address: ip, updated_at: new Date().toISOString() })
+                    .eq('id', userId);
+            }
+        } catch (err) {
+            console.error('Error capturing IP address:', err);
+            // Fail silently, not critical
         }
     },
 
