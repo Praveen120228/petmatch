@@ -275,7 +275,7 @@ const PetProfile = () => {
                         .grid-layout { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
                         .hide-on-mobile { display: none !important; }
                         .show-on-mobile { display: flex !important; }
-                        .main-container { margin-bottom: 80px !important; } /* Space for sticky footer */
+                        .main-container { margin-bottom: 120px !important; } /* Space for sticky footer */
                     }
                     @media (min-width: 901px) {
                         .hide-on-desktop { display: none !important; }
