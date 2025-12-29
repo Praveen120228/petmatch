@@ -140,6 +140,7 @@ const AddPet = () => {
 
     const handleSubmit = async () => {
         if (!user) return;
+        if (petForm.images.length === 0) return alert("Please add at least one photo of your pet");
         if (!petForm.name) return alert("Please enter a name");
         if (!petForm.breed) return alert("Please enter a breed");
 

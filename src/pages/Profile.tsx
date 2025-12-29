@@ -400,6 +400,7 @@ const Profile = () => {
 
     const handleSavePet = async () => {
         if (!editingPet || !user) return; // Need user for ID
+        if (!editingPet.image) return alert("Please add a photo of your pet");
         try {
             // 1. Upload Image if changed
             let imageUrl = editingPet.image;
