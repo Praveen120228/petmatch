@@ -1,3 +1,4 @@
+import SEO from '../components/SEO';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
@@ -476,6 +477,10 @@ const Profile = () => {
 
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)' }}>
+            <SEO
+                title={profileUser.name || 'Profile'}
+                description={isPublic ? `Check out ${profileUser.name}'s profile on Specyf` : 'Manage your pet profile and settings.'}
+            />
 
             {/* Minimalist Header */}
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>

@@ -1,9 +1,14 @@
 import { ThumbsUp, ThumbsDown } from '@phosphor-icons/react';
 import Card from '../components/Card';
+import SEO from '../components/SEO';
 
 const Guidelines = () => {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }} className="fade-in">
+            <SEO
+                title="Community Guidelines"
+                description="Read our community guidelines to ensure a safe and respectful environment for all pets and owners."
+            />
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                 <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Community Guidelines</h1>
                 <p style={{ fontSize: '1.25rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>

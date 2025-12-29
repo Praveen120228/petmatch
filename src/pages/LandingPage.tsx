@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { PawPrint, Heart, Chats, ShieldCheck, Star } from '@phosphor-icons/react';
+import SEO from '../components/SEO';
 
 const LandingPage = () => {
     const { isAuthenticated } = useAuth();
@@ -17,6 +18,10 @@ const LandingPage = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
+            <SEO
+                title="Home"
+                description="Join the #1 community for pets. Find playdates, adopt pets, and connect with local pet owners."
+            />
 
             {/* Hero Section */}
             <section style={{

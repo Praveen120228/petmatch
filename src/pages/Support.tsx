@@ -2,9 +2,15 @@ import { Envelope, Question } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 
+import SEO from '../components/SEO';
+
 const Support = () => {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }} className="fade-in">
+            <SEO
+                title="Support"
+                description="Get help and support for Specyf. Find answers to common questions about pet matching and adoption."
+            />
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                 <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Help & Support</h1>
                 <p style={{ fontSize: '1.25rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>

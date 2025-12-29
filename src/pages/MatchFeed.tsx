@@ -1,3 +1,4 @@
+import SEO from '../components/SEO';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -342,6 +343,10 @@ const MatchFeed = () => {
 
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)', display: 'flex', flexDirection: 'column' }}>
+            <SEO
+                title="Find Pets"
+                description="Browse adoptable pets and find your perfect match nearby."
+            />
 
             {/* Top Search Bar (Global) */}
             <div style={{

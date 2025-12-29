@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -20,7 +21,7 @@ import Guidelines from './pages/Guidelines';
 import Support from './pages/Support';
 
 import { ToastProvider } from './context/ToastContext';
-import { AnalyticsProvider } from './components/AnalyticsProvider'; // Added AnalyticsProvider
+import { AnalyticsProvider } from './components/AnalyticsProvider';
 
 // Wrapper to conditionally render Navbar
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -38,43 +39,45 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <Router>
-          <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <ErrorBoundary>
-              <Layout>
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/safety" element={<Safety />} />
-                  <Route path="/guidelines" element={<Guidelines />} />
-                  <Route path="/support" element={<Support />} />
+    <HelmetProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+            <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              <ErrorBoundary>
+                <Layout>
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/safety" element={<Safety />} />
+                    <Route path="/guidelines" element={<Guidelines />} />
+                    <Route path="/support" element={<Support />} />
 
-                  {/* Protected Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/onboarding" element={<Onboarding />} />
-                    <Route path="/add-pet" element={<AddPet />} />
-                    <Route path="/match" element={<MatchFeed />} />
-                    <Route path="/pet/:id" element={<PetProfile />} />
-                    <Route path="/messages" element={<Messages />}>
-                      <Route index element={<MessagesPlaceholder />} />
-                      <Route path=":id" element={<ChatRoom />} />
+                    {/* Protected Routes */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/onboarding" element={<Onboarding />} />
+                      <Route path="/add-pet" element={<AddPet />} />
+                      <Route path="/match" element={<MatchFeed />} />
+                      <Route path="/pet/:id" element={<PetProfile />} />
+                      <Route path="/messages" element={<Messages />}>
+                        <Route index element={<MessagesPlaceholder />} />
+                        <Route path=":id" element={<ChatRoom />} />
+                      </Route>
+                      <Route path="/messages/:id/info" element={<ChatSettings />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/user/:id" element={<Profile />} />
                     </Route>
-                    <Route path="/messages/:id/info" element={<ChatSettings />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/user/:id" element={<Profile />} />
-                  </Route>
-                </Routes>
-              </Layout>
-            </ErrorBoundary>
-          </div>
-        </Router>
-      </ToastProvider>
-    </AuthProvider>
+                  </Routes>
+                </Layout>
+              </ErrorBoundary>
+            </div>
+          </Router>
+        </ToastProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

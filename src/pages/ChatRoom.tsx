@@ -1,3 +1,4 @@
+import SEO from '../components/SEO';
 import { useRef, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -227,6 +228,7 @@ const ChatRoom = () => {
 
     return (
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
+            <SEO title={otherUserName ? `Chat with ${otherUserName}` : 'Chat'} />
 
             <style>{`
                 @media (min-width: 768px) {
