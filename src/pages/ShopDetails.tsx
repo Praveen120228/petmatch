@@ -96,7 +96,7 @@ const ShopDetails = () => {
 
     return (
         <div className="page-container fade-in">
-            <SEO title={`${shop.name} | PetMatch`} description={shop.description} />
+            <SEO title={`${shop.name} | Specyf`} description={shop.description} />
 
             {/* Header */}
             <div style={{ marginBottom: '3rem' }}>

@@ -92,7 +92,7 @@ const Navbar = () => {
             <nav style={navStyle}>
                 {isAuthenticated ? (
                     <Link to="/match" style={logoStyle} onClick={() => setMobileMenuOpen(false)}>
-                        <PawPrint weight="fill" color="currentColor" /> PetMatch
+                        <PawPrint weight="fill" color="currentColor" /> Specyf
                     </Link>
                 ) : (
                     <Link
@@ -100,7 +100,7 @@ const Navbar = () => {
                         style={{ ...logoStyle, textDecoration: 'none', cursor: 'pointer' }}
                         onClick={() => setMobileMenuOpen(false)}
                     >
-                        <PawPrint weight="fill" color="currentColor" /> PetMatch
+                        <PawPrint weight="fill" color="currentColor" /> Specyf
                     </Link>
                 )}
 
@@ -129,9 +129,7 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <Link to="/shops" style={linkStyle('/shops')}>
-                                <Storefront size={20} /> Shops
-                            </Link>
+
                             <Link to="/for-pet-businesses" style={{ ...linkStyle('/for-pet-businesses'), marginRight: '0.5rem', fontSize: '0.875rem', color: '#4b5563' }}>
                                 For Business
                             </Link>
@@ -175,9 +173,7 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <Link to="/shops" style={linkStyle('/shops')} onClick={() => setMobileMenuOpen(false)}>
-                                <Storefront size={24} /> <span style={{ fontSize: '1.25rem' }}>Shops</span>
-                            </Link>
+
                             <Link to="/for-pet-businesses" style={linkStyle('/for-pet-businesses')} onClick={() => setMobileMenuOpen(false)}>
                                 <span style={{ fontSize: '1.25rem' }}>For Business</span>
                             </Link>

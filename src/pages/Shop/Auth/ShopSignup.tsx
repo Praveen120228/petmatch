@@ -56,14 +56,14 @@ const ShopSignup = () => {
 
     return (
         <div className="fade-in" style={{ minHeight: '100vh', display: 'flex', background: '#f8fafc' }}>
-            <SEO title="Partner Sign Up" description="Register your pet shop or clinic on PetMatch." />
+            <SEO title="Partner Sign Up" description="Register your pet shop or clinic on Specyf." />
 
             {/* Left Side - Hero/Branding */}
             <div className="hide-on-mobile" style={{ flex: '1', background: 'var(--primary-600)', padding: '4rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', color: 'white' }}>
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
                         <PawPrint size={32} weight="fill" />
-                        <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>PetMatch Partner</span>
+                        <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>Specyf Partner</span>
                     </div>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '1.5rem', maxWidth: '500px' }}>
                         Grow your pet business with us.
@@ -96,7 +96,7 @@ const ShopSignup = () => {
                     <div className="hide-on-desktop" style={{ textAlign: 'center', marginBottom: '2rem' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-600)' }}>
                             <PawPrint size={28} weight="fill" />
-                            <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>PetMatch Partner</span>
+                            <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>Specyf Partner</span>
                         </div>
                     </div>
 

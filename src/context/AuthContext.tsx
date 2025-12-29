@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(() => {
         // Hydrate from localStorage immediately
         try {
-            const cached = localStorage.getItem('petmatch_user');
+            const cached = localStorage.getItem('specyf_user');
             return cached ? JSON.parse(cached) : null;
         } catch {
             return null;
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 });
 
                 // Update Cache
-                localStorage.setItem('petmatch_user', JSON.stringify({
+                localStorage.setItem('specyf_user', JSON.stringify({
                     id: data.id,
                     name: data.name,
                     email: data.email,
@@ -194,7 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setUser(prev => {
             const updated = prev ? { ...prev, ...data } : null;
-            if (updated) localStorage.setItem('petmatch_user', JSON.stringify(updated));
+            if (updated) localStorage.setItem('specyf_user', JSON.stringify(updated));
             return updated;
         });
     };
@@ -202,7 +202,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = async () => {
         await supabase.auth.signOut();
         // Force clear local storage to prevent stale tokens from freezing the app on next login
-        localStorage.clear(); // This clears everything including petmatch_user
+        localStorage.clear(); // This clears everything including specyf_user
         setUser(null);
     };
 
@@ -239,7 +239,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 }
 `}</style>
                         <span style={{ fontFamily: 'system-ui', fontSize: '1.125rem', fontWeight: 500 }}>
-                            Loading PetMatch...
+                            Loading Specyf...
                         </span>
                     </div>
                 </div>

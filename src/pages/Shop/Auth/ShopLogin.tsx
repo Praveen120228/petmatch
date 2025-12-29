@@ -68,7 +68,7 @@ const ShopLogin = () => {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f9fafb' }}>
             <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center' }}>
                 <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#4F46E5', fontWeight: 800, fontSize: '1.5rem' }}>
-                    <PawPrint weight="fill" /> PetMatch <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 500, marginLeft: '0.5rem' }}>Business</span>
+                    <PawPrint weight="fill" /> Specyf <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 500, marginLeft: '0.5rem' }}>Business</span>
                 </Link>
             </div>
 

@@ -37,7 +37,7 @@ const ShopLanding = () => {
                         marginBottom: '1.5rem',
                         lineHeight: 1.1
                     }}>
-                        Grow your pet business with <span style={{ color: '#16a34a' }}>PetMatch</span>
+                        Grow your pet business with <span style={{ color: '#16a34a' }}>Specyf</span>
                     </h1>
                     <p style={{
                         fontSize: '1.25rem',

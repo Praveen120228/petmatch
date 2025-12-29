@@ -479,7 +479,7 @@ const Profile = () => {
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)' }}>
             <SEO
                 title={profileUser.name || 'Profile'}
-                description={isPublic ? `Check out ${profileUser.name}'s profile on PetMatch` : 'Manage your pet profile and settings.'}
+                description={isPublic ? `Check out ${profileUser.name}'s profile on Specyf` : 'Manage your pet profile and settings.'}
             />
 
             {/* Minimalist Header */}

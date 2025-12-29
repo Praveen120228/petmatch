@@ -49,7 +49,7 @@ const ShopLayout = () => {
                 <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-600)' }}>
                         <Storefront size={32} weight="duotone" />
-                        <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>PetMatch</span>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>Specyf</span>
                         <span style={{ fontSize: '0.75rem', background: '#e0e7ff', color: 'var(--primary-700)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>Partner</span>
                     </div>
                 </div>
