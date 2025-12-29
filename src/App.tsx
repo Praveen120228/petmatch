@@ -1,6 +1,14 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from './components/ErrorBoundary';
+import ShopLayout from './components/ShopLayout';
+import ShopSignup from './pages/Shop/Auth/ShopSignup';
+import ShopDashboard from './pages/Shop/ShopDashboard';
+import ShopSchedule from './pages/Shop/ShopSchedule';
+import ShopServices from './pages/Shop/ShopServices';
+import ShopBookings from './pages/Shop/ShopBookings';
+import ShopsList from './pages/ShopsList';
+import ShopDetails from './pages/ShopDetails';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -37,6 +45,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// ... App component ...
 function App() {
   return (
     <HelmetProvider>
@@ -45,10 +54,13 @@ function App() {
           <Router>
             <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
               <ErrorBoundary>
-                <Layout>
-                  <Routes>
+                <Routes>
+                  {/* Main Website Layout */}
+                  <Route element={<Layout><Outlet /></Layout>}>
                     {/* Public Routes */}
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/shops" element={<ShopsList />} />
+                    <Route path="/shops/:id" element={<ShopDetails />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/about" element={<About />} />
@@ -56,7 +68,7 @@ function App() {
                     <Route path="/guidelines" element={<Guidelines />} />
                     <Route path="/support" element={<Support />} />
 
-                    {/* Protected Routes */}
+                    {/* Protected User Routes */}
                     <Route element={<ProtectedRoute />}>
                       <Route path="/onboarding" element={<Onboarding />} />
                       <Route path="/add-pet" element={<AddPet />} />
@@ -70,8 +82,26 @@ function App() {
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/user/:id" element={<Profile />} />
                     </Route>
-                  </Routes>
-                </Layout>
+                  </Route>
+
+                  {/* Shop Owner Portal Layout */}
+                  <Route path="/shop" element={<ShopLayout />}>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<ShopDashboard />} />
+                    <Route path="schedule" element={<ShopSchedule />} />
+                    <Route path="bookings" element={<ShopBookings />} />
+                    <Route path="services" element={<ShopServices />} />
+                  </Route>
+
+                  {/* Shop Auth Routes */}
+                  <Route path="/shop/signup" element={<ShopSignup />} />
+
+                  {/* Shop Auth Routes (Outside Layouts or Custom) */}
+                  {/* We can reuse main layout or blank. Let's use blank for simplicity or Main if we want Navbar. */}
+                  {/* For now, just placeholder or reuse existing Login with logic? 
+                        Plan says /shop/signup. Let's redirect standard login for now or basic route. 
+                    */}
+                </Routes>
               </ErrorBoundary>
             </div>
           </Router>

@@ -8,13 +8,14 @@ interface User {
     email: string;
     image?: string;
     username?: string;
+    role?: 'user' | 'shop_owner';
 }
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-    signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
+    signup: (name: string, email: string, password: string, role?: 'user' | 'shop_owner') => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
     updateUser: (data: Partial<User>) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
@@ -32,89 +33,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return null;
         }
     });
-    const [loading, setLoading] = useState(!user); // If user exists, not loading initially
+    const [loading, setLoading] = useState(true);
 
-    // Initialize Auth State & Listen for Changes
     useEffect(() => {
-        let mounted = true;
-
-        // 1. Get initial session
-        const initSession = async () => {
-            try {
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (!mounted) return;
-
-                if (error) {
-                    console.error("Auth: Session validation error:", error);
-                }
-
-                if (session?.user) {
-                    console.log("Auth: Session restored for", session.user.email);
-
-                    // Only update state if cache was empty to prevent flicker
-                    if (!user) {
-                        setUser({
-                            id: session.user.id,
-                            email: session.user.email!,
-                            name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-                            image: ''
-                        });
-                        setLoading(false); // Can show immediately
-                    }
-
-                    // Fetch full profile in background to revalidate
-                    fetchProfile(session.user.id, session.user.email!);
-                } else {
-                    console.log("Auth: No active session found.");
-                    setUser(null);
-                    localStorage.removeItem('petmatch_user');
-                    if (mounted) setLoading(false);
-                }
-            } catch (error) {
-                console.error("Auth: Initialization error:", error);
-                if (mounted) setLoading(false);
-            }
-        };
-
-        initSession();
-
-        // 2. Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (!mounted) return;
-            console.log(`Auth: Event occurred "${event}"`);
-
+        // Check active session
+        supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
-                // If user was previously null or different, update state
-                setUser(prev => {
-                    // Avoid unnecessary re-renders if ID matches
-                    if (prev?.id === session.user.id) return prev;
+                fetchProfile(session.user.id, session.user.email || '');
+            } else {
+                setLoading(false);
+            }
+        });
 
-                    return {
-                        id: session.user.id,
-                        email: session.user.email!,
-                        name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-                        image: ''
-                    };
-                });
-
-                // Always fetch profile on sign-in (could optimize to only if id changed)
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-                    fetchProfile(session.user.id, session.user.email!);
-                }
-            } else if (event === 'SIGNED_OUT') {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                fetchProfile(session.user.id, session.user.email || '');
+            } else {
                 setUser(null);
                 setLoading(false);
             }
         });
 
-        return () => {
-            mounted = false;
-            subscription.unsubscribe();
-        };
+        return () => subscription.unsubscribe();
     }, []);
 
     const fetchProfile = async (userId: string, email: string) => {
-        console.log("Auth: Fetching profile from DB...");
         try {
             // 1. Attempt to fetch
             let { data, error } = await supabase
@@ -123,86 +66,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .eq('id', userId)
                 .single();
 
-            // 2. If missing, attempt to create (handle race conditions)
+            // 2. If missing, attempt to create
             if (error) {
-                console.log('Auth: Profile missing, attempting creation...');
-
                 const { data: newProfile, error: createError } = await supabase
                     .from('profiles')
                     .insert({
                         id: userId,
                         email: email,
                         name: (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
-                        avatar_url: ''
+                        avatar_url: '',
+                        role: 'user'
                     })
                     .select()
                     .single();
 
-                if (createError) {
-                    // Check for conflict (409) or other errors that imply it exists now
-                    // Postgres error 23505 is unique_violation
-                    if (createError.code === '23505' || createError.message.includes('duplicate key')) {
-                        console.log("Auth: Profile creation conflict, fetching existing...");
-                        // Retry fetch
-                        const { data: retryData, error: retryError } = await supabase
-                            .from('profiles')
-                            .select('*')
-                            .eq('id', userId)
-                            .single();
-
-                        if (retryData) {
-                            data = retryData;
-                            error = null;
-                        } else {
-                            console.error("Auth: Failed to fetch profile after conflict:", retryError);
-                        }
-                    } else if (createError.code === '23503') {
-                        // Error 23503: Foreign key violation (auth.uid() does not exist in auth.users)
-                        // This happens if the user was deleted from DB but local session persists
-                        console.error("Auth: Stale session detected (User missing in DB). Forcing logout.");
-                        await logout();
-                        return;
-                    } else {
-                        console.error('Failed to auto-create profile:', createError);
-                        // Fallback to local state only if creation failed and data is still missing
-                        const { data: userData } = await supabase.auth.getUser();
-                        const metaName = userData.user?.user_metadata?.name;
-                        setUser(prev => prev || { id: userId, name: metaName || email.split('@')[0], email: email });
-                        return;
-                    }
-                } else {
+                if (!createError) {
                     data = newProfile;
-                    error = null;
-                    console.log("Auth: Profile auto-created");
                 }
             }
 
-            // 3. Update State with final data
+            // 3. Update State
             if (data) {
-                console.log("Auth: Profile loaded, updating user state");
                 setUser({
                     id: data.id,
-                    name: data.name || (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
-                    email: data.email || email,
+                    name: data.name,
+                    email: data.email,
                     image: data.avatar_url,
+                    role: data.role as 'user' | 'shop_owner'
                 });
 
                 // Update Cache
                 localStorage.setItem('petmatch_user', JSON.stringify({
                     id: data.id,
-                    name: data.name || (await supabase.auth.getUser()).data.user?.user_metadata?.name || email.split('@')[0],
-                    email: data.email || email,
+                    name: data.name,
+                    email: data.email,
                     image: data.avatar_url,
-                    username: data.username
+                    role: data.role
                 }));
 
-                // Capture IP Address (Fire and forget)
-                userService.captureIpAddress(data.id);
+                if (data.id) {
+                    userService.captureIpAddress(data.id);
+                }
             }
-        } catch (error) {
-            console.error('Profile fetch unexpected error:', error);
+        } catch (err) {
+            console.error('Profile fetch error:', err);
         }
     };
+
 
     const login = async (email: string, password: string) => {
         const { error } = await supabase.auth.signInWithPassword({
@@ -216,18 +126,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: true };
     };
 
-    const signup = async (name: string, email: string, password: string) => {
+    const signup = async (name: string, email: string, password: string, role: 'user' | 'shop_owner' = 'user') => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                data: { name } // Passed to metadata, can be used by triggers
+                data: { name, role } // Pass role to metadata, triggers can use this or we use it on profile creation
             }
         });
 
         if (error) return { success: false, error: error.message };
 
         if (data.user) {
+            // Need to ensure profile handles role.
+            // If we have a trigger that creates profile from metadata, great.
+            // If not, our fetchProfile logic handles creation but needs to know role.
+            // Since fetchProfile is 'lazy', we might want to force create profile here if we want role set immediately.
+
+            // HACK: For now, we will count on metadata being available or setting it during profile auto-creation if we change that logic.
+            // Actually, let's explicitely write to profiles if we can, but we are likely RLS restricted until confirming email?
+            // Safer: Just rely on metadata for now, and handle profile 'upsert' with role later.
+
             // Check if email confirmation is required (session will be null)
             if (!data.session) {
                 return { success: true, confirmationRequired: true };
@@ -238,7 +157,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 id: data.user.id,
                 name,
                 email,
-                image: ''
+                image: '',
+                role: role
+            });
+
+            // Force profile create/update with Role
+            await supabase.from('profiles').upsert({
+                id: data.user.id,
+                email,
+                name,
+                role
             });
 
             return { success: true };
@@ -303,11 +231,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             animation: 'spin 1s linear infinite'
                         }} />
                         <style>{`
-                            @keyframes spin {
-                                0% { transform: rotate(0deg); }
-                                100% { transform: rotate(360deg); }
-                            }
-                        `}</style>
+@keyframes spin {
+    0 % { transform: rotate(0deg); }
+    100 % { transform: rotate(360deg); }
+}
+`}</style>
                         <span style={{ fontFamily: 'system-ui', fontSize: '1.125rem', fontWeight: 500 }}>
                             Loading PetMatch...
                         </span>
