@@ -27,14 +27,14 @@ function LocationMarker({ position, setPosition }: { position: { lat: number, ln
     return position ? <Marker position={position}></Marker> : null;
 }
 
-function MyLocater({ setPos }: { setPos: (pos: { lat: number, lng: number }) => void }) {
+// Improved Controller
+function MapController({ coords }: { coords?: { lat: number, lng: number } | null }) {
     const map = useMapEvents({});
     useEffect(() => {
-        map.locate().on("locationfound", function (e) {
-            setPos(e.latlng);
-            map.flyTo(e.latlng, map.getZoom());
-        });
-    }, [map]);
+        if (coords) {
+            map.flyTo(coords, 18, { duration: 1.5 });
+        }
+    }, [coords, map]);
     return null;
 }
 
@@ -60,6 +60,31 @@ const ShopOnboarding = () => {
         country: '',
         coords: null as { lat: number, lng: number } | null
     });
+
+    // Add Search State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searching, setSearching] = useState(false);
+
+    const handleAddressSearch = async () => {
+        if (!searchQuery) return;
+        setSearching(true);
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+            const data = await res.json();
+            if (data && data.length > 0) {
+                const { lat, lon } = data[0];
+                const newPos = { lat: parseFloat(lat), lng: parseFloat(lon) };
+                setLocInfo(prev => ({ ...prev, coords: newPos }));
+            } else {
+                alert('Address not found. Try a different query.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Search failed. Please try again.');
+        } finally {
+            setSearching(false);
+        }
+    };
 
     const [images, setImages] = useState({
         logo: null as string | null, // Base64
@@ -254,25 +279,49 @@ const ShopOnboarding = () => {
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Pin Location on Map</label>
+
+                                <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                    <input
+                                        placeholder="Search street address (e.g. 123 Main St, New York)"
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleAddressSearch()}
+                                        style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                                    />
+                                    <Button size="sm" variant="primary" onClick={handleAddressSearch} loading={searching}>
+                                        Search
+                                    </Button>
+                                </div>
+
                                 <div style={{ height: '300px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', position: 'relative' }}>
                                     <MapContainer
                                         center={locInfo.coords || [20.5937, 78.9629]}
-                                        zoom={locInfo.coords ? 15 : 4}
+                                        zoom={locInfo.coords ? 18 : 4}
                                         style={{ height: '100%', width: '100%' }}
                                     >
                                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
                                         <LocationMarker position={locInfo.coords} setPosition={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
-                                        <MyLocater setPos={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
+                                        <MapController coords={locInfo.coords} />
                                     </MapContainer>
 
                                     {/* Overlay Helper */}
                                     <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center', zIndex: 1000, pointerEvents: 'none' }}>
-                                        Click map to pin (or use button below)
+                                        Click map to pin
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); navigator.geolocation.getCurrentPosition(pos => { const { latitude, longitude } = pos.coords; setLocInfo(prev => ({ ...prev, coords: { lat: latitude, lng: longitude } })); }) }}>
-                                        <MapPin style={{ marginRight: '0.5rem' }} /> Use My Current Location
+                                    <Button size="sm" variant="outline" onClick={(e) => {
+                                        e.preventDefault();
+                                        navigator.geolocation.getCurrentPosition(
+                                            pos => {
+                                                const { latitude, longitude } = pos.coords;
+                                                setLocInfo(prev => ({ ...prev, coords: { lat: latitude, lng: longitude } }));
+                                            },
+                                            () => { alert('Could not get location. Ensure GPS is enabled.'); },
+                                            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                                        );
+                                    }}>
+                                        <MapPin style={{ marginRight: '0.5rem' }} /> Use My Current Location (High Accuracy)
                                     </Button>
                                 </div>
                             </div>
