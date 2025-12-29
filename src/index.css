@@ -240,5 +240,13 @@ select {
 
   100% {
     background-position: -200% 0;
+  background-position: -200% 0;
+  }
+}
+
+/* Mobile Layout Fixes */
+@media (max-width: 768px) {
+  .stack-on-mobile {
+    flex-direction: column !important;
   }
 }

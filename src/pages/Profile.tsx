@@ -577,14 +577,14 @@ const Profile = () => {
                     {
                         isEditing && (
                             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-                                <div style={{ width: '89%', maxWidth: '1200px', background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', padding: '2rem' }}>
+                                <div style={{ width: '89%', maxWidth: '1200px', background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', padding: 'var(--space-8)', overflowY: 'auto', maxHeight: '90vh' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                         <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Edit Profile</h3>
                                         <button onClick={() => setIsEditing(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={24} /></button>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
                                         {/* Top Section: Photo + Fields */}
-                                        <div style={{ display: 'flex', gap: '2rem' }}>
+                                        <div className="stack-on-mobile" style={{ display: 'flex', gap: '2rem' }}>
                                             {/* Column 1: Profile Photo */}
                                             <div style={{ flex: '0 0 auto', width: '180px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                                                 <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#374151', alignSelf: 'flex-start' }}>Profile Photo</label>
@@ -627,7 +627,7 @@ const Profile = () => {
                                             {/* Column 2: Grid of Fields */}
                                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                                 {/* Row 1: Name & Username */}
-                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <div className="stack-on-mobile" style={{ display: 'flex', gap: '1rem' }}>
                                                     <div style={{ flex: 1 }}>
                                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Name</label>
                                                         <input
@@ -650,7 +650,7 @@ const Profile = () => {
                                                 </div>
 
                                                 {/* Row 2: Email & Location */}
-                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <div className="stack-on-mobile" style={{ display: 'flex', gap: '1rem' }}>
                                                     <div style={{ flex: 1 }}>
                                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Email</label>
                                                         <input
