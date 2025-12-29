@@ -1,8 +1,34 @@
 -- Enable UUID extension if not already
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Update Profiles with Role
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role text DEFAULT 'user' CHECK (role IN ('user', 'shop_owner'));
+-- 0. Profiles Table (Ensure existence and policies)
+CREATE TABLE IF NOT EXISTS profiles (
+    id uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+    email text,
+    name text,
+    avatar_url text,
+    role text DEFAULT 'user' CHECK (role IN ('user', 'shop_owner')),
+    updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Safely create policies (drop first to update)
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+
+CREATE POLICY "Public profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- 1. Update Profiles with Role (Redundant but safe)
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'role') THEN
+        ALTER TABLE profiles ADD COLUMN role text DEFAULT 'user' CHECK (role IN ('user', 'shop_owner'));
+    END IF;
+END $$;
 
 -- 2. Shops Table
 CREATE TABLE IF NOT EXISTS shops (
@@ -72,21 +98,29 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 -- Shops: Public read, Owner write
 ALTER TABLE shops ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Shops are viewable by everyone" ON shops;
 CREATE POLICY "Shops are viewable by everyone" ON shops FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Owners can insert their own shop" ON shops;
 CREATE POLICY "Owners can insert their own shop" ON shops FOR INSERT WITH CHECK (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "Owners can update their own shop" ON shops;
 CREATE POLICY "Owners can update their own shop" ON shops FOR UPDATE USING (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "Owners can delete their own shop" ON shops;
 CREATE POLICY "Owners can delete their own shop" ON shops FOR DELETE USING (auth.uid() = owner_id);
 
 -- Services: Public read, Shop Owner write
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Services are viewable by everyone" ON services;
 CREATE POLICY "Services are viewable by everyone" ON services FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Shop owners can manage services" ON services;
 CREATE POLICY "Shop owners can manage services" ON services FOR ALL USING (
     EXISTS (SELECT 1 FROM shops WHERE shops.id = services.shop_id AND shops.owner_id = auth.uid())
 );
 
 -- Time Slots: Public read, Shop Owner write
 ALTER TABLE time_slots ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Slots are viewable by everyone" ON time_slots;
 CREATE POLICY "Slots are viewable by everyone" ON time_slots FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Shop owners can manage slots" ON time_slots;
 CREATE POLICY "Shop owners can manage slots" ON time_slots FOR ALL USING (
     EXISTS (SELECT 1 FROM shops WHERE shops.id = time_slots.shop_id AND shops.owner_id = auth.uid())
 );
@@ -95,18 +129,22 @@ CREATE POLICY "Shop owners can manage slots" ON time_slots FOR ALL USING (
 -- Customer can read own, Shop Owner can read own shop's bookings
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can read own bookings" ON bookings;
 CREATE POLICY "Users can read own bookings" ON bookings FOR SELECT USING (
     auth.uid() = customer_id
 );
 
+DROP POLICY IF EXISTS "Shop owners can read bookings for their shop" ON bookings;
 CREATE POLICY "Shop owners can read bookings for their shop" ON bookings FOR SELECT USING (
     EXISTS (SELECT 1 FROM shops WHERE shops.id = bookings.shop_id AND shops.owner_id = auth.uid())
 );
 
+DROP POLICY IF EXISTS "Users can create bookings" ON bookings;
 CREATE POLICY "Users can create bookings" ON bookings FOR INSERT WITH CHECK (
     auth.uid() = customer_id
 );
 
+DROP POLICY IF EXISTS "Shop owners can update booking status" ON bookings;
 CREATE POLICY "Shop owners can update booking status" ON bookings FOR UPDATE USING (
     EXISTS (SELECT 1 FROM shops WHERE shops.id = bookings.shop_id AND shops.owner_id = auth.uid())
 );

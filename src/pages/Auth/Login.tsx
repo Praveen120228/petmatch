@@ -5,6 +5,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { PawPrint } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -21,11 +22,38 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const { success, error } = await login(email, password);
-        if (success) {
+
+        try {
+            // 1. Attempt Login
+            const { success, error } = await login(email, password);
+            if (!success) {
+                alert(error || 'Login failed');
+                return;
+            }
+
+            // 2. Strict User Role Check
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.role === 'shop_owner') {
+                    // Block access
+                    await supabase.auth.signOut();
+                    alert('Access Denied: This login is for Pet Owners only. Please use the Shop Owner Login.');
+                    return;
+                }
+            }
+
+            // 3. Success
             navigate('/match');
-        } else {
-            alert(error || 'Login failed');
+
+        } catch (err) {
+            console.error('Login error:', err);
+            alert('An unexpected error occurred');
         }
     };
 
