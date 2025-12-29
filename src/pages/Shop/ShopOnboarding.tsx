@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -25,6 +25,17 @@ function LocationMarker({ position, setPosition }: { position: { lat: number, ln
     });
 
     return position ? <Marker position={position}></Marker> : null;
+}
+
+function MyLocater({ setPos }: { setPos: (pos: { lat: number, lng: number }) => void }) {
+    const map = useMapEvents({});
+    useEffect(() => {
+        map.locate().on("locationfound", function (e) {
+            setPos(e.latlng);
+            map.flyTo(e.latlng, map.getZoom());
+        });
+    }, [map]);
+    return null;
 }
 
 const ShopOnboarding = () => {
@@ -243,13 +254,27 @@ const ShopOnboarding = () => {
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Pin Location on Map</label>
-                                <div style={{ height: '300px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                                    <MapContainer center={[20.5937, 78.9629]} zoom={4} style={{ height: '100%', width: '100%' }}>
+                                <div style={{ height: '300px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', position: 'relative' }}>
+                                    <MapContainer
+                                        center={locInfo.coords || [20.5937, 78.9629]}
+                                        zoom={locInfo.coords ? 15 : 4}
+                                        style={{ height: '100%', width: '100%' }}
+                                    >
                                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
                                         <LocationMarker position={locInfo.coords} setPosition={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
+                                        <MyLocater setPos={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
                                     </MapContainer>
+
+                                    {/* Overlay Helper */}
+                                    <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center', zIndex: 1000, pointerEvents: 'none' }}>
+                                        Click map to pin (or use button below)
+                                    </div>
                                 </div>
-                                <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>Click on the map to set your exact shop location.</p>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); navigator.geolocation.getCurrentPosition(pos => { const { latitude, longitude } = pos.coords; setLocInfo(prev => ({ ...prev, coords: { lat: latitude, lng: longitude } })); }) }}>
+                                        <MapPin style={{ marginRight: '0.5rem' }} /> Use My Current Location
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     )}

@@ -169,7 +169,16 @@ const ShopDetails = () => {
                     {/* Map Section */}
                     {shop.latitude && shop.longitude && (
                         <div style={{ marginBottom: '3rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Location</h2>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Location</h2>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`, '_blank')}
+                                >
+                                    <MapPin style={{ marginRight: '0.5rem' }} /> Get Directions
+                                </Button>
+                            </div>
                             <div style={{ height: '250px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                                 <MapContainer center={[shop.latitude, shop.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
                                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
