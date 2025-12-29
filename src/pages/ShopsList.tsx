@@ -39,32 +39,49 @@ const ShopsList = () => {
         <div className="fade-in page-container">
             <SEO title="Find Pet Shops & Services" description="Discover the best grooming, vet, and daycare services for your pet." />
 
-            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem' }}>
-                    Find the Best Care for Your Pet
+            {/* Hero Section */}
+            <div style={{
+                textAlign: 'center',
+                marginBottom: '4rem',
+                padding: '4rem 1rem',
+                background: 'linear-gradient(to bottom, var(--primary-50), rgba(255,255,255,0))',
+                borderRadius: '0 0 2rem 2rem',
+                margin: '-2rem -2rem 3rem -2rem'
+            }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'white', padding: '0.5rem 1rem', borderRadius: '99px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', marginBottom: '1.5rem', color: 'var(--primary-600)', fontWeight: 600, fontSize: '0.9rem' }}>
+                    <Storefront size={16} weight="fill" />
+                    <span>Pet Services Directory</span>
+                </div>
+                <h1 style={{ fontSize: '3rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem', lineHeight: 1.2 }}>
+                    Find the Perfect <span className="text-gradient">Care</span><br />for Your Pet
                 </h1>
-                <p style={{ fontSize: '1.2rem', color: '#64748b', maxWidth: '600px', margin: '0 auto' }}>
-                    Browse top-rated local veterinarians, groomers, and pet daycares.
+                <p style={{ fontSize: '1.2rem', color: '#64748b', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
+                    Connect with top-rated local veterinarians, groomers, and pet daycares bonded by trust.
                 </p>
             </div>
 
             {/* Search Bar */}
-            <div style={{ maxWidth: '600px', margin: '0 auto 3rem auto', position: 'relative' }}>
-                <MagnifyingGlass size={20} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                    type="text"
-                    placeholder="Search by name, service, or location..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                        width: '100%',
-                        padding: '1rem 1rem 1rem 3rem',
-                        borderRadius: '99px',
-                        border: '1px solid #e2e8f0',
-                        fontSize: '1rem',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
-                    }}
-                />
+            <div style={{ maxWidth: '700px', margin: '-5rem auto 4rem auto', position: 'relative', zIndex: 10, padding: '0 1rem' }}>
+                <div style={{ position: 'relative', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', borderRadius: '99px', background: 'white' }}>
+                    <MagnifyingGlass size={24} color="var(--primary-400)" style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                        type="text"
+                        placeholder="Search for grooming, vet, or location..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '1.25rem 1.5rem 1.25rem 4rem',
+                            borderRadius: '99px',
+                            border: '1px solid #e2e8f0',
+                            fontSize: '1.1rem',
+                            outline: 'none',
+                            transition: 'border-color 0.2s'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-400)'}
+                        onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                    />
+                </div>
             </div>
 
             {/* Shops Grid */}
@@ -79,7 +96,7 @@ const ShopsList = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
                     {filteredShops.map(shop => (
                         <Link key={shop.id} to={`/shops/${shop.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <Card className="hover-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                            <Card className="hover-card-rise" style={{ height: '100%', display: 'flex', flexDirection: 'column', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', transition: 'transform 0.2s, box-shadow 0.2s' }}>
                                 {/* Image Placeholder - In real app, verify image_url exists and load it */}
                                 <div style={{
                                     height: '200px',

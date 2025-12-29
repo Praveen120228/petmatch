@@ -89,13 +89,13 @@ const ShopDashboard = () => {
             {/* Stats Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                 {statCards.map((stat, i) => (
-                    <div key={i} style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ padding: '0.75rem', borderRadius: '12px', background: stat.bg }}>
+                    <div key={i} style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'transform 0.2s' }}>
+                        <div style={{ padding: '1rem', borderRadius: '12px', background: stat.bg, height: '48px', width: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {stat.icon}
                         </div>
                         <div>
-                            <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.25rem' }}>{stat.label}</p>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b' }}>{stat.value}</h3>
+                            <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>{stat.label}</p>
+                            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>{stat.value}</h3>
                         </div>
                     </div>
                 ))}
@@ -109,8 +109,12 @@ const ShopDashboard = () => {
                 </div>
 
                 {stats.pendingRequests === 0 ? (
-                    <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-                        No recent bookings or activity.
+                    <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '12px', border: '2px dashed #e2e8f0' }}>
+                        <div style={{ marginBottom: '1rem', display: 'inline-flex', padding: '1rem', background: '#f1f5f9', borderRadius: '50%' }}>
+                            <CalendarCheck size={32} color="#cbd5e1" weight="duotone" />
+                        </div>
+                        <p style={{ fontWeight: 500 }}>No recent bookings or activity.</p>
+                        <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>New requests will appear here.</p>
                     </div>
                 ) : (
                     <div>

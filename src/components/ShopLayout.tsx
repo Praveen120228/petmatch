@@ -47,10 +47,14 @@ const ShopLayout = () => {
             }} className="desktop-sidebar">
 
                 <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-600)' }}>
-                        <Storefront size={32} weight="duotone" />
-                        <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>Specyf</span>
-                        <span style={{ fontSize: '0.75rem', background: '#e0e7ff', color: 'var(--primary-700)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>Partner</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary-600)' }}>
+                        <div style={{ background: 'var(--primary-50)', padding: '0.5rem', borderRadius: '8px' }}>
+                            <Storefront size={24} weight="fill" />
+                        </div>
+                        <div>
+                            <span style={{ fontSize: '1.25rem', fontWeight: 800, display: 'block', lineHeight: 1 }}>Specyf</span>
+                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>Partner Portal</span>
+                        </div>
                     </div>
                 </div>
 
@@ -70,7 +74,8 @@ const ShopLayout = () => {
                                     color: isActive(item.path) ? 'var(--primary-700)' : '#64748b',
                                     background: isActive(item.path) ? '#eff6ff' : 'transparent',
                                     fontWeight: isActive(item.path) ? 600 : 500,
-                                    transition: 'all 0.2s'
+                                    transition: 'all 0.2s',
+                                    borderLeft: isActive(item.path) ? '4px solid var(--primary-600)' : '4px solid transparent'
                                 }}
                             >
                                 {item.icon}
@@ -110,6 +115,11 @@ const ShopLayout = () => {
                 </div>
             </aside>
 
+            <style>{`
+                .hover-scale { transition: transform 0.2s; }
+                .hover-scale:hover { transform: scale(1.02); }
+            `}</style>
+
             {/* Mobile Nav Toggle */}
             <div style={{
                 position: 'fixed', top: 0, left: 0, right: 0, height: '64px', background: 'white', borderBottom: '1px solid #e2e8f0', zIndex: 40,
@@ -139,42 +149,44 @@ const ShopLayout = () => {
             </main>
 
             {/* Mobile Sidebar Overlay */}
-            {sidebarOpen && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 60 }}>
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} onClick={() => setSidebarOpen(false)} />
-                    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '80%', maxWidth: '300px', background: 'white', padding: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                            <span style={{ fontWeight: 700 }}>Menu</span>
-                            <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none' }}><X size={24} /></button>
-                        </div>
-                        <nav>
-                            {navItems.map(item => (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    onClick={() => setSidebarOpen(false)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.75rem',
-                                        padding: '1rem',
-                                        textDecoration: 'none',
-                                        color: '#64748b',
-                                        borderBottom: '1px solid #f1f5f9'
-                                    }}
-                                >
-                                    {item.icon}
-                                    {item.label}
-                                </Link>
-                            ))}
-                        </nav>
-                        <div style={{ marginTop: '2rem' }}>
-                            <Button variant="outline" fullWidth onClick={logout}>Sign Out</Button>
+            {
+                sidebarOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 60 }}>
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} onClick={() => setSidebarOpen(false)} />
+                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '80%', maxWidth: '300px', background: 'white', padding: '1.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                                <span style={{ fontWeight: 700 }}>Menu</span>
+                                <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none' }}><X size={24} /></button>
+                            </div>
+                            <nav>
+                                {navItems.map(item => (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={() => setSidebarOpen(false)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            padding: '1rem',
+                                            textDecoration: 'none',
+                                            color: '#64748b',
+                                            borderBottom: '1px solid #f1f5f9'
+                                        }}
+                                    >
+                                        {item.icon}
+                                        {item.label}
+                                    </Link>
+                                ))}
+                            </nav>
+                            <div style={{ marginTop: '2rem' }}>
+                                <Button variant="outline" fullWidth onClick={logout}>Sign Out</Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 
