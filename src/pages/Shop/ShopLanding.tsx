@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Storefront, CheckCircle, ChartLineUp, CalendarCheck } from '@phosphor-icons/react';
-import Navbar from '../../components/Navbar';
+
 import Button from '../../components/Button';
 
 const ShopLanding = () => {
     return (
         <div style={{ minHeight: '100vh', background: '#fff' }}>
-            <Navbar />
+
 
             {/* Hero Section */}
             <section style={{
