@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Button from './Button';
-import { PawPrint, User, Chats, List, X } from '@phosphor-icons/react';
+import { PawPrint, User, Chats, List, X, Storefront } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -111,6 +111,9 @@ const Navbar = () => {
                             <Link to="/match" style={linkStyle('/match')}>
                                 Find Pets
                             </Link>
+                            <Link to="/shops" style={linkStyle('/shops')}>
+                                <Storefront size={20} /> Shops
+                            </Link>
                             <Link to="/messages" style={linkStyle('/messages')}>
                                 <Chats size={20} /> Messages
                             </Link>
@@ -126,6 +129,9 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
+                            <Link to="/shops" style={linkStyle('/shops')}>
+                                <Storefront size={20} /> Shops
+                            </Link>
                             <Link to="/login">
                                 <Button size="sm" variant="ghost">Login</Button>
                             </Link>
@@ -154,6 +160,9 @@ const Navbar = () => {
                             <Link to="/match" style={linkStyle('/match')} onClick={() => setMobileMenuOpen(false)}>
                                 <PawPrint size={24} /> <span style={{ fontSize: '1.25rem' }}>Find Pets</span>
                             </Link>
+                            <Link to="/shops" style={linkStyle('/shops')} onClick={() => setMobileMenuOpen(false)}>
+                                <Storefront size={24} /> <span style={{ fontSize: '1.25rem' }}>Shops</span>
+                            </Link>
                             <Link to="/messages" style={linkStyle('/messages')} onClick={() => setMobileMenuOpen(false)}>
                                 <Chats size={24} /> <span style={{ fontSize: '1.25rem' }}>Messages</span>
                             </Link>
@@ -163,6 +172,9 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
+                            <Link to="/shops" style={linkStyle('/shops')} onClick={() => setMobileMenuOpen(false)}>
+                                <Storefront size={24} /> <span style={{ fontSize: '1.25rem' }}>Shops</span>
+                            </Link>
                             <Link to="/login" onClick={() => setMobileMenuOpen(false)} style={{ width: '100%' }}>
                                 <Button size="lg" variant="outline" fullWidth>Login</Button>
                             </Link>
