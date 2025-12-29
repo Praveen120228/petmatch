@@ -24,7 +24,7 @@ const Signup = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         isSigningUp.current = true;
-        const { success, error, confirmationRequired } = await signup(name, email, password);
+        const { success, error, confirmationRequired } = await signup(name, email, password, 'user');
 
         if (success) {
             if (confirmationRequired) {

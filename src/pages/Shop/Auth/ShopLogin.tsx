@@ -25,17 +25,11 @@ const ShopLogin = () => {
                 throw new Error(result.error || 'Login failed');
             }
 
-            // 2. Strict Role Check
+            // 2. Strict Role Check (Auth Metadata)
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('No user found');
 
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-            if (profile?.role !== 'shop_owner') {
+            if (user.user_metadata?.role !== 'shop_owner') {
                 // Not a shop owner, sign them out immediately from this view
                 await supabase.auth.signOut();
                 throw new Error('Access denied. This portal is for shop owners only.');

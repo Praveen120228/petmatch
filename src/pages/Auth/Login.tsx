@@ -34,13 +34,8 @@ const Login = () => {
             // 2. Strict User Role Check
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile?.role === 'shop_owner') {
+                // Check metadata directly (Auth Table separation)
+                if (user.user_metadata?.role === 'shop_owner') {
                     // Block access
                     await supabase.auth.signOut();
                     alert('Access Denied: This login is for Pet Owners only. Please use the Shop Owner Login.');
