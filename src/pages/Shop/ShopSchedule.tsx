@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Trash, Plus } from '@phosphor-icons/react';
+import { Trash, Plus, MagicWand } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import { format, addMinutes, parseISO, startOfToday } from 'date-fns';
@@ -9,6 +9,7 @@ import { format, addMinutes, parseISO, startOfToday } from 'date-fns';
 const ShopSchedule = () => {
     const { user } = useAuth();
     const [slots, setSlots] = useState<any[]>([]);
+    const [services, setServices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [shopId, setShopId] = useState<string | null>(null);
 
@@ -19,20 +20,26 @@ const ShopSchedule = () => {
     const [duration, setDuration] = useState(30);
 
     useEffect(() => {
-        fetchShopAndSlots();
+        fetchShopAndData();
     }, [user]);
 
-    const fetchShopAndSlots = async () => {
+    const fetchShopAndData = async () => {
         if (!user) return;
         try {
             const { data: shop } = await supabase.from('shops').select('id').eq('owner_id', user.id).single();
             if (shop) {
                 setShopId(shop.id);
                 fetchSlots(shop.id);
+                fetchServices(shop.id);
             }
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchServices = async (sId: string) => {
+        const { data } = await supabase.from('services').select('*').eq('shop_id', sId);
+        if (data) setServices(data);
     };
 
     const fetchSlots = async (sId: string) => {
@@ -40,7 +47,6 @@ const ShopSchedule = () => {
             .from('time_slots')
             .select('*')
             .eq('shop_id', sId)
-            // .gte('start_time', new Date().toISOString()) // Optional: only future
             .order('start_time', { ascending: true });
 
         if (data) setSlots(data);
@@ -50,7 +56,6 @@ const ShopSchedule = () => {
         if (!shopId) return alert("Shop not found. Please create a profile first.");
 
         // Generate slots
-        // Start from Date + StartTime
         const startDateTime = parseISO(`${date}T${startTime}`);
         const endDateTime = parseISO(`${date}T${endTime}`);
 
@@ -84,6 +89,10 @@ const ShopSchedule = () => {
         if (!confirm('Delete this slot?')) return;
         await supabase.from('time_slots').delete().eq('id', id);
         setSlots(prev => prev.filter(s => s.id !== id));
+    };
+
+    const handleQuickSetDuration = (mins: number) => {
+        setDuration(mins);
     };
 
     if (loading) return <div>Loading...</div>;
@@ -124,16 +133,35 @@ const ShopSchedule = () => {
 
                             <div>
                                 <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Slot Duration (Min)</label>
+                                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                                    {/* Quick Suggestions from Services */}
+                                    {services.map(s => (
+                                        <button
+                                            key={s.id}
+                                            onClick={() => handleQuickSetDuration(s.duration_minutes)}
+                                            style={{
+                                                fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px',
+                                                border: '1px solid var(--primary-200)', background: 'var(--primary-50)', color: 'var(--primary-700)',
+                                                cursor: 'pointer'
+                                            }}
+                                            title={`Set to ${s.name} duration`}
+                                        >
+                                            {s.name} ({s.duration_minutes}m)
+                                        </button>
+                                    ))}
+                                </div>
                                 <select value={duration} onChange={e => setDuration(Number(e.target.value))} style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
                                     <option value={15}>15 Minutes</option>
                                     <option value={30}>30 Minutes</option>
                                     <option value={45}>45 Minutes</option>
                                     <option value={60}>60 Minutes</option>
+                                    <option value={90}>90 Minutes</option>
+                                    <option value={120}>2 Hours</option>
                                 </select>
                             </div>
 
                             <Button variant="primary" fullWidth onClick={handleCreateSlots} style={{ marginTop: '1rem' }}>
-                                Generate Slots
+                                <MagicWand weight="bold" style={{ marginRight: '0.5rem' }} /> Generate Slots
                             </Button>
                         </div>
                     </Card>

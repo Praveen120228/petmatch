@@ -7,6 +7,16 @@ import Card from '../components/Card';
 import { useAuth } from '../context/AuthContext';
 import { format, parseISO, isSameDay } from 'date-fns';
 import SEO from '../components/SEO';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+
+// Fix Leaflet Icon
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+});
 
 const ShopDetails = () => {
     const { id } = useParams();
@@ -14,6 +24,7 @@ const ShopDetails = () => {
     const { user } = useAuth(); // Need auth to book
     const [shop, setShop] = useState<any>(null);
     const [services, setServices] = useState<any[]>([]);
+    const [gallery, setGallery] = useState<any[]>([]);
     const [slots, setSlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -22,6 +33,9 @@ const ShopDetails = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [selectedSlot, setSelectedSlot] = useState<any>(null);
     const [bookingProcessing, setBookingProcessing] = useState(false);
+
+    // Visual State
+    const [heroImage, setHeroImage] = useState<string | null>(null);
 
     useEffect(() => {
         if (id) fetchShopDetails();
@@ -32,12 +46,17 @@ const ShopDetails = () => {
             // 1. Fetch Shop
             const { data: shopData } = await supabase.from('shops').select('*').eq('id', id).single();
             setShop(shopData);
+            setHeroImage(shopData?.image_url);
 
             // 2. Fetch Services
             const { data: svcData } = await supabase.from('services').select('*').eq('shop_id', id);
             setServices(svcData || []);
 
-            // 3. Fetch Slots
+            // 3. Fetch Gallery
+            const { data: galleryData } = await supabase.from('shop_images').select('*').eq('shop_id', id).order('display_order');
+            setGallery(galleryData || []);
+
+            // 4. Fetch Slots
             // In a real app, maybe filter by date range
             const { data: slotsData } = await supabase
                 .from('time_slots')
@@ -98,15 +117,40 @@ const ShopDetails = () => {
         <div className="page-container fade-in">
             <SEO title={`${shop.name} | Specyf`} description={shop.description} />
 
-            {/* Hero Image */}
+            {/* Hero Section */}
             <div style={{
-                height: '300px',
+                position: 'relative',
+                height: '400px',
                 borderRadius: '16px',
-                background: shop.image_url ? `url(${shop.image_url}) center/cover` : 'var(--primary-100)',
+                overflow: 'hidden',
+                background: heroImage ? `url(${heroImage}) center/cover` : 'var(--primary-100)',
                 marginBottom: '2rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
             }}>
-                {!shop.image_url && <Storefront size={64} color="var(--primary-300)" weight="duotone" />}
+                {!heroImage && <Storefront size={64} color="var(--primary-300)" weight="duotone" />}
+
+                {/* Gallery Thumbnails Overlay */}
+                {gallery.length > 0 && (
+                    <div style={{
+                        position: 'absolute', bottom: '16px', right: '16px',
+                        display: 'flex', gap: '8px', padding: '8px', background: 'rgba(255,255,255,0.8)',
+                        backdropFilter: 'blur(4px)', borderRadius: '12px'
+                    }}>
+                        {/* Include Main Image in list */}
+                        {[{ image_url: shop.image_url }, ...gallery].slice(0, 5).map((img: any, i) => (
+                            <div
+                                key={i}
+                                onClick={() => setHeroImage(img.image_url)}
+                                style={{
+                                    width: '60px', height: '60px', borderRadius: '8px', cursor: 'pointer',
+                                    background: `url(${img.image_url}) center/cover`,
+                                    border: heroImage === img.image_url ? '2px solid var(--primary-600)' : '2px solid white'
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Header */}
@@ -120,8 +164,23 @@ const ShopDetails = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem' }}>
-                {/* Left Column: Services & Selection */}
+                {/* Left Column: Services & Map */}
                 <div>
+                    {/* Map Section */}
+                    {shop.latitude && shop.longitude && (
+                        <div style={{ marginBottom: '3rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Location</h2>
+                            <div style={{ height: '250px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                                <MapContainer center={[shop.latitude, shop.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
+                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
+                                    <Marker position={[shop.latitude, shop.longitude]}>
+                                        <Popup>{shop.name}</Popup>
+                                    </Marker>
+                                </MapContainer>
+                            </div>
+                        </div>
+                    )}
+
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Select Service</h2>
                     <div style={{ display: 'grid', gap: '1rem', marginBottom: '3rem' }}>
                         {services.length === 0 ? <p style={{ color: '#94a3b8' }}>No services listed.</p> :

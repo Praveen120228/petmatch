@@ -51,6 +51,11 @@ export const storageService = {
         return this.uploadFile(file, 'pet-images', `shops/${userId}/${fileName}`);
     },
 
+    async uploadShopGalleryImage(file: File | Blob, userId: string): Promise<string> {
+        const fileName = `gallery_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        return this.uploadFile(file, 'pet-images', `shops/${userId}/gallery/${fileName}`);
+    },
+
     async uploadAvatar(file: File | Blob, userId: string): Promise<string> {
         // Use consistent filename for avatar to avoid accumulating garbage? 
         // Or unique to avoid caching issues? Unique is safer for CDN.
