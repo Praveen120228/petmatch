@@ -67,15 +67,15 @@ const ShopLogin = () => {
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f9fafb' }}>
             <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#4F46E5', fontWeight: 800, fontSize: '1.5rem' }}>
-                    <PawPrint weight="fill" /> Specyf <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 500, marginLeft: '0.5rem' }}>Business</span>
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'var(--primary-600)', fontWeight: 800, fontSize: '1.5rem' }}>
+                    <PawPrint weight="fill" /> Specyf <span style={{ fontSize: '0.875rem', color: 'var(--gray-500)', fontWeight: 500, marginLeft: '0.5rem' }}>Business</span>
                 </Link>
             </div>
 
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
                 <div style={{ width: '100%', maxWidth: '400px', background: 'white', padding: '2rem', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <div style={{ display: 'inline-flex', padding: '0.75rem', background: '#ecfdf5', borderRadius: '50%', marginBottom: '1rem', color: '#16a34a' }}>
+                        <div style={{ display: 'inline-flex', padding: '0.75rem', background: 'var(--primary-50)', borderRadius: '50%', marginBottom: '1rem', color: 'var(--primary-600)' }}>
                             <Storefront size={32} />
                         </div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827' }}>Shop Owner Login</h2>
@@ -110,13 +110,13 @@ const ShopLogin = () => {
                             />
                         </div>
 
-                        <Button type="submit" size="lg" variant="primary" loading={loading} style={{ background: '#16a34a', borderColor: '#16a34a' }}>
+                        <Button type="submit" size="lg" variant="primary" loading={loading} fullWidth>
                             Sign In
                         </Button>
                     </form>
 
                     <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                        Don't have a shop account? <Link to="/shop/register" style={{ color: '#16a34a', fontWeight: 600 }}>Register here</Link>
+                        Don't have a shop account? <Link to="/shop/register" style={{ color: 'var(--primary-600)', fontWeight: 600 }}>Register here</Link>
                     </p>
                 </div>
             </div>

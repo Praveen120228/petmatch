@@ -83,14 +83,14 @@ const ShopsList = () => {
                                 {/* Image Placeholder - In real app, verify image_url exists and load it */}
                                 <div style={{
                                     height: '200px',
-                                    background: shop.image_url ? `url(${shop.image_url}) center/cover` : '#e2e8f0',
+                                    background: shop.image_url ? `url(${shop.image_url}) center/cover` : 'var(--primary-50)',
                                     borderRadius: '12px',
                                     marginBottom: '1rem',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    {!shop.image_url && <Storefront size={48} color="#94a3b8" weight="duotone" />}
+                                    {!shop.image_url && <Storefront size={48} color="var(--primary-200)" weight="duotone" />}
                                 </div>
 
                                 <div style={{ flex: 1 }}>
@@ -98,7 +98,7 @@ const ShopsList = () => {
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
                                         <MapPin size={16} weight="fill" />
-                                        <span>{shop.location || 'Location not specified'}</span>
+                                        <span>{shop.location || [shop.city, shop.state].filter(Boolean).join(', ') || 'Location not specified'}</span>
                                     </div>
 
                                     <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

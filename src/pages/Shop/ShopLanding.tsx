@@ -12,7 +12,7 @@ const ShopLanding = () => {
             <section style={{
                 padding: '6rem 1.5rem',
                 textAlign: 'center',
-                background: 'linear-gradient(to bottom, #f0fdf4, #ffffff)'
+                background: 'radial-gradient(circle at 50% 50%, var(--primary-50) 0%, rgba(255,255,255,0) 70%)'
             }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                     <div style={{
@@ -20,12 +20,14 @@ const ShopLanding = () => {
                         alignItems: 'center',
                         gap: '0.5rem',
                         padding: '0.5rem 1rem',
-                        background: '#dcfce7',
-                        color: '#166534',
+                        background: 'var(--white)',
+                        color: 'var(--primary-700)',
+                        border: '1px solid var(--primary-200)',
                         borderRadius: '999px',
                         marginBottom: '1.5rem',
                         fontWeight: 600,
-                        fontSize: '0.875rem'
+                        fontSize: '0.875rem',
+                        boxShadow: 'var(--shadow-sm)'
                     }}>
                         <Storefront size={18} weight="fill" />
                         For Pet Businesses
@@ -33,11 +35,11 @@ const ShopLanding = () => {
                     <h1 style={{
                         fontSize: '3.5rem',
                         fontWeight: 800,
-                        color: '#111827',
+                        color: 'var(--gray-900)',
                         marginBottom: '1.5rem',
                         lineHeight: 1.1
                     }}>
-                        Grow your pet business with <span style={{ color: '#16a34a' }}>Specyf</span>
+                        Grow your pet business with <span className="text-gradient">Specyf</span>
                     </h1>
                     <p style={{
                         fontSize: '1.25rem',
@@ -49,7 +51,7 @@ const ShopLanding = () => {
                     </p>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
                         <Link to="/shop/register">
-                            <Button size="lg" variant="primary" style={{ background: '#16a34a', borderColor: '#16a34a' }}>
+                            <Button size="lg" variant="primary">
                                 Register Your Shop
                             </Button>
                         </Link>
@@ -72,17 +74,17 @@ const ShopLanding = () => {
                     }}>
                         {[
                             {
-                                icon: <CheckCircle size={32} color="#16a34a" />,
+                                icon: <CheckCircle size={32} weight="duotone" color="var(--primary-600)" />,
                                 title: "Get more Bookings",
                                 desc: "Showcase your services to pet owners actively looking for them in your area."
                             },
                             {
-                                icon: <CalendarCheck size={32} color="#16a34a" />,
+                                icon: <CalendarCheck size={32} weight="duotone" color="var(--primary-600)" />,
                                 title: "Smart Scheduling",
                                 desc: "Set your own hours and let clients book available slots automatically."
                             },
                             {
-                                icon: <ChartLineUp size={32} color="#16a34a" />,
+                                icon: <ChartLineUp size={32} weight="duotone" color="var(--primary-600)" />,
                                 title: "Grow Revenue",
                                 desc: "Reduce no-shows and fill empty slots with our optimized booking flow."
                             }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { MapPin } from '@phosphor-icons/react';
+import { MapPin, Storefront } from '@phosphor-icons/react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { useAuth } from '../context/AuthContext';
@@ -98,11 +98,23 @@ const ShopDetails = () => {
         <div className="page-container fade-in">
             <SEO title={`${shop.name} | Specyf`} description={shop.description} />
 
+            {/* Hero Image */}
+            <div style={{
+                height: '300px',
+                borderRadius: '16px',
+                background: shop.image_url ? `url(${shop.image_url}) center/cover` : 'var(--primary-100)',
+                marginBottom: '2rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+                {!shop.image_url && <Storefront size={64} color="var(--primary-300)" weight="duotone" />}
+            </div>
+
             {/* Header */}
             <div style={{ marginBottom: '3rem' }}>
                 <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '0.5rem' }}>{shop.name}</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '1.1rem' }}>
-                    <MapPin size={20} weight="fill" /> {shop.location || 'Location not available'}
+                    <MapPin size={20} weight="fill" />
+                    {shop.location || [shop.city, shop.state, shop.country].filter(Boolean).join(', ') || 'Location not available'}
                 </div>
                 {shop.description && <p style={{ marginTop: '1.5rem', fontSize: '1.1rem', lineHeight: 1.6, color: '#475569', maxWidth: '800px' }}>{shop.description}</p>}
             </div>
