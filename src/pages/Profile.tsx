@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight, PawPrint } from '@phosphor-icons/react';
+import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight, PawPrint, CaretDown } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
@@ -665,21 +665,48 @@ const Profile = () => {
                                                     <div style={{ flex: 1 }}>
                                                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Phone Number <span style={{ color: 'red' }}>*</span></label>
                                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                            <select
-                                                                value={editForm.country_code}
-                                                                onChange={e => setEditForm({ ...editForm, country_code: e.target.value })}
-                                                                style={{ width: '80px', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', background: 'white' }}
-                                                            >
-                                                                {COUNTRY_CODES.map(c => (
-                                                                    <option key={c.code} value={c.code}>{c.code} ({c.country})</option>
-                                                                ))}
-                                                            </select>
+                                                            <div style={{ position: 'relative', width: '130px' }}>
+                                                                <select
+                                                                    value={editForm.country_code}
+                                                                    onChange={e => setEditForm({ ...editForm, country_code: e.target.value })}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '0.75rem 1rem',
+                                                                        paddingRight: '2rem',
+                                                                        borderRadius: '12px',
+                                                                        border: '1px solid #e5e7eb',
+                                                                        fontSize: '1rem',
+                                                                        background: '#f9fafb',
+                                                                        appearance: 'none',
+                                                                        WebkitAppearance: 'none',
+                                                                        cursor: 'pointer',
+                                                                        color: '#374151'
+                                                                    }}
+                                                                >
+                                                                    {COUNTRY_CODES.map(c => (
+                                                                        <option key={c.code} value={c.code}>{c.code} ({c.country})</option>
+                                                                    ))}
+                                                                </select>
+                                                                <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6b7280', display: 'flex' }}>
+                                                                    <CaretDown size={14} weight="bold" />
+                                                                </div>
+                                                            </div>
+
                                                             <input
                                                                 type="tel"
                                                                 value={editForm.phone_number}
                                                                 onChange={e => setEditForm({ ...editForm, phone_number: e.target.value })}
                                                                 placeholder="1234567890"
-                                                                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem' }}
+                                                                style={{
+                                                                    flex: 1,
+                                                                    padding: '0.75rem 1rem',
+                                                                    borderRadius: '12px',
+                                                                    border: '1px solid #e5e7eb',
+                                                                    fontSize: '1rem',
+                                                                    background: '#f9fafb'
+                                                                }}
+                                                                onFocus={e => { e.target.style.background = 'white'; e.target.style.borderColor = 'var(--primary-300)'; e.target.style.boxShadow = '0 0 0 3px var(--primary-50)'; }}
+                                                                onBlur={e => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; }}
                                                             />
                                                         </div>
                                                     </div>
