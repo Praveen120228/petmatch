@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
-import Card from '../components/Card';
+
 import { PawPrint, Heart, Chats, ShieldCheck, Star } from '@phosphor-icons/react';
 import SEO from '../components/SEO';
 
@@ -126,58 +126,33 @@ const LandingPage = () => {
                             desc: 'Safety is our top priority. Every profile is verified to ensure a trustworthy community for you and your pet.'
                         }
                     ].map((feature, i) => (
-                        <Card
-                            key={i}
-                            interactive
-                            hover
-                            padding="xl"
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                textAlign: 'center',
-                                gap: '1.5rem',
-                                border: '1px solid var(--gray-200)'
-                            }}
-                        >
-                            <div style={{
-                                padding: '1.5rem',
-                                background: 'var(--gray-50)',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginBottom: '0.5rem'
-                            }}>
-                                {feature.icon}
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{feature.title}</h3>
-                            <p style={{ color: 'var(--gray-500)', lineHeight: 1.6 }}>{feature.desc}</p>
-                        </Card>
+                        <div key={i} style={{ padding: '1.5rem', background: 'white', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                            <div style={{ marginBottom: '1rem' }}>{feature.icon}</div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>{feature.title}</h3>
+                            <p style={{ color: 'var(--gray-600)' }}>{feature.desc}</p>
+                        </div>
                     ))}
                 </div>
             </section>
 
             {/* Footer */}
             <footer style={{
-                padding: '4rem 2rem',
+                marginTop: 'auto',
+                padding: '2rem',
                 borderTop: '1px solid var(--gray-200)',
-                textAlign: 'center',
-                background: 'var(--gray-50)'
+                background: 'white',
+                textAlign: 'center'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                    <div style={{ padding: '8px', background: 'var(--primary-600)', borderRadius: '8px', display: 'flex' }}>
-                        <PawPrint weight="fill" color="white" size={24} />
-                    </div>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>Specyf</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <PawPrint size={24} weight="fill" color="var(--primary)" />
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>PetMatch</span>
                 </div>
-                <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '2rem', fontSize: '0.9rem', color: 'var(--gray-600)' }}>
-                    <Link to="/about" style={{ textDecoration: 'none', fontWeight: 500 }}>About</Link>
-                    <Link to="/safety" style={{ textDecoration: 'none', fontWeight: 500 }}>Safety</Link>
-                    <Link to="/guidelines" style={{ textDecoration: 'none', fontWeight: 500 }}>Guidelines</Link>
-                    <Link to="/support" style={{ textDecoration: 'none', fontWeight: 500 }}>Support</Link>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
+                    {['About', 'Safety', 'Guidelines', 'Support'].map(link => (
+                        <Link key={link} to={`/${link.toLowerCase()}`} style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>{link}</Link>
+                    ))}
                 </div>
-                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} Specyf. All rights reserved.</p>
+                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} PetMatch. All rights reserved.</p>
             </footer>
         </div>
     );

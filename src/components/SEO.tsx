@@ -12,19 +12,19 @@ const SEO = ({ title, description, name, type = 'website', image }: SEOProps) =>
     return (
         <Helmet>
             {/* Standard metadata tags */}
-            <title>{title} | Specyf</title>
+            <title>{title} | PetMatch</title>
             {description && <meta name="description" content={description} />}
 
-            {/* Facebook tags */}
+            {/* Open Graph / Facebook */}
             <meta property="og:type" content={type} />
-            <meta property="og:title" content={`${title} | Specyf`} />
+            <meta property="og:title" content={`${title} | PetMatch`} />
             {description && <meta property="og:description" content={description} />}
             {image && <meta property="og:image" content={image} />}
 
-            {/* Twitter tags */}
-            <meta name="twitter:creator" content={name || "Specyf"} />
+            {/* Twitter */}
+            <meta name="twitter:creator" content={name || "PetMatch"} />
             <meta name="twitter:card" content={type === 'article' ? 'summary_large_image' : 'summary'} />
-            <meta name="twitter:title" content={`${title} | Specyf`} />
+            <meta name="twitter:title" content={`${title} | PetMatch`} />
             {description && <meta name="twitter:description" content={description} />}
         </Helmet>
     );

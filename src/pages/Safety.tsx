@@ -1,14 +1,26 @@
+
 import { ShieldCheck, Warning, CheckCircle } from '@phosphor-icons/react';
 import Card from '../components/Card';
 
 const Safety = () => {
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }} className="fade-in">
-            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Safety Center</h1>
-                <p style={{ fontSize: '1.25rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>
-                    Your safety and your pet's well-being are our highest priorities. Here's how to stay safe on Specyf.
-                </p>
+        <>
+            {/* Assuming a Head component or similar for SEO, not present in original but implied by description prop */}
+            {/* <Head
+                title="Safety Center - PetMatch"
+                description="Safety guidelines and tips for using PetMatch. Learn how to protect yourself and your pet."
+            /> */}
+
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                    <div style={{ display: 'inline-flex', padding: '1rem', background: '#e8f5e9', borderRadius: '50%', color: '#4caf50', marginBottom: '1.5rem' }}>
+                        <ShieldCheck size={48} weight="fill" />
+                    </div>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Safety First</h1>
+                    <p style={{ fontSize: '1.125rem', color: 'var(--gray-600)', maxWidth: '600px', margin: '0 auto' }}>
+                        Your safety and your pet's well-being are our highest priorities. Here's how to stay safe on PetMatch.
+                    </p>
+                </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -55,7 +67,8 @@ const Safety = () => {
                     </ul>
                 </Card>
             </div>
-        </div>
+
+        </>
     );
 };
 

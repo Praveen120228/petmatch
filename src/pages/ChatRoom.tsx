@@ -26,7 +26,7 @@ const ChatRoom = () => {
     const downloadImage = (base64Str: string) => {
         const link = document.createElement('a');
         link.href = base64Str;
-        link.download = `specyf-shared-${Date.now()}.png`;
+        link.download = `petmatch-shared-${Date.now()}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
