@@ -7,7 +7,8 @@ import {
     SignOut,
     List,
     X,
-    House
+    House,
+    Gear
 } from '@phosphor-icons/react';
 import { useState } from 'react';
 import Button from './Button';
@@ -28,6 +29,7 @@ const ShopLayout = () => {
         { path: '/shop/schedule', icon: <CalendarCheck size={20} />, label: 'Schedule' },
         { path: '/shop/bookings', icon: <Users size={20} />, label: 'Bookings' },
         { path: '/shop/services', icon: <Storefront size={20} />, label: 'Services' },
+        { path: '/shop/settings', icon: <Gear size={20} />, label: 'Settings' },
     ];
 
     const isActive = (path: string) => location.pathname === path;

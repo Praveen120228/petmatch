@@ -7,6 +7,7 @@ import ShopDashboard from './pages/Shop/ShopDashboard';
 import ShopSchedule from './pages/Shop/ShopSchedule';
 import ShopServices from './pages/Shop/ShopServices';
 import ShopBookings from './pages/Shop/ShopBookings';
+import ShopSettings from './pages/Shop/ShopSettings';
 import ShopLanding from './pages/Shop/ShopLanding';
 import ShopLogin from './pages/Shop/Auth/ShopLogin';
 import ShopRegister from './pages/Shop/Auth/ShopRegister';
@@ -103,6 +104,7 @@ function App() {
                     <Route path="schedule" element={<ShopSchedule />} />
                     <Route path="bookings" element={<ShopBookings />} />
                     <Route path="services" element={<ShopServices />} />
+                    <Route path="settings" element={<ShopSettings />} />
                   </Route>
 
                   {/* Shop Auth Routes */}
