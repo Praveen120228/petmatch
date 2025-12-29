@@ -38,6 +38,15 @@ function MapController({ coords }: { coords?: { lat: number, lng: number } | nul
     return null;
 }
 
+// Fix for Map not sizing correctly in hidden tabs
+function MapUpdater() {
+    const map = useMapEvents({});
+    useEffect(() => {
+        map.invalidateSize();
+    }, [map]);
+    return null;
+}
+
 const ShopOnboarding = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -302,6 +311,7 @@ const ShopOnboarding = () => {
                                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
                                         <LocationMarker position={locInfo.coords} setPosition={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
                                         <MapController coords={locInfo.coords} />
+                                        <MapUpdater />
                                     </MapContainer>
 
                                     {/* Overlay Helper */}
