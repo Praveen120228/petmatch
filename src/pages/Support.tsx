@@ -7,7 +7,7 @@ const Support = () => {
         <div style={{ minHeight: '100vh', paddingTop: '80px', paddingBottom: '4rem', background: 'var(--gray-50)' }}>
             <SEO
                 title="Support"
-                description="Get help and support for Specyf. Find answers to common questions about pet matching and adoption."
+                description="Get help and support for PetMatch. Find answers to common questions about pet matching and adoption."
             />
 
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem' }}>
@@ -20,7 +20,7 @@ const Support = () => {
 
                 <div style={{ display: 'grid', gap: '2rem' }}>
                     {[
-                        { q: "Is Specyf free to use?", a: "Yes! Creating a profile and matching with other pets is completely free." },
+                        { q: "Is PetMatch free to use?", a: "Yes! Creating a profile and matching with other pets is completely free." },
                         { q: "How do I report a user?", a: "Go to the user's profile, click the three dots menu, and select 'Report User'." },
                         { q: "Can I adopt pets here?", a: "Yes, many shelters and individuals list pets for adoption. Look for the 'Adoption' tag." },
                         { q: "Is my data safe?", a: "We use industry-standard encryption to protect your personal information." }
@@ -35,7 +35,7 @@ const Support = () => {
                 <div style={{ textAlign: 'center', marginTop: '4rem', padding: '3rem', background: 'white', borderRadius: '1rem' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Still need help?</h2>
                     <p style={{ color: 'var(--gray-600)', marginBottom: '2rem' }}>Our team is available Monday through Friday, 9am - 5pm EST.</p>
-                    <Button variant="primary" size="lg" onClick={() => window.location.href = 'mailto:support@specyf.online'}>
+                    <Button variant="primary" size="lg" onClick={() => window.location.href = 'mailto:support@petmatch.online'}>
                         Contact Support
                     </Button>
                 </div>

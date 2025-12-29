@@ -19,8 +19,21 @@ const LandingPage = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
             <SEO
-                title="Home"
-                description="Join the #1 community for pets. Find playdates, adopt pets, and connect with local pet owners."
+                title="Find Your Perfect Pet Match"
+                description="PetMatch connects pets with loving homes. Discover dogs, cats, and other pets for adoption or playdates near you."
+                canonicalUrl="https://petmatch.online/"
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    "name": "PetMatch",
+                    "url": "https://petmatch.online/",
+                    "potentialAction": {
+                        "@type": "SearchAction",
+                        "target": "https://petmatch.online/search?q={search_term_string}",
+                        "query-input": "required name=search_term_string"
+                    },
+                    "description": "PetMatch is a pet adoption and matching platform connecting pets with loving homes."
+                }}
             />
 
             {/* Hero Section */}
@@ -105,7 +118,7 @@ const LandingPage = () => {
 
             {/* Features Section */}
             <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem 8rem' }}>
-                <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Why Specyf?</h2>
+                <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Why PetMatch?</h2>
                 <p style={{ textAlign: 'center', color: 'var(--gray-500)', fontSize: '1.125rem', marginBottom: '5rem', maxWidth: '600px', margin: '0 auto 5rem' }}>We've built a platform specifically designed for the unique needs of pets and their owners.</p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
@@ -145,14 +158,14 @@ const LandingPage = () => {
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                     <PawPrint size={24} weight="fill" color="var(--primary)" />
-                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>Specyf</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>PetMatch</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
                     {['About', 'Safety', 'Guidelines', 'Support'].map(link => (
                         <Link key={link} to={`/${link.toLowerCase()}`} style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>{link}</Link>
                     ))}
                 </div>
-                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} Specyf. All rights reserved.</p>
+                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} PetMatch. All rights reserved.</p>
             </footer>
         </div>
     );

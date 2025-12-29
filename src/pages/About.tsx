@@ -5,7 +5,7 @@ const About = () => {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }} className="fade-in">
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>About Specyf</h1>
+                <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>About PetMatch</h1>
                 <p style={{ fontSize: '1.25rem', color: 'var(--gray-600)', lineHeight: '1.8' }}>
                     We're on a mission to connect every pet with a loving home.
                 </p>
@@ -20,10 +20,10 @@ const About = () => {
                         <h2 style={{ fontSize: '2rem', fontWeight: 700 }}>Our Story</h2>
                     </div>
                     <p style={{ fontSize: '1.125rem', color: 'var(--gray-700)', lineHeight: '1.7' }}>
-                        Specyf was founded with a simple belief: pets are happier when they have friends. We provide a safe,
+                        PetMatch was founded with a simple belief: pets are happier when they have friends. We provide a safe,
                         secure platform for pet owners to find playdates, adoption opportunities, and community support.
                         Whether you're looking for a new family member or a walking buddy for your furry friend,
-                        Specyf helps you find the perfect match.
+                        PetMatch helps you find the perfect match.
                     </p>
                 </section>
 

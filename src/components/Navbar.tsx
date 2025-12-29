@@ -100,7 +100,7 @@ const Navbar = () => {
                         style={{ ...logoStyle, textDecoration: 'none', cursor: 'pointer' }}
                         onClick={() => setMobileMenuOpen(false)}
                     >
-                        <PawPrint weight="fill" color="currentColor" /> Specyf
+                        <PawPrint weight="fill" color="currentColor" /> PetMatch
                     </Link>
                 )}
 
