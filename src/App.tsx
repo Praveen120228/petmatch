@@ -20,16 +20,19 @@ import Guidelines from './pages/Guidelines';
 import Support from './pages/Support';
 
 import { ToastProvider } from './context/ToastContext';
+import { AnalyticsProvider } from './components/AnalyticsProvider'; // Added AnalyticsProvider
 
 // Wrapper to conditionally render Navbar
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-      <Navbar />
-      <div className="content-container" style={{ flex: 1 }}>
-        {children}
+    <AnalyticsProvider>
+      <div className="layout-content">
+        <Navbar />
+        <main className="main-container">
+          {children}
+        </main>
       </div>
-    </>
+    </AnalyticsProvider>
   );
 };
 
