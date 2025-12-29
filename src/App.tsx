@@ -7,6 +7,10 @@ import ShopDashboard from './pages/Shop/ShopDashboard';
 import ShopSchedule from './pages/Shop/ShopSchedule';
 import ShopServices from './pages/Shop/ShopServices';
 import ShopBookings from './pages/Shop/ShopBookings';
+import ShopLanding from './pages/Shop/ShopLanding';
+import ShopLogin from './pages/Shop/Auth/ShopLogin';
+import ShopRegister from './pages/Shop/Auth/ShopRegister';
+import ShopOnboarding from './pages/Shop/ShopOnboarding';
 import ShopsList from './pages/ShopsList';
 import ShopDetails from './pages/ShopDetails';
 import { AuthProvider } from './context/AuthContext';
@@ -62,6 +66,14 @@ function App() {
                     <Route path="/shops" element={<ShopsList />} />
                     <Route path="/shops/:id" element={<ShopDetails />} />
                     <Route path="/login" element={<Login />} />
+
+                    {/* Public Business Landing */}
+                    <Route path="/for-pet-businesses" element={<ShopLanding />} />
+
+                    {/* Dedicated Shop Auth Routes (No layout or different layout) */}
+                    <Route path="/shop/login" element={<ShopLogin />} />
+                    <Route path="/shop/register" element={<ShopRegister />} />
+                    <Route path="/shop/onboarding" element={<ProtectedRoute><ShopOnboarding /></ProtectedRoute>} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/safety" element={<Safety />} />

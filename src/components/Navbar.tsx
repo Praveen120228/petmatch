@@ -132,6 +132,9 @@ const Navbar = () => {
                             <Link to="/shops" style={linkStyle('/shops')}>
                                 <Storefront size={20} /> Shops
                             </Link>
+                            <Link to="/for-pet-businesses" style={{ ...linkStyle('/for-pet-businesses'), marginRight: '0.5rem', fontSize: '0.875rem', color: '#4b5563' }}>
+                                For Business
+                            </Link>
                             <Link to="/login">
                                 <Button size="sm" variant="ghost">Login</Button>
                             </Link>
@@ -174,6 +177,9 @@ const Navbar = () => {
                         <>
                             <Link to="/shops" style={linkStyle('/shops')} onClick={() => setMobileMenuOpen(false)}>
                                 <Storefront size={24} /> <span style={{ fontSize: '1.25rem' }}>Shops</span>
+                            </Link>
+                            <Link to="/for-pet-businesses" style={linkStyle('/for-pet-businesses')} onClick={() => setMobileMenuOpen(false)}>
+                                <span style={{ fontSize: '1.25rem' }}>For Business</span>
                             </Link>
                             <Link to="/login" onClick={() => setMobileMenuOpen(false)} style={{ width: '100%' }}>
                                 <Button size="lg" variant="outline" fullWidth>Login</Button>

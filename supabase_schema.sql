@@ -13,8 +13,26 @@ CREATE TABLE IF NOT EXISTS shops (
     location text NOT NULL,
     image_url text,
     created_at timestamptz DEFAULT now(),
-    updated_at timestamptz DEFAULT now()
+    updated_at timestamptz DEFAULT now(),
+    -- New columns for Phase 5
+    status text DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    shop_type text,
+    city text
 );
+
+-- Safely add columns if table already exists (Migration support)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'shops' AND column_name = 'status') THEN
+        ALTER TABLE shops ADD COLUMN status text DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected'));
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'shops' AND column_name = 'shop_type') THEN
+        ALTER TABLE shops ADD COLUMN shop_type text;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'shops' AND column_name = 'city') THEN
+        ALTER TABLE shops ADD COLUMN city text;
+    END IF;
+END $$;
 
 -- 3. Services Table
 CREATE TABLE IF NOT EXISTS services (
