@@ -12,7 +12,7 @@ export interface AnalyticsEvent {
     created_at?: string;
 }
 
-const SESSION_KEY = 'petmatch_session_id';
+const SESSION_KEY = 'specyf_session_id';
 
 export const analyticsService = {
     sessionId: '',

@@ -18,7 +18,7 @@ const Safety = () => {
                     </div>
                     <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Safety First</h1>
                     <p style={{ fontSize: '1.125rem', color: 'var(--gray-600)', maxWidth: '600px', margin: '0 auto' }}>
-                        Your safety and your pet's well-being are our highest priorities. Here's how to stay safe on PetMatch.
+                        Your safety and your pet's well-being are our highest priorities. Here's how to stay safe on Specyf.
                     </p>
                 </div>
             </div>

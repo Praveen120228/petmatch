@@ -145,14 +145,14 @@ const LandingPage = () => {
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                     <PawPrint size={24} weight="fill" color="var(--primary)" />
-                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>PetMatch</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>Specyf</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
                     {['About', 'Safety', 'Guidelines', 'Support'].map(link => (
                         <Link key={link} to={`/${link.toLowerCase()}`} style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>{link}</Link>
                     ))}
                 </div>
-                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} PetMatch. All rights reserved.</p>
+                <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} Specyf. All rights reserved.</p>
             </footer>
         </div>
     );

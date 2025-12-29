@@ -309,7 +309,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             }
                         `}</style>
                         <span style={{ fontFamily: 'system-ui', fontSize: '1.125rem', fontWeight: 500 }}>
-                            Loading PetMatch...
+                            Loading Specyf...
                         </span>
                     </div>
                 </div>
