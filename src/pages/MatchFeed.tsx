@@ -43,6 +43,7 @@ const MatchFeed = () => {
     const { showToast } = useToast();
 
     // State
+    const [isInitializing, setIsInitializing] = useState(true);
     const [likes, setLikes] = useState<number[]>([]);
     const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
     const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -66,15 +67,30 @@ const MatchFeed = () => {
     const [stateQuery, setStateQuery] = useState('');
     const [breedSearchQuery, setBreedSearchQuery] = useState('');
 
-    // Load Likes (Once)
+    // Load Likes & Location (Once)
     useEffect(() => {
         if (!user) return;
-        featureService.getLikes(user.id).then(setLikes);
-        userService.getProfile(user.id).then(p => {
-            if (p?.latitude && p?.longitude) {
-                setUserLoc({ lat: p.latitude, lng: p.longitude });
+
+        const init = async () => {
+            try {
+                const [likesData, profileData] = await Promise.all([
+                    featureService.getLikes(user.id),
+                    userService.getProfile(user.id)
+                ]);
+
+                setLikes(likesData);
+
+                if (profileData?.latitude && profileData?.longitude) {
+                    setUserLoc({ lat: profileData.latitude, lng: profileData.longitude });
+                }
+            } catch (error) {
+                console.error("Error initializing feed:", error);
+            } finally {
+                setIsInitializing(false);
             }
-        });
+        };
+
+        init();
     }, [user]);
 
     // React Query for Infinite Scroll
@@ -122,7 +138,7 @@ const MatchFeed = () => {
             return lastPage.length === 20 ? allPages.length + 1 : undefined;
         },
         initialPageParam: 1,
-        enabled: !!user,
+        enabled: !!user && !isInitializing, // Wait for initialization
         staleTime: 1000 * 60 * 5, // 5 minutes cache
     });
 
@@ -859,12 +875,12 @@ const MatchFeed = () => {
                         gap: '1rem',
                         paddingBottom: '2rem'
                     }}>
-                        {isLoading && (
+                        {(isLoading || isInitializing) && (
                             Array.from({ length: 8 }).map((_, i) => (
                                 <PetCardSkeleton key={i} />
                             ))
                         )}
-                        {!isLoading && pets.length > 0 && (
+                        {!isLoading && !isInitializing && pets.length > 0 && (
                             <>
                                 {pets.map(pet => (
                                     <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
@@ -975,7 +991,7 @@ const MatchFeed = () => {
                                 )}
                             </>
                         )}
-                        {!isLoading && pets.length === 0 && (
+                        {!isLoading && !isInitializing && pets.length === 0 && (
                             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
                                 <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
                                     <PawPrint size={32} weight="duotone" />
