@@ -2,7 +2,7 @@ import SEO from '../components/SEO';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { MagnifyingGlass, PawPrint, Faders, MapPin, Heart } from '@phosphor-icons/react';
+import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { featureService } from '../lib/featureService';
@@ -11,7 +11,6 @@ import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { recommendationService } from '../lib/recommendationService';
-
 import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
@@ -127,14 +126,6 @@ const MatchFeed = () => {
         staleTime: 1000 * 60 * 5, // 5 minutes cache
     });
 
-    // Recommendations Query
-    const { data: recommendations } = useQuery({
-        queryKey: ['recommendations', user?.id, userLoc],
-        queryFn: () => user?.id ? recommendationService.getRecommendations(user.id, userLoc) : Promise.resolve([]),
-        enabled: !!user?.id,
-        staleTime: 1000 * 60 * 5 // 5 minutes
-    });
-
     const pets = useMemo(() => {
         return (data?.pages.flat() || []) as any[];
     }, [data]);
@@ -159,7 +150,13 @@ const MatchFeed = () => {
         };
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-
+    // Recommendations Query
+    const { data: recommendations } = useQuery({
+        queryKey: ['recommendations', user?.id, userLoc],
+        queryFn: () => user?.id ? recommendationService.getRecommendations(user.id, userLoc) : Promise.resolve([]),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5 // 5 minutes
+    });
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
@@ -770,8 +767,6 @@ const MatchFeed = () => {
                     marginLeft: 0, // Flexbox handles the spacing now
                     transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
-
-
 
                     {/* Recommendations Section */}
                     {recommendations && recommendations.length > 0 && (

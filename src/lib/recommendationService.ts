@@ -39,7 +39,6 @@ export const recommendationService = {
                 .from('pets')
                 .select('*, owner_profile:owner_id(latitude, longitude)')
                 .neq('owner_id', userId)
-                .not('name', 'in', '("Marsh","Cookie","Leo","Whiskey")') // Filter out dummy data
                 .limit(limit);
             return randomPets || [];
         }
@@ -76,7 +75,6 @@ export const recommendationService = {
             .from('pets')
             .select('*, owner_profile:owner_id(latitude, longitude)')
             .neq('owner_id', userId)
-            .not('name', 'in', '("Marsh","Cookie","Leo","Whiskey")') // Filter out dummy data
             .not('id', 'in', `(${likedPetIds.join(',')})`)
             .limit(50); // Pool of candidates to rank
 
