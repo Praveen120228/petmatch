@@ -42,6 +42,7 @@ export const petService = {
                 owner_profile:profiles!owner_id!inner(location, country, state, latitude, longitude, show_location, username, avatar_url)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
+            .eq('status', 'available')
             .range(from, to);
 
         if (filters?.type && filters.type.length > 0 && !filters.type.includes('all')) {
