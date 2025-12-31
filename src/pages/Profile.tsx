@@ -15,6 +15,8 @@ import { userService } from '../lib/userService';
 import { storageService } from '../lib/storageService';
 import { dateService } from '../lib/dateService';
 import { chatService } from '../lib/chatService';
+import { supabase } from '../lib/supabase';
+import { format } from 'date-fns';
 
 const COUNTRY_CODES = [
     { code: '+1', country: 'US/CA' },
@@ -183,6 +185,9 @@ const Profile = () => {
     const [dateRequests, setDateRequests] = useState<any[]>([]);
     const [myRelationships, setMyRelationships] = useState<any[]>([]);
 
+    // Booking State
+    const [userBookings, setUserBookings] = useState<any[]>([]);
+
     useEffect(() => {
         let isMounted = true;
 
@@ -309,8 +314,28 @@ const Profile = () => {
             }
         };
 
+        const loadBookings = async () => {
+            if (!user) return;
+            // Only fetch for private profile (my profile)
+            if (isPublic) return;
+
+            const { data } = await supabase
+                .from('bookings')
+                .select(`
+                     *,
+                     shop:shops (name, image, location),
+                     service:services (name, duration_minutes),
+                     slot:time_slots (start_time, end_time)
+                 `)
+                .eq('customer_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (data && isMounted) setUserBookings(data);
+        };
+
         loadData();
         loadDatingData();
+        loadBookings();
 
         return () => { isMounted = false; };
     }, [user?.id, isPublic, id]); // Only depend on ID, not the whole user object to prevent spurious refetches
@@ -992,7 +1017,7 @@ const Profile = () => {
                     }}>
                         <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px', paddingRight: '1rem', flex: 1 }}>
                             {
-                                ['pets', 'matches', 'likes', 'collections', 'dates'].map((tab) => (
+                                ['pets', 'matches', 'likes', 'collections', 'dates', 'services'].map((tab) => (
                                     (!isPublic || (tab !== 'matches' && tab !== 'likes' && tab !== 'dates')) && ( // Hide private tabs on public profile
                                         <button
                                             key={tab}
@@ -1531,6 +1556,68 @@ const Profile = () => {
                                                 </div>
                                             );
                                         })
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'services' && !isPublic && (
+                                <div className="fade-in" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {userBookings.length > 0 ? userBookings.map((booking: any) => (
+                                        <div key={booking.id} style={{
+                                            background: 'white',
+                                            borderRadius: '16px',
+                                            padding: '1.5rem',
+                                            border: '1px solid #e5e7eb',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            flexWrap: 'wrap',
+                                            gap: '1rem',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                        }}>
+                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                {/* Shop Image */}
+                                                <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', background: '#f3f4f6', flexShrink: 0 }}>
+                                                    {booking.shop?.image ? (
+                                                        <img src={booking.shop.image} alt={booking.shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
+                                                            <PawPrint size={24} weight="duotone" />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', margin: 0 }}>{booking.shop?.name || 'Shop'}</h4>
+                                                    <div style={{ fontSize: '0.9rem', color: '#4b5563', marginTop: '0.25rem' }}>
+                                                        {booking.service?.name} • {booking.service?.duration_minutes}m
+                                                    </div>
+                                                    <div style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span>{booking.slot ? format(new Date(booking.slot.start_time), 'PPP p') : 'Time TBD'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                                                <span style={{
+                                                    padding: '0.4rem 1rem',
+                                                    borderRadius: '99px',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 600,
+                                                    textTransform: 'capitalize',
+                                                    background: booking.status === 'confirmed' ? '#dcfce7' : booking.status === 'rejected' ? '#fee2e2' : '#fef9c3',
+                                                    color: booking.status === 'confirmed' ? '#166534' : booking.status === 'rejected' ? '#991b1b' : '#854d0e'
+                                                }}>
+                                                    {booking.status === 'confirmed' ? 'Accepted' : booking.status}
+                                                </span>
+                                                <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
+                                                    Booked on {format(new Date(booking.created_at), 'MMM d, yyyy')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px' }}>
+                                            <p>No appointment requests yet.</p>
+                                        </div>
                                     )}
                                 </div>
                             )}

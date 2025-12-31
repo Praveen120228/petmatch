@@ -87,10 +87,10 @@ const ShopBookings = () => {
                 ) : (
                     bookings.map(booking => (
                         <Card key={booking.id} padding="lg">
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 {/* Header: Status + Date */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                                         <div style={{
                                             background: getStatusColor(booking.status),
                                             color: '#1e293b',
@@ -141,37 +141,79 @@ const ShopBookings = () => {
                                     )}
                                 </div>
 
-                                {/* Body: Customer & Service */}
-                                <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                            {booking.customer?.avatar_url ? <img src={booking.customer.avatar_url} style={{ width: '100%' }} /> : <User size={20} />}
-                                        </div>
+                                {/* Body Divider */}
+                                <div style={{ height: '1px', background: '#f1f5f9' }} />
+
+                                {/* Detailed Body Grid */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+
+                                    {/* Column 1: Customer & Service */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                         <div>
-                                            <div style={{ fontWeight: 600 }}>{booking.customer?.name || 'Unknown User'}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Customer</div>
-                                            {booking.customer?.email && (
-                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{booking.customer.email}</div>
-                                            )}
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>The Customer</div>
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                                                    {booking.customer?.avatar_url ? <img src={booking.customer.avatar_url} style={{ width: '100%' }} /> : <User size={24} />}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>{booking.customer?.name || 'Unknown User'}</div>
+
+                                                    {/* Contact Info */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
+                                                        {booking.customer?.email && (
+                                                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>✉️ {booking.customer.email}</div>
+                                                        )}
+                                                        {booking.customer?.phone_number && (
+                                                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>📞 {booking.customer.phone_number}</div>
+                                                        )}
+                                                        {booking.customer?.location && (
+                                                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>📍 {booking.customer.location}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Requested Service</div>
+                                            <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                                <div style={{ fontWeight: 600, color: '#334155' }}>{booking.service?.name || 'Custom Service'}</div>
+                                                {booking.service?.duration_minutes && (
+                                                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Duration: {booking.service.duration_minutes} mins</div>
+                                                )}
+                                                {booking.service?.price && (
+                                                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Price: ${booking.service.price}</div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Service</div>
-                                        <div style={{ fontWeight: 600 }}>{booking.service?.name || 'Custom Service'}</div>
-                                    </div>
-
+                                    {/* Column 2: Pet Details */}
                                     {booking.pet && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                                {booking.pet.image ? <img src={booking.pet.image} style={{ width: '100%' }} /> : <span style={{ fontSize: '1.2rem' }}>🐾</span>}
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Pet Details</div>
-                                                <div style={{ fontWeight: 600 }}>{booking.pet.name} ({booking.pet.breed})</div>
+                                        <div>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>The Pet</div>
+                                            <div style={{ background: '#f0f9ff', borderRadius: '12px', padding: '1rem', border: '1px solid #e0f2fe' }}>
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <div style={{ width: '64px', height: '64px', borderRadius: '12px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                                        {booking.pet.image ? <img src={booking.pet.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '1.5rem' }}>🐾</span>}
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#0c4a6e' }}>{booking.pet.name}</div>
+                                                        <div style={{ fontSize: '0.9rem', color: '#0284c7', fontWeight: 600 }}>{booking.pet.breed}</div>
+                                                        <div style={{ fontSize: '0.85rem', marginTop: '2px', display: 'flex', gap: '8px', color: '#0369a1' }}>
+                                                            <span>{booking.pet.age} old</span> • <span>{booking.pet.gender}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {booking.pet.bio && (
+                                                    <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.6)', borderRadius: '8px', fontSize: '0.85rem', color: '#334155', fontStyle: 'italic', lineHeight: 1.5 }}>
+                                                        "{booking.pet.bio}"
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )}
+
                                 </div>
                             </div>
                         </Card>

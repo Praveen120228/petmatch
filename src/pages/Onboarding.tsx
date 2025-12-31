@@ -14,6 +14,7 @@ const Onboarding = () => {
 
     const [username, setUsername] = useState('');
     const [name, setName] = useState(''); // Added name state
+    const [phoneNumber, setPhoneNumber] = useState(''); // Added phone state
     const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
     const [state, setState] = useState(''); // Added state
@@ -31,7 +32,8 @@ const Onboarding = () => {
             userService.getProfile(user.id).then(p => {
                 if (p) {
                     setUsername(p.username || '');
-                    setName(p.name || ''); // Load name
+                    if (p.name) setName(p.name);
+                    if (p.phone_number) setPhoneNumber(p.phone_number);
                     setLocation(p.location || '');
                     setCountry(p.country || '');
                     setState(p.state || ''); // Load state
@@ -107,6 +109,7 @@ const Onboarding = () => {
         if (!user) return alert("Please login first");
         if (!username.trim()) return alert("Please choose a username");
         if (!name.trim()) return alert("Please enter your name");
+        if (!phoneNumber.trim()) return alert("Please enter your phone number");
         if (!location.trim()) return alert("Please enter your location");
 
         setIsSubmitting(true);
@@ -123,6 +126,7 @@ const Onboarding = () => {
             await userService.updateProfile(user.id, {
                 username: username,
                 name: name,
+                phone_number: phoneNumber,
                 location: location,
                 country: country,
                 state: state, // Save state
@@ -246,6 +250,16 @@ const Onboarding = () => {
                         onChange={(e) => setName(e.target.value)}
                         fullWidth
                         required
+                    />
+
+                    <Input
+                        label="Phone Number"
+                        placeholder="+1 234 567 8900"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        fullWidth
+                        required
+                        type="tel"
                     />
 
                     <Input

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Trash, Plus, MagicWand } from '@phosphor-icons/react';
 import Button from '../../components/Button';
+import Select from '../../components/Select';
 import Card from '../../components/Card';
 import { format, addMinutes, parseISO, startOfToday } from 'date-fns';
 
@@ -118,24 +119,22 @@ const ShopSchedule = () => {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Service (Optional)</label>
-                                <select
+                                <Select
+                                    label="Service (Optional)"
                                     value={selectedServiceId}
-                                    onChange={e => {
-                                        const val = e.target.value;
+                                    onChange={(val) => {
                                         setSelectedServiceId(val);
                                         if (val !== 'all') {
                                             const svc = services.find(s => s.id === val);
                                             if (svc) setDuration(svc.duration_minutes);
                                         }
                                     }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                                >
-                                    <option value="all">Any Service (Generic Slot)</option>
-                                    {services.map(s => (
-                                        <option key={s.id} value={s.id}>{s.name} ({s.duration_minutes}m)</option>
-                                    ))}
-                                </select>
+                                    options={[
+                                        { label: 'Any Service (Generic Slot)', value: 'all' },
+                                        ...services.map(s => ({ label: `${s.name} (${s.duration_minutes}m)`, value: s.id }))
+                                    ]}
+                                    fullWidth
+                                />
                             </div>
 
                             <div>
@@ -173,14 +172,19 @@ const ShopSchedule = () => {
                                         </button>
                                     ))}
                                 </div>
-                                <select value={duration} onChange={e => setDuration(Number(e.target.value))} style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                                    <option value={15}>15 Minutes</option>
-                                    <option value={30}>30 Minutes</option>
-                                    <option value={45}>45 Minutes</option>
-                                    <option value={60}>60 Minutes</option>
-                                    <option value={90}>90 Minutes</option>
-                                    <option value={120}>2 Hours</option>
-                                </select>
+                                <Select
+                                    value={duration}
+                                    onChange={(val) => setDuration(Number(val))}
+                                    options={[
+                                        { label: '15 Minutes', value: 15 },
+                                        { label: '30 Minutes', value: 30 },
+                                        { label: '45 Minutes', value: 45 },
+                                        { label: '60 Minutes', value: 60 },
+                                        { label: '90 Minutes', value: 90 },
+                                        { label: '2 Hours', value: 120 }
+                                    ]}
+                                    fullWidth
+                                />
                             </div>
 
                             <Button variant="primary" fullWidth onClick={handleCreateSlots} style={{ marginTop: '1rem' }}>

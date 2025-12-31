@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/Button';
+import Select from '../../components/Select';
 import { Storefront, MapPin, Tag, Camera, CaretRight, CaretLeft, Check, Plus, Trash, Images } from '@phosphor-icons/react';
 import { storageService } from '../../lib/storageService';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
@@ -42,15 +43,30 @@ function MapController({ coords }: { coords?: { lat: number, lng: number } | nul
 function MapUpdater() {
     const map = useMapEvents({});
     useEffect(() => {
-        map.invalidateSize();
+        if (map) map.invalidateSize();
     }, [map]);
     return null;
 }
+
+// Helper to fetch user phone
+const fetchUserPhone = async (userId: string) => {
+    const { data } = await supabase.from('profiles').select('phone_number').eq('id', userId).single();
+    return data?.phone_number || '';
+};
 
 const ShopOnboarding = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
+    // Fetch existing phone
+    useEffect(() => {
+        if (user) {
+            fetchUserPhone(user.id).then(phone => {
+                if (phone) setBasicInfo(prev => ({ ...prev, phoneNumber: phone }));
+            });
+        }
+    }, [user]);
 
     // Steps: 0=Basic, 1=Location, 2=Visuals, 3=Services
     const [step, setStep] = useState(0);
@@ -60,6 +76,7 @@ const ShopOnboarding = () => {
     const [basicInfo, setBasicInfo] = useState({
         name: location.state?.initialShopName || '',
         type: 'Grooming',
+        phoneNumber: '', // Added phone
         description: ''
     });
 
@@ -150,9 +167,13 @@ const ShopOnboarding = () => {
 
     const handleSubmit = async () => {
         if (!user) return;
+        if (!basicInfo.phoneNumber.trim()) return alert("Owner phone number is required.");
+
         setLoading(true);
 
         try {
+            // 0. Update User Profile Phone if changed
+            await supabase.from('profiles').update({ phone_number: basicInfo.phoneNumber }).eq('id', user.id);
             // 1. Upload Logo
             let logoUrl = null;
             if (images.logo) {
@@ -254,13 +275,29 @@ const ShopOnboarding = () => {
                                 <input value={basicInfo.name} onChange={e => handleBasicChange('name', e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} placeholder="e.g. Paws & Claws" />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Business Type</label>
-                                <select value={basicInfo.type} onChange={e => handleBasicChange('type', e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>
-                                    <option value="Grooming">Grooming Salon</option>
-                                    <option value="Vet">Veterinary Clinic</option>
-                                    <option value="Training">Training Center</option>
-                                    <option value="Boarding">Boarding & Daycare</option>
-                                </select>
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Owner Phone Number <span style={{ color: 'red' }}>*</span></label>
+                                <input
+                                    value={basicInfo.phoneNumber}
+                                    onChange={e => handleBasicChange('phoneNumber', e.target.value)}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                                    placeholder="+1 234 567 8900"
+                                    type="tel"
+                                />
+                                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>Clients will use this to contact you.</div>
+                            </div>
+                            <div>
+                                <Select
+                                    label="Business Type"
+                                    value={basicInfo.type}
+                                    onChange={(val) => handleBasicChange('type', val)}
+                                    options={[
+                                        { label: 'Grooming Salon', value: 'Grooming' },
+                                        { label: 'Veterinary Clinic', value: 'Vet' },
+                                        { label: 'Training Center', value: 'Training' },
+                                        { label: 'Boarding & Daycare', value: 'Boarding' }
+                                    ]}
+                                    fullWidth
+                                />
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Description</label>
