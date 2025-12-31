@@ -20,6 +20,7 @@ import AdminShops from './pages/Admin/AdminShops';
 import AdminUsers from './pages/Admin/AdminUsers';
 import AdminBookings from './pages/Admin/AdminBookings';
 import AdminPets from './pages/Admin/AdminPets';
+import AdminReports from './pages/Admin/AdminReports';
 import AdminAnalytics from './pages/Admin/AdminAnalytics';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -122,6 +123,7 @@ function App() {
                     <Route path="users" element={<AdminUsers />} />
                     <Route path="bookings" element={<AdminBookings />} />
                     <Route path="pets" element={<AdminPets />} />
+                    <Route path="reports" element={<AdminReports />} />
                     <Route path="analytics" element={<AdminAnalytics />} />
                   </Route>
 

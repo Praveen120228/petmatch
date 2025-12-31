@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight, PawPrint, CaretDown } from '@phosphor-icons/react';
+import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight, PawPrint, CaretDown, Flag, WarningCircle } from '@phosphor-icons/react';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
@@ -60,6 +60,12 @@ const Profile = () => {
         phone_number: '',
         country_code: '+1' // Default
     });
+
+    // Reporting State
+    const [isReporting, setIsReporting] = useState(false);
+    const [reportReason, setReportReason] = useState('spam');
+    const [reportDescription, setReportDescription] = useState('');
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
     const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
     const [traitInput, setTraitInput] = useState(''); // State for new trait input
@@ -500,6 +506,34 @@ const Profile = () => {
         }
     };
 
+    const handleSubmitReport = async () => {
+        if (!user) return alert("Please login to report");
+        if (!profileData?.id) return;
+        if (!reportDescription.trim()) return alert("Please provide a description");
+
+        setIsSubmittingReport(true);
+        try {
+            const { error } = await supabase.from('reports').insert({
+                reporter_id: user.id,
+                reported_id: profileData.id,
+                reason: reportReason,
+                description: reportDescription
+            });
+
+            if (error) throw error;
+
+            alert("Report submitted successfully. Admins will review it shortly.");
+            setIsReporting(false);
+            setReportDescription('');
+            setReportReason('spam');
+        } catch (error) {
+            console.error(error);
+            alert("Failed to submit report");
+        } finally {
+            setIsSubmittingReport(false);
+        }
+    };
+
     return (
         <div className="fade-in" style={{ minHeight: '100vh', background: 'var(--color-bg-app)' }}>
             <SEO
@@ -596,13 +630,68 @@ const Profile = () => {
                         }
                         {
                             isPublic && (
-                                <Button variant="primary" size="sm" onClick={handleMessage}>
-                                    <ChatCircle size={18} weight="bold" /> Message
-                                </Button>
+                                <>
+                                    <Button variant="primary" size="sm" onClick={handleMessage}>
+                                        <ChatCircle size={18} weight="bold" /> Message
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setIsReporting(true)}
+                                        style={{ color: '#ef4444', borderColor: '#fee2e2' }}
+                                        title="Report User"
+                                    >
+                                        <Flag size={18} weight="bold" />
+                                    </Button>
+                                </>
                             )
                         }
                     </div>
 
+
+                    {/* Report Modal */}
+                    {isReporting && (
+                        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+                            <div style={{ width: '90%', maxWidth: '500px', background: 'white', borderRadius: '16px', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
+                                        <WarningCircle weight="fill" /> Report User
+                                    </h3>
+                                    <button onClick={() => setIsReporting(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+                                </div>
+
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Reason</label>
+                                    <select
+                                        value={reportReason}
+                                        onChange={(e) => setReportReason(e.target.value)}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                                    >
+                                        <option value="spam">Spam / Scam</option>
+                                        <option value="harassment">Harassment</option>
+                                        <option value="inappropriate">Inappropriate Content</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Description</label>
+                                    <textarea
+                                        value={reportDescription}
+                                        onChange={(e) => setReportDescription(e.target.value)}
+                                        placeholder="Please provide details..."
+                                        rows={4}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'vertical' }}
+                                    />
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                    <Button variant="ghost" onClick={() => setIsReporting(false)}>Cancel</Button>
+                                    <Button variant="primary" onClick={handleSubmitReport} loading={isSubmittingReport} style={{ background: '#dc2626', borderColor: '#dc2626' }}>Submit Report</Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Edit Profile Modal */}
                     {
