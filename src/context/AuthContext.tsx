@@ -54,7 +54,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        return () => subscription.unsubscribe();
+        // Safety Timeout: Force loading to false after 8 seconds if DB hangs
+        const timeoutId = setTimeout(() => {
+            setLoading(prev => {
+                if (prev) {
+                    console.error('Auth loading timed out. Database might be slow or locked.');
+                    return false;
+                }
+                return prev;
+            });
+        }, 8000);
+
+        return () => {
+            subscription.unsubscribe();
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     const fetchProfile = async (userId: string, email: string) => {
