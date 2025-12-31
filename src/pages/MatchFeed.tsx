@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import Card from '../components/Card';
+import PetCard from '../components/PetCard';
 import Button from '../components/Button';
 import { featureService } from '../lib/featureService';
 import { useAuth } from '../context/AuthContext';
@@ -793,9 +794,9 @@ const MatchFeed = () => {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', // Optimized for 3:4 card (240px width)
-                        gap: '1rem',
-                        paddingBottom: '2rem'
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', // Wider minimum for better presence
+                        gap: '2rem', // More breathing room
+                        paddingBottom: '4rem'
                     }}>
                         {(isLoading || isInitializing) && (
                             Array.from({ length: 8 }).map((_, i) => (
@@ -805,141 +806,66 @@ const MatchFeed = () => {
                         {!isLoading && !isInitializing && pets.length > 0 && (
                             <>
                                 {pets.map(pet => (
-                                    <div key={pet.id} onMouseEnter={() => setHoveredId(pet.id)} onMouseLeave={() => setHoveredId(null)} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
-                                        <Card
-                                            padding="0"
-                                            style={{
-                                                borderRadius: '24px',
-                                                border: 'none',
-                                                boxShadow: hoveredId === pet.id ? 'var(--shadow-xl)' : 'var(--shadow-md)',
-                                                transition: 'all 0.3s ease',
-                                                transform: hoveredId === pet.id ? 'translateY(-4px)' : 'none',
-                                                overflow: 'hidden',
-                                                background: 'var(--gray-900)',
-                                                height: '100%',
-                                                position: 'relative',
-                                                display: 'block'
-                                            }}
-                                        >
-                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
-                                                <div style={{ position: 'relative', height: '100%' }}>
-                                                    <img
-                                                        src={pet.image || pet.images?.[0] || 'https://placehold.co/400x600/f3f4f6/9ca3af?text=No+Image'}
-                                                        alt={pet.name}
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    />
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        bottom: 0,
-                                                        left: 0,
-                                                        right: 0,
-                                                        padding: '1.5rem',
-                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)',
-                                                        color: 'white',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'flex-end',
-                                                        height: '60%'
-                                                    }}>
-                                                        <div style={{ transform: 'translateY(0)', transition: 'transform 0.3s' }}>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.25rem' }}>
-                                                                <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>
-                                                                    {pet.name}, <span style={{ fontWeight: 400, fontSize: '1.25rem' }}>{pet.age}</span>
-                                                                </h3>
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', opacity: 0.9, marginBottom: '0.5rem', fontWeight: 500 }}>
-                                                                <MapPin size={16} weight="fill" color="#e11d48" />
-                                                                {userLoc && pet.latitude && pet.longitude ? (
-                                                                    <span>{getDistance(userLoc.lat, userLoc.lng, Number(pet.latitude), Number(pet.longitude))} away</span>
-                                                                ) : (
-                                                                    <span>{pet.location}</span>
-                                                                )}
-                                                            </div>
-                                                            <p style={{
-                                                                fontSize: '0.875rem',
-                                                                lineHeight: 1.4,
-                                                                opacity: 0.8,
-                                                                margin: 0,
-                                                                display: '-webkit-box',
-                                                                WebkitLineClamp: 2,
-                                                                WebkitBoxOrient: 'vertical',
-                                                                overflow: 'hidden'
-                                                            }}>
-                                                                {pet.bio}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                            <button
-                                                className="like-button"
-                                                onClick={(e) => handleLike(e, pet)}
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '1rem',
-                                                    right: '1rem',
-                                                    background: 'rgba(255, 255, 255, 0.2)',
-                                                    backdropFilter: 'blur(8px)',
-                                                    border: '1px solid rgba(255,255,255,0.3)',
-                                                    borderRadius: '50%',
-                                                    width: '44px',
-                                                    height: '44px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                                    zIndex: 10,
-                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                    zIndex: 10,
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                                 }}
                                             >
-                                                <Heart
-                                                    size={24}
-                                                    weight={likes.includes(pet.id) ? "fill" : "bold"}
-                                                    color={likes.includes(pet.id) ? "#ef4444" : "white"}
-                                                    style={{
-                                                        filter: likes.includes(pet.id) ? 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
-                                                        transform: likes.includes(pet.id) ? 'scale(1.1)' : 'scale(1)'
-                                                    }}
-                                                />
-                                            </button>
-                                        </Card>
-                                    </div>
+                                <Heart
+                                    size={24}
+                                    weight={likes.includes(pet.id) ? "fill" : "bold"}
+                                    color={likes.includes(pet.id) ? "#ef4444" : "white"}
+                                    style={{
+                                        filter: likes.includes(pet.id) ? 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                                        transform: likes.includes(pet.id) ? 'scale(1.1)' : 'scale(1)'
+                                    }}
+                                />
+                            </button>
+                    </Card>
+            </div>
                                 ))}
-                                {isFetchingNextPage && (
-                                    Array.from({ length: 4 }).map((_, i) => (
-                                        <PetCardSkeleton key={`loading-${i}`} />
-                                    ))
-                                )}
-                            </>
-                        )}
-                        {!isLoading && !isInitializing && pets.length === 0 && (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
-                                <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                                    <PawPrint size={32} weight="duotone" />
-                                </div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
-                                <p style={{ fontSize: '1rem' }}>Try adjusting your search or filters.</p>
-                                <Button variant="outline" onClick={clearFilters} style={{ marginTop: '1.5rem' }}>Clear Filters</Button>
-                            </div>
-                        )}
+            {isFetchingNextPage && (
+                Array.from({ length: 4 }).map((_, i) => (
+                    <PetCardSkeleton key={`loading-${i}`} />
+                ))
+            )}
+        </>
+    )
+}
+{
+    !isLoading && !isInitializing && pets.length === 0 && (
+        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
+            <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <PawPrint size={32} weight="duotone" />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
+            <p style={{ fontSize: '1rem' }}>Try adjusting your search or filters.</p>
+            <Button variant="outline" onClick={clearFilters} style={{ marginTop: '1.5rem' }}>Clear Filters</Button>
+        </div>
+    )
+}
 
-                        {/* Infinite Scroll Skeletons - REMOVED (Duplicate) */}
+{/* Infinite Scroll Skeletons - REMOVED (Duplicate) */ }
 
-                        {/* Infinite Scroll Sentinel */}
-                        {hasNextPage && (
-                            <div
-                                ref={observerRef}
-                                style={{
-                                    gridColumn: '1 / -1',
-                                    height: '20px',
-                                    marginTop: '1rem',
-                                    visibility: 'hidden'
-                                }}
-                            />
-                        )}
-                    </div>
-                </main>
+{/* Infinite Scroll Sentinel */ }
+{
+    hasNextPage && (
+        <div
+            ref={observerRef}
+            style={{
+                gridColumn: '1 / -1',
+                height: '20px',
+                marginTop: '1rem',
+                visibility: 'hidden'
+            }}
+        />
+    )
+}
+                    </div >
+                </main >
             </div >
         </div >
     );
