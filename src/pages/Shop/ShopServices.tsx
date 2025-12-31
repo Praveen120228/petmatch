@@ -151,7 +151,7 @@ const ShopServices = () => {
                                     <input value={serviceForm.name} onChange={e => setServiceForm({ ...serviceForm, name: e.target.value })} placeholder="e.g. Grooming" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                                 </div>
                                 <div style={{ flex: 1, minWidth: '100px' }}>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem', color: '#64748b' }}>Price ($)</label>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.25rem', color: '#64748b' }}>Price (₹)</label>
                                     <input type="number" value={serviceForm.price} onChange={e => setServiceForm({ ...serviceForm, price: Number(e.target.value) })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                                 </div>
                                 <div style={{ flex: 1, minWidth: '100px' }}>
@@ -168,7 +168,7 @@ const ShopServices = () => {
                                 <div key={svc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', border: '1px solid #f1f5f9', borderRadius: '12px', background: 'white', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                                     <div>
                                         <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1e293b' }}>{svc.name}</div>
-                                        <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.25rem' }}>{svc.duration_minutes} mins • <span style={{ color: 'var(--primary-600)', fontWeight: 600 }}>${svc.price}</span></div>
+                                        <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.25rem' }}>{svc.duration_minutes} mins • <span style={{ color: 'var(--primary-600)', fontWeight: 600 }}>₹{svc.price}</span></div>
                                     </div>
                                     <button onClick={() => handleDeleteService(svc.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>
                                         <Trash size={18} />

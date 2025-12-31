@@ -424,7 +424,7 @@ const ShopOnboarding = () => {
                             <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                                     <input placeholder="Service Name (e.g. Full Grooming)" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
-                                    <input type="number" placeholder="Price ($)" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                                    <input type="number" placeholder="Price (₹)" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
                                     <input type="number" placeholder="Duration (min)" value={newService.duration} onChange={e => setNewService({ ...newService, duration: Number(e.target.value) })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
                                 </div>
                                 <Button fullWidth variant="outline" onClick={addService} disabled={!newService.name}>+ Add Service</Button>

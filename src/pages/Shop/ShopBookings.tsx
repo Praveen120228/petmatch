@@ -182,7 +182,7 @@ const ShopBookings = () => {
                                                     <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Duration: {booking.service.duration_minutes} mins</div>
                                                 )}
                                                 {booking.service?.price && (
-                                                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Price: ${booking.service.price}</div>
+                                                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Price: ₹{booking.service.price}</div>
                                                 )}
                                             </div>
                                         </div>

@@ -270,7 +270,7 @@ const ShopDetails = () => {
                                             <div style={{ fontWeight: 700, color: '#1e293b' }}>{svc.name}</div>
                                             <div style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.25rem' }}>{svc.duration_minutes} mins</div>
                                         </div>
-                                        <div style={{ fontWeight: 700, color: 'var(--primary-600)' }}>${svc.price}</div>
+                                        <div style={{ fontWeight: 700, color: 'var(--primary-600)' }}>₹{svc.price}</div>
                                     </div>
                                 ))}
                             </div>
@@ -400,7 +400,7 @@ const ShopDetails = () => {
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
                                 <span>Total</span>
-                                <span>{selectedService ? `$${selectedService.price}` : '$0'}</span>
+                                <span>{selectedService ? `₹${selectedService.price}` : '₹0'}</span>
                             </div>
                         </div>
 
