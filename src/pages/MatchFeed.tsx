@@ -824,45 +824,53 @@ const MatchFeed = () => {
                             }}>
                                 {recommendations.map((pet: any) => (
                                     <div key={`rec-${pet.id}`} style={{ height: '280px', width: '100%', position: 'relative' }}>
-                                        <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', height: '100%', display: 'block' }}>
-                                            <div style={{
-                                                height: '100%',
+                                        <Card
+                                            padding="0"
+                                            style={{
                                                 borderRadius: '16px',
+                                                border: 'none',
+                                                boxShadow: 'var(--shadow-md)',
+                                                height: '100%',
                                                 overflow: 'hidden',
-                                                position: 'relative',
-                                                boxShadow: 'var(--shadow-md)'
-                                            }}>
-                                                <img
-                                                    src={pet.image}
-                                                    alt={pet.name}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                />
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    padding: '12px',
-                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                                                    color: 'white'
-                                                }}>
-                                                    <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{pet.name}, {pet.age}</div>
-                                                    <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>{pet.breed}</div>
-                                                    {pet.score > 0 && (
-                                                        <div style={{
-                                                            fontSize: '0.75rem',
-                                                            marginTop: '4px',
-                                                            background: 'rgba(255,255,255,0.2)',
-                                                            width: 'fit-content',
-                                                            padding: '2px 6px',
-                                                            borderRadius: '4px'
-                                                        }}>
-                                                            {Math.round(pet.score)}% Match
-                                                        </div>
-                                                    )}
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', height: '100%', display: 'block' }}>
+                                                <div style={{ position: 'relative', height: '100%' }}>
+                                                    <img
+                                                        src={pet.image || pet.images?.[0] || 'https://placehold.co/400x500/f3f4f6/9ca3af?text=No+Image'}
+                                                        alt={pet.name}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    />
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        padding: '12px',
+                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                                                        color: 'white'
+                                                    }}>
+                                                        <div style={{ fontSize: '1.25rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{pet.name}, <span style={{ fontWeight: 400 }}>{pet.age}</span></div>
+                                                        <div style={{ fontSize: '0.9rem', opacity: 0.9, fontWeight: 500 }}>{pet.breed}</div>
+                                                        {pet.score > 0 && (
+                                                            <div style={{
+                                                                fontSize: '0.75rem',
+                                                                marginTop: '4px',
+                                                                background: 'rgba(255,255,255,0.2)',
+                                                                backdropFilter: 'blur(4px)',
+                                                                width: 'fit-content',
+                                                                padding: '2px 8px',
+                                                                borderRadius: '12px',
+                                                                fontWeight: 600
+                                                            }}>
+                                                                {Math.round(pet.score)}% Match
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </Link>
+                                            </Link>
+                                        </Card>
                                     </div>
                                 ))}
                             </div>
@@ -902,7 +910,7 @@ const MatchFeed = () => {
                                             <Link to={`/pet/${pet.id}`} style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
                                                 <div style={{ position: 'relative', height: '100%' }}>
                                                     <img
-                                                        src={pet.images?.[0] || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'}
+                                                        src={pet.images?.[0] || 'https://placehold.co/400x600/f3f4f6/9ca3af?text=No+Image'}
                                                         alt={pet.name}
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />
