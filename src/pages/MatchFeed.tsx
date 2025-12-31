@@ -126,9 +126,7 @@ const MatchFeed = () => {
         staleTime: 1000 * 60 * 5, // 5 minutes cache
     });
 
-    const pets = useMemo(() => {
-        return (data?.pages.flat() || []) as any[];
-    }, [data]);
+
 
     // Infinite Scroll Observer
     useEffect(() => {
@@ -157,6 +155,16 @@ const MatchFeed = () => {
         enabled: !!user?.id,
         staleTime: 1000 * 60 * 5 // 5 minutes
     });
+
+    const pets = useMemo(() => {
+        const allPets = (data?.pages.flat() || []) as any[];
+        // Filter out pets that are already in recommendations
+        if (recommendations && recommendations.length > 0) {
+            const recIds = new Set(recommendations.map((r: any) => r.id));
+            return allPets.filter(p => !recIds.has(p.id));
+        }
+        return allPets;
+    }, [data, recommendations]);
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
