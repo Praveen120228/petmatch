@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ChartBar, Eye, Clock, CalendarBlank, ArrowUpRight, ArrowDownRight } from '@phosphor-icons/react';
+import { ChartBar, Eye, Clock, ArrowUpRight, ArrowDownRight } from '@phosphor-icons/react';
 import Card from '../../components/Card';
-import Button from '../../components/Button';
-import { format, subDays, startOfDay, endOfDay, isSameDay, parseISO } from 'date-fns';
+import { format, subDays, startOfDay } from 'date-fns';
 import {
     BarChart,
     Bar,
@@ -18,8 +17,6 @@ import {
     AreaChart,
     Area
 } from 'recharts';
-
-const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 type TimeRange = '24h' | '7d' | '30d' | 'all';
 
@@ -247,7 +244,7 @@ const AdminAnalytics = () => {
         const Icon = isPositive ? ArrowUpRight : ArrowDownRight;
 
         return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color, marginTop: '0.5rem', background: isPositive ? '#ecfdf5' : '#fef2f2', padding: '0.1rem 0.5rem', borderRadius: '4px', alignSelf: 'flex-start', display: 'inline-flex' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color, marginTop: '0.5rem', background: isPositive ? '#ecfdf5' : '#fef2f2', padding: '0.1rem 0.5rem', borderRadius: '4px', alignSelf: 'flex-start' }}>
                 <Icon weight="bold" />
                 <span>{Math.abs(change)}% vs prev</span>
             </div>
