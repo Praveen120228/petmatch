@@ -3,6 +3,7 @@ import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import ShopPending from '../pages/Shop/ShopPending';
+import ShopSuspended from '../pages/Shop/ShopSuspended';
 import {
     Storefront,
     CalendarCheck,
@@ -74,7 +75,11 @@ const ShopLayout = () => {
     if (!isAuthenticated) return <Navigate to="/shop/login" replace />;
     if (user?.role !== 'shop_owner') return <Navigate to="/" replace />; // Kick non-owners to main site
 
-    // Pending Guard
+    // Account Status Guards
+    if (shopStatus === 'suspended') {
+        return <ShopSuspended />;
+    }
+
     if (shopStatus === 'pending') {
         return <ShopPending onRefresh={fetchShopStatus} />;
     }

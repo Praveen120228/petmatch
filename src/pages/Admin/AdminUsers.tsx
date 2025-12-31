@@ -16,7 +16,7 @@ const AdminUsers = () => {
             let query = supabase
                 .from('profiles')
                 .select('*')
-                .order('created_at', { ascending: false });
+                .order('updated_at', { ascending: false });
 
             if (search) {
                 query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);

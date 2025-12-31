@@ -17,9 +17,10 @@ const AdminBookings = () => {
                 .select(`
                     *,
                     shop:shops(name),
-                    user:profiles(name, email)
+                    user:profiles(name, email),
+                    slot:time_slots(start_time, end_time)
                 `)
-                .order('date', { ascending: false });
+                .order('created_at', { ascending: false }); // Sort by creation since ordering by joined column is complex in basic select
 
             if (statusFilter !== 'all') {
                 query = query.eq('status', statusFilter);
@@ -100,10 +101,10 @@ const AdminBookings = () => {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                                             <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1e293b' }}>
-                                                {new Date(booking.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                {booking.slot?.start_time ? new Date(booking.slot.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date'}
                                             </span>
                                             <span style={{ fontSize: '0.9rem', color: '#64748b' }}>
-                                                {booking.time}
+                                                {booking.slot ? `${new Date(booking.slot.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
                                             </span>
                                             <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: '99px', background: statusColor.bg, color: statusColor.text }}>
                                                 {booking.status.toUpperCase()}

@@ -15,7 +15,7 @@ const AdminPets = () => {
         try {
             let query = supabase
                 .from('pets')
-                .select('*, owner_id, profiles(email, name)') // Join profile if possible, though owner_id is on pet
+                .select('*, profiles!pets_owner_id_fkey(email, name)') // Join profile explicitly
                 .order('created_at', { ascending: false });
 
             if (filter !== 'all') {

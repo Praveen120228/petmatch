@@ -101,6 +101,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             // 3. Update State
             if (data) {
+                // SECURITY CHECK: Kick out banned/suspended users
+                if (data.status === 'suspended' || data.status === 'banned') {
+                    console.warn(`User ${data.email} is ${data.status}. Logging out.`);
+                    await logout();
+                    alert(`Your account has been ${data.status}. Please contact support.`);
+                    return; // Stop here
+                }
+
                 setUser({
                     id: data.id,
                     name: data.name,
