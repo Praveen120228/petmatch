@@ -90,53 +90,97 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                             right: 0,
                             padding: '1.5rem',
                             color: 'white',
-                            zIndex: 2
+                            zIndex: 2,
+                            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif'
                         }}>
+                            {/* Owner Info - Floating Badge */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '-280px', // Position at top of card
+                                left: '1.25rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                background: 'rgba(0, 0, 0, 0.4)',
+                                backdropFilter: 'blur(8px)',
+                                padding: '4px 10px 4px 4px',
+                                borderRadius: '30px',
+                                border: '1px solid rgba(255,255,255,0.15)'
+                            }}>
+                                <div style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    overflow: 'hidden',
+                                    background: '#f3f4f6',
+                                    flexShrink: 0
+                                }}>
+                                    <img
+                                        src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'Owner'}&background=random`}
+                                        alt="Owner"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                </div>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>
+                                    {pet.owner_profile?.username || 'Pet Owner'}
+                                </span>
+                            </div>
+
                             {/* Name & Age */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'baseline',
-                                gap: '0.5rem',
-                                marginBottom: '0.25rem',
+                                gap: '0.75rem',
+                                marginBottom: '0.5rem',
                                 textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                             }}>
-                                <h3 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
+                                <h3 style={{ margin: 0, fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>
                                     {pet.name},
                                 </h3>
-                                <span style={{ fontSize: '1.25rem', fontWeight: 400, opacity: 0.9 }}>{pet.age}</span>
+                                <div style={{
+                                    fontSize: '1.1rem',
+                                    fontWeight: 500,
+                                    background: 'rgba(255,255,255,0.2)',
+                                    padding: '2px 8px',
+                                    borderRadius: '8px',
+                                    backdropFilter: 'blur(4px)'
+                                }}>
+                                    {pet.age} y/o
+                                </div>
                             </div>
 
                             {/* Location & Bread */}
                             <div style={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '0.25rem',
+                                gap: '0.35rem',
                                 marginBottom: '0.75rem'
                             }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.9rem', fontWeight: 600, color: 'rgba(255,255,255,0.95)' }}>
-                                    <MapPin size={16} weight="fill" color="#f43f5e" />
-                                    {userLoc && pet.latitude && pet.longitude ? (
-                                        <span>{getDistance(userLoc.lat, userLoc.lng, Number(pet.latitude), Number(pet.longitude))} away</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.95rem', fontWeight: 600, color: 'rgba(255,255,255,0.95)' }}>
+                                    <MapPin size={18} weight="fill" color="#f43f5e" />
+                                    {userLoc && pet.owner_profile?.latitude && pet.owner_profile?.longitude ? (
+                                        <span>{getDistance(userLoc.lat, userLoc.lng, Number(pet.owner_profile.latitude), Number(pet.owner_profile.longitude))} away</span>
                                     ) : (
-                                        <span>{pet.location}</span>
+                                        <span>{pet.owner_profile?.location || pet.owner_profile?.state || pet.owner_profile?.country || 'Location hidden'}</span>
                                     )}
                                 </div>
-                                <div style={{ fontSize: '0.85rem', fontWeight: 500, opacity: 0.8, paddingLeft: '2px' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500, opacity: 0.9, paddingLeft: '4px' }}>
                                     {pet.breed}
                                 </div>
                             </div>
 
                             {/* Bio (Auto-hide on shorter cards, clamp on others) */}
                             <p style={{
-                                fontSize: '0.875rem',
+                                fontSize: '0.9rem',
                                 lineHeight: 1.5,
-                                color: 'rgba(255,255,255,0.8)',
+                                color: 'rgba(255,255,255,0.9)',
                                 margin: 0,
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
                                 WebkitBoxOrient: 'vertical',
                                 overflow: 'hidden',
-                                maxWidth: '90%' // Prevent text from hitting the like button area if it was lower
+                                maxWidth: '90%', // Prevent text from hitting the like button area if it was lower
+                                fontWeight: 400
                             }}>
                                 {pet.bio}
                             </p>
