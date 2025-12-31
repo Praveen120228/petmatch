@@ -1,9 +1,7 @@
 import SEO from '../components/SEO';
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
-import Card from '../components/Card';
+import { MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import PetCard from '../components/PetCard';
 import Button from '../components/Button';
 import { featureService } from '../lib/featureService';
@@ -11,7 +9,6 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
-import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
 
@@ -815,16 +812,47 @@ const MatchFeed = () => {
                                         setHoveredId={setHoveredId}
                                     />
                                 ))}
+                                {isFetchingNextPage && (
+                                    Array.from({ length: 4 }).map((_, i) => (
+                                        <PetCardSkeleton key={`loading-${i}`} />
+                                    ))
+                                )}
+                            </>
+                        )}
+                        {!isLoading && !isInitializing && pets.length === 0 && (
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 1rem', color: 'var(--gray-500)' }}>
+                                <div style={{
+                                    background: 'var(--gray-50)',
+                                    width: '80px',
+                                    height: '80px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto 1.5rem',
+                                    border: '1px solid var(--gray-100)'
+                                }}>
+                                    <PawPrint size={40} weight="duotone" color="var(--primary-400)" />
+                                </div>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gray-900)', marginBottom: '0.75rem' }}>No pets found</h3>
+                                <p style={{ fontSize: '1.1rem', maxWidth: '400px', margin: '0 auto' }}>We couldn't find any pets matching your criteria. Try adjusting your filters or location.</p>
+                                <Button variant="outline" onClick={clearFilters} style={{ marginTop: '2rem' }}>Clear All Filters</Button>
+                            </div>
+                        )}
+
+                        {/* Infinite Scroll Sentinel */}
+                        {hasNextPage && (
+                            <div
+                                ref={observerRef}
                                 style={{
                                     gridColumn: '1 / -1',
                                     height: '20px',
                                     marginTop: '1rem',
                                     visibility: 'hidden'
                                 }}
-        />
-                                )
-}
-                            </div >
+                            />
+                        )}
+                    </div>
                 </main >
             </div >
         </div >
