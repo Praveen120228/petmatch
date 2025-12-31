@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Button from './Button';
-import { PawPrint, User, Chats, List, X, Storefront } from '@phosphor-icons/react';
+import { PawPrint, User, Chats, List, X, Storefront, ShieldCheck } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -127,6 +127,11 @@ const Navbar = () => {
                                     </div>
                                 )}
                             </Link>
+                            {user?.role === 'admin' && (
+                                <Link to="/admin" style={{ ...linkStyle('/admin'), background: '#1e293b', color: 'white' }}>
+                                    <ShieldCheck size={20} /> Admin
+                                </Link>
+                            )}
                         </>
                     ) : (
                         <>

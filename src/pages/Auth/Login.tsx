@@ -41,6 +41,12 @@ const Login = () => {
                     alert('Access Denied: This login is for Pet Owners only. Please use the Shop Owner Login.');
                     return;
                 }
+
+                // Admin Redirect
+                if (user.user_metadata?.role === 'admin') {
+                    navigate('/admin/dashboard');
+                    return;
+                }
             }
 
             // 3. Success
