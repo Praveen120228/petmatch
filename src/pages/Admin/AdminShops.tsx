@@ -37,14 +37,22 @@ const AdminShops = () => {
 
         setProcessingId(shopId);
         try {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('shops')
                 .update({ status })
-                .eq('id', shopId);
+                .eq('id', shopId)
+                .select(); // Critical: Return data to confirm update happened
 
             if (error) throw error;
 
-            // Update local state
+            if (data.length === 0) {
+                // RLS blocked the update silently
+                alert('Action Failed: Permission Denied. Please Log Out and Log Back In to refresh your Admin privileges.');
+                // Revert local optimistic update if we did one (we haven't yet)
+                return;
+            }
+
+            // Update local state only if DB update confirmed
             setShops(prev => prev.map(s => s.id === shopId ? { ...s, status } : s));
 
         } catch (error) {
