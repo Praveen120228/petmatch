@@ -14,6 +14,9 @@ import ShopRegister from './pages/Shop/Auth/ShopRegister';
 import ShopOnboarding from './pages/Shop/ShopOnboarding';
 import ShopsList from './pages/ShopsList';
 import ShopDetails from './pages/ShopDetails';
+import AdminLayout from './components/AdminLayout';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import AdminShops from './pages/Admin/AdminShops';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -105,6 +108,13 @@ function App() {
                     <Route path="bookings" element={<ShopBookings />} />
                     <Route path="services" element={<ShopServices />} />
                     <Route path="settings" element={<ShopSettings />} />
+                  </Route>
+
+                  {/* Admin Portal Layout */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="shops" element={<AdminShops />} />
                   </Route>
 
                   {/* Shop Auth Routes */}

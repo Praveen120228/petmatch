@@ -8,14 +8,14 @@ interface User {
     email: string;
     image?: string;
     username?: string;
-    role?: 'user' | 'shop_owner';
+    role?: 'user' | 'shop_owner' | 'admin';
 }
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-    signup: (name: string, email: string, password: string, role?: 'user' | 'shop_owner') => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
+    signup: (name: string, email: string, password: string, role?: 'user' | 'shop_owner' | 'admin') => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
     updateUser: (data: Partial<User>) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: data.name,
                     email: data.email,
                     image: data.avatar_url,
-                    role: data.role as 'user' | 'shop_owner'
+                    role: data.role as 'user' | 'shop_owner' | 'admin'
                 });
 
                 // Update Cache
@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: true };
     };
 
-    const signup = async (name: string, email: string, password: string, role: 'user' | 'shop_owner' = 'user') => {
+    const signup = async (name: string, email: string, password: string, role: 'user' | 'shop_owner' | 'admin' = 'user') => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
