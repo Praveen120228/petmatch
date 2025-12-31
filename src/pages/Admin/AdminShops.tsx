@@ -123,11 +123,6 @@ const AdminShops = () => {
         }
     };
 
-    const filteredShops = shops.filter(shop => {
-        if (activeTab === 'all') return true;
-        return (shop.status || 'pending') === activeTab;
-    });
-
     const tabs = [
         { id: 'pending', label: 'Pending' },
         { id: 'approved', label: 'Approved' },

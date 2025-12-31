@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, X, User, Prohibit, Trash, MagnifyingGlass } from '@phosphor-icons/react';
 import Button from '../../components/Button';
-import Card from '../../components/Card';
 import PaginationControls from '../../components/PaginationControls';
 
 const PAGE_SIZE = 10;
