@@ -86,6 +86,31 @@ const AdminReports = () => {
         }
     };
 
+    const handleHidePet = async (report: any) => {
+        if (!confirm(`Are you sure you want to HIDE ${report.reported_pet?.name}?`)) return;
+        setProcessingId(report.id);
+        try {
+            // 1. Update Pet Status
+            const { error: petError } = await supabase
+                .from('pets')
+                .update({ status: 'hidden' })
+                .eq('id', report.reported_pet_id);
+
+            if (petError) throw petError;
+
+            // 2. Mark report as resolved
+            await handleUpdateStatus(report.id, 'resolved');
+
+            alert(`Pet ${report.reported_pet?.name} has been HIDDEN.`);
+            fetchReports();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to hide pet");
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'pending': return { bg: '#fee2e2', text: '#ef4444' };
@@ -211,15 +236,27 @@ const AdminReports = () => {
                                                 >
                                                     <X weight="bold" /> Dismiss
                                                 </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    style={{ color: '#dc2626', borderColor: '#fee2e2' }}
-                                                    onClick={() => handleBanUser(report)}
-                                                    disabled={!!processingId}
-                                                >
-                                                    <Prohibit weight="bold" /> Ban User
-                                                </Button>
+                                                {report.reported_pet ? (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        style={{ color: '#d97706', borderColor: '#fcd34d' }}
+                                                        onClick={() => handleHidePet(report)}
+                                                        disabled={!!processingId}
+                                                    >
+                                                        <EyeSlash weight="bold" /> Hide Pet
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        style={{ color: '#dc2626', borderColor: '#fee2e2' }}
+                                                        onClick={() => handleBanUser(report)}
+                                                        disabled={!!processingId}
+                                                    >
+                                                        <Prohibit weight="bold" /> Ban User
+                                                    </Button>
+                                                )}
                                             </>
                                         )}
                                         {report.status !== 'pending' && (
