@@ -53,6 +53,10 @@ export const analyticsService = {
     },
 
     trackPageView(path: string) {
-        this.trackEvent('page_view', { path });
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        this.trackEvent('page_view', {
+            path,
+            device: isMobile ? 'mobile' : 'desktop'
+        });
     }
 };
