@@ -35,7 +35,37 @@ const ShopLayout = () => {
     };
 
     useEffect(() => {
-        if (user) fetchShopStatus();
+        if (!user) return;
+
+        fetchShopStatus();
+
+        // Real-time listener for status changes
+        const channel = supabase
+            .channel('shop_status_updates')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'shops',
+                    filter: `owner_id=eq.${user.id}`
+                },
+                (payload) => {
+                    console.log('Real-time update received:', payload);
+                    const newStatus = payload.new.status;
+                    setShopStatus(newStatus);
+
+                    if (newStatus === 'approved') {
+                        // Optional: Show a browser notification or toast here if we had a toast library
+                        alert("🎉 Congratulations! Your shop has been approved. You now have full access.");
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [user]);
 
     if (loading || statusLoading) return <div>Loading...</div>;
