@@ -1,7 +1,7 @@
 import SEO from '../components/SEO';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { MagnifyingGlass, PawPrint, Faders, MapPin, Heart } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
+import { recommendationService } from '../lib/recommendationService';
 
 import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
@@ -124,6 +125,14 @@ const MatchFeed = () => {
         initialPageParam: 1,
         enabled: !!user,
         staleTime: 1000 * 60 * 5, // 5 minutes cache
+    });
+
+    // Recommendations Query
+    const { data: recommendations } = useQuery({
+        queryKey: ['recommendations', user?.id, userLoc],
+        queryFn: () => user?.id ? recommendationService.getRecommendations(user.id, userLoc) : Promise.resolve([]),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5 // 5 minutes
     });
 
     const pets = useMemo(() => {
@@ -763,6 +772,74 @@ const MatchFeed = () => {
                 }}>
 
 
+
+                    {/* Recommendations Section */}
+                    {recommendations && recommendations.length > 0 && (
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h2 style={{
+                                fontSize: '1.5rem',
+                                fontWeight: 700,
+                                color: 'var(--gray-900)',
+                                marginBottom: '1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <Heart weight="fill" color="#e11d48" /> Recommended for You
+                            </h2>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                gap: '1rem',
+                                overflowX: 'auto',
+                                paddingBottom: '1rem'
+                            }}>
+                                {recommendations.map((pet: any) => (
+                                    <div key={`rec-${pet.id}`} style={{ height: '280px', width: '100%', position: 'relative' }}>
+                                        <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', height: '100%', display: 'block' }}>
+                                            <div style={{
+                                                height: '100%',
+                                                borderRadius: '16px',
+                                                overflow: 'hidden',
+                                                position: 'relative',
+                                                boxShadow: 'var(--shadow-md)'
+                                            }}>
+                                                <img
+                                                    src={pet.image}
+                                                    alt={pet.name}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    padding: '12px',
+                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                                                    color: 'white'
+                                                }}>
+                                                    <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{pet.name}, {pet.age}</div>
+                                                    <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>{pet.breed}</div>
+                                                    {pet.score > 0 && (
+                                                        <div style={{
+                                                            fontSize: '0.75rem',
+                                                            marginTop: '4px',
+                                                            background: 'rgba(255,255,255,0.2)',
+                                                            width: 'fit-content',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px'
+                                                        }}>
+                                                            {Math.round(pet.score)}% Match
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div style={{
                         display: 'grid',
