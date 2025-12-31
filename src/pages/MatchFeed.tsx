@@ -158,13 +158,22 @@ const MatchFeed = () => {
 
     const pets = useMemo(() => {
         const allPets = (data?.pages.flat() || []) as any[];
+        let filteredPets = allPets;
+
         // Filter out pets that are already in recommendations
         if (recommendations && recommendations.length > 0) {
             const recIds = new Set(recommendations.map((r: any) => r.id));
-            return allPets.filter(p => !recIds.has(p.id));
+            filteredPets = filteredPets.filter(p => !recIds.has(p.id));
         }
-        return allPets;
-    }, [data, recommendations]);
+
+        // Filter out pets that are already liked
+        if (likes && likes.length > 0) {
+            const likedIds = new Set(likes);
+            filteredPets = filteredPets.filter(p => !likedIds.has(p.id));
+        }
+
+        return filteredPets;
+    }, [data, recommendations, likes]);
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
