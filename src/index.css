@@ -132,6 +132,7 @@ h6 {
 h1 {
   background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   /* Fallback for browsers that don't support text-fill-color */
   color: var(--primary-700);
