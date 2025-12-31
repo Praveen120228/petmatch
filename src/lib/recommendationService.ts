@@ -39,6 +39,7 @@ export const recommendationService = {
                 .from('pets')
                 .select('*, owner_profile:owner_id(latitude, longitude)')
                 .neq('owner_id', userId)
+                .eq('status', 'available')
                 .limit(limit);
             return randomPets || [];
         }
@@ -75,6 +76,7 @@ export const recommendationService = {
             .from('pets')
             .select('*, owner_profile:owner_id(latitude, longitude)')
             .neq('owner_id', userId)
+            .eq('status', 'available')
             .not('id', 'in', `(${likedPetIds.join(',')})`)
             .limit(50); // Pool of candidates to rank
 
