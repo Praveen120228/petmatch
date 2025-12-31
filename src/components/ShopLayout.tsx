@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import ShopPending from '../pages/Shop/ShopPending';
 import {
     Storefront,
     CalendarCheck,
@@ -10,19 +13,41 @@ import {
     House,
     Gear
 } from '@phosphor-icons/react';
-import { useState } from 'react';
 import Button from './Button';
 
 const ShopLayout = () => {
     const { user, isAuthenticated, logout, loading } = useAuth();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [shopStatus, setShopStatus] = useState<string | null>(null);
+    const [statusLoading, setStatusLoading] = useState(true);
 
-    if (loading) return <div>Loading...</div>;
+    const fetchShopStatus = async () => {
+        if (!user) return;
+        try {
+            const { data } = await supabase.from('shops').select('status').eq('owner_id', user.id).single();
+            setShopStatus(data?.status || null);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setStatusLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user) fetchShopStatus();
+    }, [user]);
+
+    if (loading || statusLoading) return <div>Loading...</div>;
 
     // Role Guard
     if (!isAuthenticated) return <Navigate to="/shop/login" replace />;
     if (user?.role !== 'shop_owner') return <Navigate to="/" replace />; // Kick non-owners to main site
+
+    // Pending Guard
+    if (shopStatus === 'pending') {
+        return <ShopPending onRefresh={fetchShopStatus} />;
+    }
 
     const navItems = [
         { path: '/shop/dashboard', icon: <House size={20} />, label: 'Dashboard' },

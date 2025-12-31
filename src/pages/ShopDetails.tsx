@@ -120,7 +120,7 @@ const ShopDetails = () => {
         try {
             // Fetch Shop, Services, Gallery, Slots (same as before)
             const [shopRes, svcRes, galleryRes] = await Promise.all([
-                supabase.from('shops').select('*').eq('id', id).single(),
+                supabase.from('shops').select('*').eq('id', id).eq('status', 'approved').single(),
                 supabase.from('services').select('*').eq('shop_id', id),
                 supabase.from('shop_images').select('*').eq('shop_id', id).order('display_order')
             ]);

@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { CalendarCheck, Users, TrendUp, Clock } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import { Link } from 'react-router-dom';
+import ShopPending from './ShopPending';
 
 const ShopDashboard = () => {
     const { user } = useAuth();
@@ -15,44 +16,44 @@ const ShopDashboard = () => {
     const [shop, setShop] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchDashboard = async () => {
-            if (!user) return;
-            try {
-                // 1. Get Shop Details
-                const { data: shopData } = await supabase
-                    .from('shops')
-                    .select('*')
-                    .eq('owner_id', user.id)
-                    .single();
+    const fetchDashboard = async () => {
+        if (!user) return;
+        try {
+            // 1. Get Shop Details
+            const { data: shopData } = await supabase
+                .from('shops')
+                .select('*')
+                .eq('owner_id', user.id)
+                .single();
 
-                if (shopData) {
-                    setShop(shopData);
+            if (shopData) {
+                setShop(shopData);
 
-                    // 2. Mock Stats/Get Stats (We assume bookings table is getting populated)
-                    // For now, simple count queries if tables exist
-                    const { count: pendingCount } = await supabase
-                        .from('bookings')
-                        .select('id', { count: 'exact', head: true })
-                        .eq('shop_id', shopData.id)
-                        .eq('status', 'pending');
+                // 2. Mock Stats/Get Stats (We assume bookings table is getting populated)
+                // For now, simple count queries if tables exist
+                const { count: pendingCount } = await supabase
+                    .from('bookings')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('shop_id', shopData.id)
+                    .eq('status', 'pending');
 
-                    setStats(prev => ({ ...prev, pendingRequests: pendingCount || 0 }));
+                setStats(prev => ({ ...prev, pendingRequests: pendingCount || 0 }));
 
-                } else {
-                    // No Shop yet? Redirect to create shop or show prompts
-                }
-
-                // Mock stats for demo if empty
-                if (!shopData) setStats({ todayBookings: 0, pendingRequests: 0, totalServices: 0 });
-
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
+            } else {
+                // No Shop yet? Redirect to create shop or show prompts
             }
-        };
 
+            // Mock stats for demo if empty
+            if (!shopData) setStats({ todayBookings: 0, pendingRequests: 0, totalServices: 0 });
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchDashboard();
     }, [user]);
 
@@ -64,13 +65,19 @@ const ShopDashboard = () => {
                 <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
                     <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome, {user?.name}!</h1>
                     <p style={{ color: '#64748b', marginBottom: '2rem', fontSize: '1.1rem' }}>You haven't set up your shop profile yet.</p>
-                    <Link to="/shop/services">
+                    <Link to="/shop/onboarding"> {/* Fixed link to onboarding */}
                         <Button variant="primary" size="lg">Create Shop Profile</Button>
                     </Link>
                 </div>
             </div>
         );
     }
+
+    if (shop.status === 'pending') {
+        return <ShopPending onRefresh={fetchDashboard} />;
+    }
+
+    // ... rest of the component remains same ...
 
     const statCards = [
         { label: 'Today\'s Bookings', value: stats.todayBookings, icon: <CalendarCheck size={24} color="#4f46e5" />, bg: '#eef2ff' },
