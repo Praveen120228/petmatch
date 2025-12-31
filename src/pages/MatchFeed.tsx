@@ -791,7 +791,6 @@ const MatchFeed = () => {
                     transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
 
-
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', // Wider minimum for better presence
@@ -806,65 +805,26 @@ const MatchFeed = () => {
                         {!isLoading && !isInitializing && pets.length > 0 && (
                             <>
                                 {pets.map(pet => (
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                    zIndex: 10,
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                                }}
-                                            >
-                                <Heart
-                                    size={24}
-                                    weight={likes.includes(pet.id) ? "fill" : "bold"}
-                                    color={likes.includes(pet.id) ? "#ef4444" : "white"}
-                                    style={{
-                                        filter: likes.includes(pet.id) ? 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
-                                        transform: likes.includes(pet.id) ? 'scale(1.1)' : 'scale(1)'
-                                    }}
-                                />
-                            </button>
-                    </Card>
-            </div>
+                                    <PetCard
+                                        key={pet.id}
+                                        pet={pet}
+                                        userLoc={userLoc}
+                                        isLiked={likes.includes(pet.id)}
+                                        onLike={(e) => handleLike(e, pet)}
+                                        hoveredId={hoveredId}
+                                        setHoveredId={setHoveredId}
+                                    />
                                 ))}
-            {isFetchingNextPage && (
-                Array.from({ length: 4 }).map((_, i) => (
-                    <PetCardSkeleton key={`loading-${i}`} />
-                ))
-            )}
-        </>
-    )
-}
-{
-    !isLoading && !isInitializing && pets.length === 0 && (
-        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--gray-400)' }}>
-            <div style={{ background: 'var(--gray-100)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                <PawPrint size={32} weight="duotone" />
-            </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--gray-900)', marginBottom: '0.5rem' }}>No pets found</h3>
-            <p style={{ fontSize: '1rem' }}>Try adjusting your search or filters.</p>
-            <Button variant="outline" onClick={clearFilters} style={{ marginTop: '1.5rem' }}>Clear Filters</Button>
-        </div>
-    )
-}
-
-{/* Infinite Scroll Skeletons - REMOVED (Duplicate) */ }
-
-{/* Infinite Scroll Sentinel */ }
-{
-    hasNextPage && (
-        <div
-            ref={observerRef}
-            style={{
-                gridColumn: '1 / -1',
-                height: '20px',
-                marginTop: '1rem',
-                visibility: 'hidden'
-            }}
+                                style={{
+                                    gridColumn: '1 / -1',
+                                    height: '20px',
+                                    marginTop: '1rem',
+                                    visibility: 'hidden'
+                                }}
         />
-    )
+                                )
 }
-                    </div >
+                            </div >
                 </main >
             </div >
         </div >
