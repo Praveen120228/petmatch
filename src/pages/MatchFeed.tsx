@@ -1,7 +1,7 @@
 import SEO from '../components/SEO';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Heart, MagnifyingGlass, PawPrint, Faders, MapPin } from '@phosphor-icons/react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -10,7 +10,6 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
-import { recommendationService } from '../lib/recommendationService';
 import { getDistance } from '../utils/distance';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
@@ -164,23 +163,13 @@ const MatchFeed = () => {
         };
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    // Recommendations Query
-    const { data: recommendations } = useQuery({
-        queryKey: ['recommendations', user?.id, userLoc],
-        queryFn: () => user?.id ? recommendationService.getRecommendations(user.id, userLoc) : Promise.resolve([]),
-        enabled: !!user?.id,
-        staleTime: 1000 * 60 * 5 // 5 minutes
-    });
+
 
     const pets = useMemo(() => {
         const allPets = (data?.pages.flat() || []) as any[];
         let filteredPets = allPets;
 
-        // Filter out pets that are already in recommendations
-        if (recommendations && recommendations.length > 0) {
-            const recIds = new Set(recommendations.map((r: any) => r.id));
-            filteredPets = filteredPets.filter(p => !recIds.has(p.id));
-        }
+
 
         // Filter out pets that are already liked
         if (likes && likes.length > 0) {
@@ -189,7 +178,7 @@ const MatchFeed = () => {
         }
 
         return filteredPets;
-    }, [data, recommendations, likes]);
+    }, [data, likes]);
 
     // Derived Age Options based on Max Lifespan
     const ageOptions = useMemo(() => {
@@ -801,96 +790,6 @@ const MatchFeed = () => {
                     transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
 
-                    {/* Recommendations Section */}
-                    {recommendations && recommendations.length > 0 && (
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h2 style={{
-                                fontSize: '1.5rem',
-                                fontWeight: 700,
-                                color: 'var(--gray-900)',
-                                marginBottom: '1rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}>
-                                <Heart weight="fill" color="#e11d48" /> Recommended for You
-                            </h2>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                                gap: '1rem',
-                                overflowX: 'auto',
-                                paddingBottom: '1rem'
-                            }}>
-                                {recommendations.map((pet: any) => (
-                                    <div key={`rec-${pet.id}`} style={{ height: '280px', width: '100%', position: 'relative' }}>
-                                        <Card
-                                            padding="0"
-                                            style={{
-                                                borderRadius: '16px',
-                                                border: 'none',
-                                                boxShadow: 'var(--shadow-md)',
-                                                height: '100%',
-                                                overflow: 'hidden',
-                                                position: 'relative'
-                                            }}
-                                        >
-                                            <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', height: '100%', display: 'block' }}>
-                                                <div style={{
-                                                    height: '100%',
-                                                    borderRadius: '16px',
-                                                    overflow: 'hidden',
-                                                    position: 'relative',
-                                                    boxShadow: 'var(--shadow-md)'
-                                                }}>
-                                                    <img
-                                                        src={pet.image || pet.images?.[0] || 'https://placehold.co/400x500/f3f4f6/9ca3af?text=No+Image'}
-                                                        alt={pet.name}
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    />
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        bottom: 0,
-                                                        left: 0,
-                                                        right: 0,
-                                                        padding: '1.25rem',
-                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)',
-                                                        color: 'white',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'flex-end',
-                                                        height: '60%'
-                                                    }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.2rem' }}>
-                                                            <div style={{ fontSize: '1.35rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>
-                                                                {pet.name}, <span style={{ fontWeight: 400, fontSize: '1.1rem' }}>{pet.age}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ fontSize: '0.85rem', opacity: 0.9, fontWeight: 500, marginBottom: '0.35rem' }}>{pet.breed}</div>
-                                                        {pet.score > 0 && (
-                                                            <div style={{
-                                                                fontSize: '0.75rem',
-                                                                marginTop: '2px',
-                                                                background: 'rgba(255,255,255,0.2)',
-                                                                backdropFilter: 'blur(4px)',
-                                                                width: 'fit-content',
-                                                                padding: '2px 8px',
-                                                                borderRadius: '12px',
-                                                                fontWeight: 600,
-                                                                border: '1px solid rgba(255,255,255,0.1)'
-                                                            }}>
-                                                                {Math.round(pet.score)}% Match
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </Card>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     <div style={{
                         display: 'grid',
