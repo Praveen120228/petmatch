@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, X, Storefront, MapPin, Prohibit, Trash } from '@phosphor-icons/react';
+import { Check, X, Storefront, MapPin, Prohibit, Trash, MagnifyingGlass } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
+import PaginationControls from '../../components/PaginationControls';
+
+const PAGE_SIZE = 10;
 
 const AdminShops = () => {
     const [shops, setShops] = useState<any[]>([]);
@@ -10,16 +13,41 @@ const AdminShops = () => {
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'suspended'>('pending');
 
+    // Pagination & Search
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+
     const fetchShops = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
+            const from = (page - 1) * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
+
+            let query = supabase
                 .from('shops')
-                .select('*')
-                .order('created_at', { ascending: false });
+                .select('*', { count: 'exact' })
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            // Filter by search
+            if (search) {
+                query = query.ilike('name', `%${search}%`);
+            }
+
+            // Client-side vs Server-side filtering note: 
+            // Ideally we do this server-side, but 'status' checks are simple eq()
+            // However, activeTab logic was "filter array after fetch" in previous code. 
+            // To do pagination correctly, we MUST filter in the query.
+            if (activeTab !== 'all') {
+                query = query.eq('status', activeTab);
+            }
+
+            const { data, error, count } = await query;
 
             if (error) throw error;
             setShops(data || []);
+            setTotalCount(count || 0);
         } catch (error) {
             console.error(error);
         } finally {
@@ -29,7 +57,15 @@ const AdminShops = () => {
 
     useEffect(() => {
         fetchShops();
-    }, []);
+    }, [activeTab, page]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (page === 1) fetchShops();
+            else setPage(1);
+        }, 300);
+        return () => clearTimeout(timeoutId);
+    }, [search]);
 
     const handleStatusUpdate = async (shopId: string, status: 'approved' | 'rejected' | 'suspended') => {
         const action = status === 'suspended' ? 'SUSPEND' : status.toUpperCase();
@@ -101,9 +137,32 @@ const AdminShops = () => {
 
     return (
         <div className="fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b' }}>Manage Shops</h1>
-                <Button variant="outline" onClick={fetchShops} disabled={loading}>Refresh</Button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div style={{ position: 'relative', width: '250px' }}>
+                        <MagnifyingGlass
+                            size={20}
+                            color="#94a3b8"
+                            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Search shops..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '0.6rem 1rem 0.6rem 2.5rem',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                fontSize: '0.9rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+                    <Button variant="outline" onClick={fetchShops} disabled={loading}>Refresh</Button>
+                </div>
             </div>
 
             {/* Tabs */}
@@ -144,14 +203,14 @@ const AdminShops = () => {
                 <div>Loading shops...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {filteredShops.length === 0 && (
+                    {shops.length === 0 && (
                         <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
                             <Storefront size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
                             <p>No {activeTab === 'all' ? '' : activeTab} shops found.</p>
                         </div>
                     )}
 
-                    {filteredShops.map(shop => {
+                    {shops.map(shop => {
                         const statusColor = getStatusColor(shop.status || 'pending');
                         return (
                             <Card key={shop.id} padding="lg">
@@ -247,6 +306,16 @@ const AdminShops = () => {
                             </Card>
                         );
                     })}
+
+                    <PaginationControls
+                        currentPage={page}
+                        totalPages={Math.ceil(totalCount / PAGE_SIZE)}
+                        onPageChange={setPage}
+                        hasNext={page * PAGE_SIZE < totalCount}
+                        hasPrev={page > 1}
+                        loading={loading}
+                        totalItems={totalCount}
+                    />
                 </div>
             )}
         </div>

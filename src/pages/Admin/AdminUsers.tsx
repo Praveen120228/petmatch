@@ -3,6 +3,9 @@ import { supabase } from '../../lib/supabase';
 import { Check, X, User, Prohibit, Trash, MagnifyingGlass } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
+import PaginationControls from '../../components/PaginationControls';
+
+const PAGE_SIZE = 10;
 
 const AdminUsers = () => {
     const [users, setUsers] = useState<any[]>([]);
@@ -10,22 +13,33 @@ const AdminUsers = () => {
     const [search, setSearch] = useState('');
     const [processingId, setProcessingId] = useState<string | null>(null);
 
+    // Pagination State
+    const [page, setPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+
+
     const fetchUsers = async () => {
         setLoading(true);
         try {
+            // Calculate range
+            const from = (page - 1) * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
+
             let query = supabase
                 .from('profiles')
-                .select('*')
-                .order('updated_at', { ascending: false });
+                .select('*', { count: 'exact' })
+                .order('updated_at', { ascending: false })
+                .range(from, to);
 
             if (search) {
                 query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
             }
 
-            const { data, error } = await query;
+            const { data, error, count } = await query;
 
             if (error) throw error;
             setUsers(data || []);
+            setTotalCount(count || 0);
         } catch (error) {
             console.error(error);
         } finally {
@@ -38,6 +52,11 @@ const AdminUsers = () => {
             fetchUsers();
         }, 300);
         return () => clearTimeout(timeoutId);
+    }, [search, page]);
+
+    // Reset page when search changes
+    useEffect(() => {
+        setPage(1);
     }, [search]);
 
     const handleStatusUpdate = async (userId: string, status: 'active' | 'suspended' | 'banned') => {
@@ -127,89 +146,110 @@ const AdminUsers = () => {
             {loading ? (
                 <div>Loading users...</div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {users.length === 0 && <p>No users found.</p>}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                    {/* Wrap list in a nice border container */}
+                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+                        {users.length === 0 && (
+                            <div style={{ padding: '3rem', textAlign: 'center', background: 'white' }}>
+                                <p>No users found.</p>
+                            </div>
+                        )}
 
-                    {users.map(u => {
-                        const statusColor = getStatusColor(u.status || 'active');
-                        return (
-                            <Card key={u.id} padding="lg">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                        {users.map((u, index) => {
+                            const statusColor = getStatusColor(u.status || 'active');
+                            const isLast = index === users.length - 1;
+                            return (
+                                <div key={u.id} style={{
+                                    padding: '1.5rem',
+                                    background: 'white',
+                                    borderBottom: isLast ? 'none' : '1px solid #f1f5f9'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
 
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                        <div style={{
-                                            width: '50px', height: '50px', borderRadius: '50%',
-                                            background: u.avatar_url ? `url(${u.avatar_url}) center/cover` : '#e2e8f0',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            flexShrink: 0
-                                        }}>
-                                            {!u.avatar_url && <User size={24} color="#64748b" />}
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                            <div style={{
+                                                width: '50px', height: '50px', borderRadius: '50%',
+                                                background: u.avatar_url ? `url(${u.avatar_url}) center/cover` : '#e2e8f0',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                flexShrink: 0
+                                            }}>
+                                                {!u.avatar_url && <User size={24} color="#64748b" />}
+                                            </div>
+                                            <div>
+                                                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    {u.name || 'Unnamed User'}
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: 500, padding: '0.1rem 0.5rem', borderRadius: '99px', background: statusColor.bg, color: statusColor.text }}>
+                                                        {(u.status || 'active').toUpperCase()}
+                                                    </span>
+                                                </h3>
+                                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{u.email}</p>
+                                                <p style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Role: {u.role}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                {u.name || 'Unnamed User'}
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 500, padding: '0.1rem 0.5rem', borderRadius: '99px', background: statusColor.bg, color: statusColor.text }}>
-                                                    {(u.status || 'active').toUpperCase()}
-                                                </span>
-                                            </h3>
-                                            <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{u.email}</p>
-                                            <p style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Role: {u.role}</p>
-                                        </div>
-                                    </div>
 
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        {(u.status || 'active') === 'active' && (
-                                            <>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            {(u.status || 'active') === 'active' && (
+                                                <>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleStatusUpdate(u.id, 'suspended')}
+                                                        loading={processingId === u.id}
+                                                        disabled={!!processingId}
+                                                        style={{ color: '#d97706', borderColor: '#d97706' }}
+                                                    >
+                                                        <Prohibit /> Suspend
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleStatusUpdate(u.id, 'banned')}
+                                                        loading={processingId === u.id}
+                                                        disabled={!!processingId}
+                                                        style={{ color: '#dc2626', borderColor: '#dc2626' }}
+                                                    >
+                                                        <X /> Ban
+                                                    </Button>
+                                                </>
+                                            )}
+
+                                            {(u.status === 'suspended' || u.status === 'banned') && (
                                                 <Button
                                                     size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleStatusUpdate(u.id, 'suspended')}
+                                                    variant="primary"
+                                                    onClick={() => handleStatusUpdate(u.id, 'active')}
                                                     loading={processingId === u.id}
                                                     disabled={!!processingId}
-                                                    style={{ color: '#d97706', borderColor: '#d97706' }}
                                                 >
-                                                    <Prohibit /> Suspend
+                                                    <Check /> Activate
                                                 </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleStatusUpdate(u.id, 'banned')}
-                                                    loading={processingId === u.id}
-                                                    disabled={!!processingId}
-                                                    style={{ color: '#dc2626', borderColor: '#dc2626' }}
-                                                >
-                                                    <X /> Ban
-                                                </Button>
-                                            </>
-                                        )}
+                                            )}
 
-                                        {(u.status === 'suspended' || u.status === 'banned') && (
                                             <Button
                                                 size="sm"
-                                                variant="primary"
-                                                onClick={() => handleStatusUpdate(u.id, 'active')}
-                                                loading={processingId === u.id}
+                                                variant="ghost"
+                                                onClick={() => handleDelete(u.id)}
                                                 disabled={!!processingId}
+                                                style={{ color: '#94a3b8' }}
                                             >
-                                                <Check /> Activate
+                                                <Trash size={18} />
                                             </Button>
-                                        )}
+                                        </div>
 
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleDelete(u.id)}
-                                            disabled={!!processingId}
-                                            style={{ color: '#94a3b8' }}
-                                        >
-                                            <Trash size={18} />
-                                        </Button>
                                     </div>
-
                                 </div>
-                            </Card>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
+                    <PaginationControls
+                        currentPage={page}
+                        totalPages={Math.ceil(totalCount / PAGE_SIZE)}
+                        onPageChange={setPage}
+                        hasNext={page * PAGE_SIZE < totalCount}
+                        hasPrev={page > 1}
+                        loading={loading}
+                        totalItems={totalCount}
+                    />
                 </div>
             )}
         </div>

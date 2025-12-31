@@ -3,11 +3,19 @@ import { supabase } from '../../lib/supabase';
 import { Eye, EyeSlash, Trash, PawPrint, Funnel, X, User, ChartLineUp } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
+import PaginationControls from '../../components/PaginationControls';
+import { MagnifyingGlass } from '@phosphor-icons/react';
+
+const PAGE_SIZE = 12;
 
 const AdminPets = () => {
     const [pets, setPets] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [selectedPet, setSelectedPet] = useState<any | null>(null);
     const [petAnalytics, setPetAnalytics] = useState<{ views: number, loading: boolean }>({ views: 0, loading: false });
@@ -15,19 +23,28 @@ const AdminPets = () => {
     const fetchPets = async () => {
         setLoading(true);
         try {
+            const from = (page - 1) * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
+
             let query = supabase
                 .from('pets')
-                .select('*, profiles!pets_owner_id_fkey(id, email, name, avatar_url, username)') // Join profile explicitly with more fields
-                .order('created_at', { ascending: false });
+                .select('*, profiles!pets_owner_id_fkey(id, email, name, avatar_url, username)', { count: 'exact' }) // Join profile explicitly with more fields
+                .order('created_at', { ascending: false })
+                .range(from, to);
 
             if (filter !== 'all') {
                 query = query.eq('status', filter);
             }
 
-            const { data, error } = await query;
+            if (search) {
+                query = query.or(`name.ilike.%${search}%,breed.ilike.%${search}%`);
+            }
+
+            const { data, error, count } = await query;
 
             if (error) throw error;
             setPets(data || []);
+            setTotalCount(count || 0);
         } catch (error) {
             console.error(error);
         } finally {
@@ -66,7 +83,16 @@ const AdminPets = () => {
 
     useEffect(() => {
         fetchPets();
-    }, [filter]);
+    }, [filter, page]);
+
+    // Reset page on search or filter change (debounce search)
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (page === 1) fetchPets();
+            else setPage(1);
+        }, 300);
+        return () => clearTimeout(timeoutId);
+    }, [search]);
 
     useEffect(() => {
         if (selectedPet) {
@@ -124,7 +150,28 @@ const AdminPets = () => {
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b' }}>Moderate Pets</h1>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', width: '250px' }}>
+                        <MagnifyingGlass
+                            size={20}
+                            color="#94a3b8"
+                            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Search pets..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '0.6rem 1rem 0.6rem 2.5rem',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                fontSize: '0.9rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
                     <div style={{ position: 'relative' }}>
                         <Funnel size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
                         <select
@@ -152,58 +199,69 @@ const AdminPets = () => {
             {loading ? (
                 <div>Loading pets...</div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                    {pets.length === 0 && (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
-                            <PawPrint size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
-                            <p>No pets found.</p>
-                        </div>
-                    )}
-
-                    {pets.map(pet => (
-                        <Card key={pet.id} padding="none" style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer', transition: 'transform 0.2s', border: selectedPet?.id === pet.id ? '2px solid #3b82f6' : 'none' }} onClick={() => setSelectedPet(pet)}>
-                            <div style={{ height: '200px', background: '#f1f5f9', position: 'relative' }}>
-                                {pet.image ? (
-                                    <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                ) : (
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                        <PawPrint size={48} color="#cbd5e1" />
-                                    </div>
-                                )}
-                                {pet.status === 'hidden' && (
-                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, letterSpacing: '0.1em' }}>
-                                        HIDDEN
-                                    </div>
-                                )}
-                                <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px' }}>
-                                    <span style={{ background: 'rgba(0,0,0,0.6)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
-                                        {pet.status?.toUpperCase() || 'AVAILABLE'}
-                                    </span>
-                                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                        {pets.length === 0 && (
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
+                                <PawPrint size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                                <p>No pets found.</p>
                             </div>
+                        )}
 
-                            <div style={{ padding: '1rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{pet.name}</h3>
-                                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{pet.breed}</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#e2e8f0', overflow: 'hidden' }}>
-                                        {pet.profiles?.avatar_url ? (
-                                            <img src={pet.profiles.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <User size={16} style={{ margin: '4px' }} color="#94a3b8" />
-                                        )}
+                        {pets.map(pet => (
+                            <Card key={pet.id} padding="none" style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer', transition: 'transform 0.2s', border: selectedPet?.id === pet.id ? '2px solid #3b82f6' : 'none' }} onClick={() => setSelectedPet(pet)}>
+                                <div style={{ height: '200px', background: '#f1f5f9', position: 'relative' }}>
+                                    {pet.image ? (
+                                        <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                            <PawPrint size={48} color="#cbd5e1" />
+                                        </div>
+                                    )}
+                                    {pet.status === 'hidden' && (
+                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, letterSpacing: '0.1em' }}>
+                                            HIDDEN
+                                        </div>
+                                    )}
+                                    <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px' }}>
+                                        <span style={{ background: 'rgba(0,0,0,0.6)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
+                                            {pet.status?.toUpperCase() || 'AVAILABLE'}
+                                        </span>
                                     </div>
-                                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{pet.profiles?.name || pet.profiles?.email || 'Unknown Owner'}</span>
                                 </div>
 
-                                <Button size="sm" variant="outline" fullWidth style={{ marginTop: 'auto' }}>
-                                    View Details
-                                </Button>
-                            </div>
-                        </Card>
-                    ))}
+                                <div style={{ padding: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{pet.name}</h3>
+                                        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{pet.breed}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#e2e8f0', overflow: 'hidden' }}>
+                                            {pet.profiles?.avatar_url ? (
+                                                <img src={pet.profiles.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <User size={16} style={{ margin: '4px' }} color="#94a3b8" />
+                                            )}
+                                        </div>
+                                        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{pet.profiles?.name || pet.profiles?.email || 'Unknown Owner'}</span>
+                                    </div>
+
+                                    <Button size="sm" variant="outline" fullWidth style={{ marginTop: 'auto' }}>
+                                        View Details
+                                    </Button>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                    <PaginationControls
+                        currentPage={page}
+                        totalPages={Math.ceil(totalCount / PAGE_SIZE)}
+                        onPageChange={setPage}
+                        hasNext={page * PAGE_SIZE < totalCount}
+                        hasPrev={page > 1}
+                        loading={loading}
+                        totalItems={totalCount}
+                    />
                 </div>
             )}
 
