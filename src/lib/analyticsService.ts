@@ -24,7 +24,12 @@ export const analyticsService = {
             sid = uuidv4();
             localStorage.setItem(SESSION_KEY, sid!);
             // Track new session start
-            this.trackEvent('session_start', { referer: document.referrer });
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            this.trackEvent('session_start', {
+                referer: document.referrer,
+                device: isMobile ? 'mobile' : 'desktop',
+                userAgent: navigator.userAgent
+            });
         }
         this.sessionId = sid!;
     },
