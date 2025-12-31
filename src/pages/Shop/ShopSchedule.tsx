@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Trash, Plus, MagicWand } from '@phosphor-icons/react';
+import { Trash, Plus, MagicWand, CalendarBlank } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Select from '../../components/Select';
 import Card from '../../components/Card';
@@ -98,6 +98,18 @@ const ShopSchedule = () => {
         setDuration(mins);
     };
 
+    // Group slots by date
+    const groupedSlots = useMemo(() => {
+        return slots.reduce((acc, slot) => {
+            const dateKey = format(parseISO(slot.start_time), 'yyyy-MM-dd');
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(slot);
+            return acc;
+        }, {} as Record<string, typeof slots>);
+    }, [slots]);
+
+    const sortedDates = Object.keys(groupedSlots).sort();
+
     if (loading) return <div>Loading...</div>;
     if (!shopId) return <div className="fade-in"><Card>Please set up your Shop Details in the Services/Profile tab first.</Card></div>;
 
@@ -108,11 +120,11 @@ const ShopSchedule = () => {
                 <p style={{ color: '#64748b' }}>Generate available time slots for your customers.</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem' }}>
 
                 {/* Generator Panel */}
-                <div>
-                    <Card padding="xl">
+                <div style={{ height: 'fit-content' }}>
+                    <Card padding="xl" style={{ position: 'sticky', top: '2rem' }}>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Plus size={20} /> Generate Slots
                         </h3>
@@ -139,17 +151,17 @@ const ShopSchedule = () => {
 
                             <div>
                                 <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Date</label>
-                                <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }} />
+                                <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', padding: '0.9rem', borderRadius: '16px', border: '1px solid #e5e7eb', fontFamily: 'inherit', color: '#1e293b' }} />
                             </div>
 
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Start Time</label>
-                                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }} />
+                                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={{ width: '100%', padding: '0.9rem', borderRadius: '16px', border: '1px solid #e5e7eb', fontFamily: 'inherit', color: '#1e293b' }} />
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>End Time</label>
-                                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }} />
+                                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={{ width: '100%', padding: '0.9rem', borderRadius: '16px', border: '1px solid #e5e7eb', fontFamily: 'inherit', color: '#1e293b' }} />
                                 </div>
                             </div>
 
@@ -162,9 +174,9 @@ const ShopSchedule = () => {
                                             key={s.id}
                                             onClick={() => handleQuickSetDuration(s.duration_minutes)}
                                             style={{
-                                                fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px',
+                                                fontSize: '0.75rem', padding: '4px 10px', borderRadius: '12px',
                                                 border: '1px solid var(--primary-200)', background: 'var(--primary-50)', color: 'var(--primary-700)',
-                                                cursor: 'pointer'
+                                                cursor: 'pointer', fontWeight: 600
                                             }}
                                             title={`Set to ${s.name} duration`}
                                         >
@@ -199,44 +211,81 @@ const ShopSchedule = () => {
                     <Card padding="xl">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Upcoming Slots</h3>
-                            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{slots.length} Slots</span>
+                            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{slots.length} Total</span>
                         </div>
 
-                        {slots.length === 0 ? (
-                            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem' }}>No slots generated yet.</p>
+                        {sortedDates.length === 0 ? (
+                            <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '16px', border: '2px dashed #e2e8f0' }}>
+                                <CalendarBlank size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                                <p>No slots generated yet. Use the generator on the left.</p>
+                            </div>
                         ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
-                                {slots.map(slot => (
-                                    <div key={slot.id} style={{
-                                        padding: '1rem',
-                                        borderRadius: '8px',
-                                        border: '1px solid #e2e8f0',
-                                        background: slot.is_booked ? '#fef2f2' : '#f0fdf4',
-                                        position: 'relative'
-                                    }}>
-                                        <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.25rem' }}>
-                                            {format(parseISO(slot.start_time), 'MMM d, yyyy')}
-                                        </div>
-                                        <div style={{ fontWeight: 700, color: '#1e293b' }}>
-                                            {format(parseISO(slot.start_time), 'HH:mm')} - {format(parseISO(slot.end_time), 'HH:mm')}
-                                        </div>
-                                        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: slot.is_booked ? '#ef4444' : '#16a34a', fontWeight: 600 }}>
-                                            {slot.is_booked ? 'BOOKED' : 'AVAILABLE'}
-                                            {slot.service && <span style={{ marginLeft: '0.5rem', color: '#6366f1' }}>• {slot.service.name} Only</span>}
-                                        </div>
-
-                                        {!slot.is_booked && (
-                                            <button
-                                                onClick={() => handleDeleteSlot(slot.id)}
-                                                style={{
-                                                    position: 'absolute', top: '5px', right: '5px',
-                                                    background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer'
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                {sortedDates.map(dateKey => (
+                                    <div key={dateKey} className="fade-in">
+                                        <h4 style={{
+                                            fontSize: '1.1rem',
+                                            fontWeight: 700,
+                                            marginBottom: '1rem',
+                                            color: 'var(--gray-800)',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            borderBottom: '1px solid #e2e8f0',
+                                            paddingBottom: '0.5rem'
+                                        }}>
+                                            {format(parseISO(dateKey), 'EEEE, MMMM d')}
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 600, background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px', color: '#64748b' }}>
+                                                {groupedSlots[dateKey].length} Slots
+                                            </span>
+                                        </h4>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                                            {groupedSlots[dateKey].map((slot: any) => (
+                                                <div key={slot.id} style={{
+                                                    padding: '0.75rem',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid #e2e8f0',
+                                                    background: slot.is_booked ? '#fef2f2' : 'white',
+                                                    position: 'relative',
+                                                    transition: 'all 0.2s',
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                                 }}
-                                                title="Delete Slot"
-                                            >
-                                                <Trash size={16} />
-                                            </button>
-                                        )}
+                                                    onMouseEnter={e => { if (!slot.is_booked) e.currentTarget.style.borderColor = 'var(--primary-300)'; }}
+                                                    onMouseLeave={e => { if (!slot.is_booked) e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                                                >
+                                                    <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '1rem', marginBottom: '0.25rem' }}>
+                                                        {format(parseISO(slot.start_time), 'HH:mm')}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                        {format(parseISO(slot.end_time), 'HH:mm')}
+                                                    </div>
+
+                                                    {slot.service && (
+                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--primary-600)', background: 'var(--primary-50)', padding: '2px 6px', borderRadius: '4px', width: 'fit-content' }}>
+                                                            {slot.service.name}
+                                                        </div>
+                                                    )}
+
+                                                    {slot.is_booked ? (
+                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }} /> BOOKED
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleDeleteSlot(slot.id)}
+                                                            style={{
+                                                                position: 'absolute', top: '8px', right: '8px',
+                                                                background: 'white', border: '1px solid #e2e8f0', color: '#94a3b8', cursor: 'pointer',
+                                                                width: '24px', height: '24px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                            }}
+                                                            title="Delete Slot"
+                                                        >
+                                                            <Trash size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -245,6 +294,14 @@ const ShopSchedule = () => {
                 </div>
 
             </div>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    div[style*="grid-template-columns: minmax(300px, 1fr) 2fr"] {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
