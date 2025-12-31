@@ -914,71 +914,40 @@ const PetProfile = () => {
                 </div>
             )}
 
-            <div style={{ padding: '1.5rem', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <input
-                        type="text"
-                        placeholder="Create new collection..."
-                        value={newCollectionName}
-                        onChange={(e) => setNewCollectionName(e.target.value)}
-                        style={{
-                            flex: 1,
-                            padding: '0.875rem 1rem',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '12px',
-                            fontSize: '0.95rem',
-                            outline: 'none',
-                            transition: 'border-color 0.2s'
-                        }}
-                        onFocus={e => e.target.style.borderColor = '#3b82f6'}
-                        onBlur={e => e.target.style.borderColor = '#d1d5db'}
-                    />
-                    <Button
-                        onClick={handleCreateCollection}
-                        disabled={!newCollectionName.trim()}
-                        style={{ borderRadius: '12px', padding: '0 1.25rem' }}
-                    >
-                        <Plus size={20} weight="bold" />
-                    </Button>
-                </div>
-            </div>
-        </div>
-                    </div >
-                </>
-            )}
 
-{/* Date Request Modal */ }
-{
-    showDateModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
-            <div style={{ background: 'white', padding: '2rem', borderRadius: '24px', width: '90%', maxWidth: '400px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Pick your pet</h3>
-                    <button onClick={() => setShowDateModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={24} /></button>
-                </div>
-                <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Which of your pets would like to ask <strong>{pet.name}</strong> on a date?</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
-                    {myPetsForDate.map(p => (
-                        <div key={p.id}
-                            onClick={() => handleSendDateRequest(p.id)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
-                                border: '1px solid #e5e7eb', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'white'}
-                        >
-                            <img src={p.image} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                            <span style={{ fontWeight: 600 }}>{p.name}</span>
+            {/* Date Request Modal */}
+            {
+                showDateModal && (
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+                        <div style={{ background: 'white', padding: '2rem', borderRadius: '24px', width: '90%', maxWidth: '400px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Pick your pet</h3>
+                                <button onClick={() => setShowDateModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={24} /></button>
+                            </div>
+                            <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Which of your pets would like to ask <strong>{pet.name}</strong> on a date?</p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
+                                {myPetsForDate.map(p => (
+                                    <div key={p.id}
+                                        onClick={() => handleSendDateRequest(p.id)}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
+                                            border: '1px solid #e5e7eb', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                                    >
+                                        <img src={p.image} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                        <span style={{ fontWeight: 600 }}>{p.name}</span>
+                                    </div>
+                                ))}
+                                {myPetsForDate.length === 0 && <p>You have no pets!</p>}
+                            </div>
                         </div>
-                    ))}
-                    {myPetsForDate.length === 0 && <p>You have no pets!</p>}
-                </div>
-            </div>
-        </div>
-    )
-}
+                    </div>
+                )
+            }
         </div >
     );
 };
