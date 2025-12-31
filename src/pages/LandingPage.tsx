@@ -21,15 +21,15 @@ const LandingPage = () => {
             <SEO
                 title="Find Your Perfect Pet Match"
                 description="Specyf connects pets with loving homes. Discover dogs, cats, and other pets for adoption or playdates near you."
-                canonicalUrl="https://petmatch.online/"
+                canonicalUrl="https://specyf.in/"
                 structuredData={{
                     "@context": "https://schema.org",
                     "@type": "WebSite",
                     "name": "Specyf",
-                    "url": "https://petmatch.online/",
+                    "url": "https://specyf.in/",
                     "potentialAction": {
                         "@type": "SearchAction",
-                        "target": "https://petmatch.online/search?q={search_term_string}",
+                        "target": "https://specyf.in/search?q={search_term_string}",
                         "query-input": "required name=search_term_string"
                     },
                     "description": "Specyf is a pet adoption and matching platform connecting pets with loving homes."
@@ -46,8 +46,16 @@ const LandingPage = () => {
                 textAlign: 'center',
                 padding: '4rem 2rem',
                 position: 'relative',
-                background: 'radial-gradient(circle at 50% 50%, var(--primary-50) 0%, rgba(255,255,255,0) 70%)'
+                overflow: 'hidden',
+                background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 70%)'
             }} className="fade-in">
+
+                {/* Background Decoration (Floating Elements) */}
+                <div style={{ position: 'absolute', top: '10%', left: '10%', fontSize: '3rem', opacity: 0.2, animationDelay: '0s' }} className="float-animation">🐾</div>
+                <div style={{ position: 'absolute', top: '20%', right: '15%', fontSize: '4rem', opacity: 0.15, animationDelay: '1s' }} className="float-animation">🦴</div>
+                <div style={{ position: 'absolute', bottom: '15%', left: '20%', fontSize: '2.5rem', opacity: 0.2, animationDelay: '2s' }} className="float-animation">🎾</div>
+                <div style={{ position: 'absolute', bottom: '20%', right: '10%', fontSize: '3rem', opacity: 0.1, animationDelay: '3s' }} className="float-animation">🐕</div>
+                <div style={{ position: 'absolute', top: '15%', left: '80%', fontSize: '2rem', opacity: 0.2, animationDelay: '1.5s' }} className="float-animation">🐈</div>
 
                 {/* Badge */}
                 <div style={{
@@ -57,12 +65,13 @@ const LandingPage = () => {
                     marginBottom: '2rem',
                     padding: '0.5rem 1.25rem',
                     borderRadius: 'var(--radius-full)',
-                    background: 'var(--white)',
-                    border: '1px solid var(--gray-200)',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid var(--primary-200)',
                     boxShadow: 'var(--shadow-md)'
-                }}>
-                    <span style={{ fontSize: '1.25rem' }}>🐾</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-600)' }}>#1 Community for Pets</span>
+                }} className="pulse-animation">
+                    <span style={{ fontSize: '1.25rem' }}>✨</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-700)' }}>#1 Community for Pets</span>
                 </div>
 
                 {/* Headline */}
@@ -72,8 +81,8 @@ const LandingPage = () => {
                     lineHeight: 1.1,
                     marginBottom: '2rem',
                     letterSpacing: '-0.03em',
-                    color: 'var(--gray-900)',
                     maxWidth: '1000px',
+                    // Color handled by global CSS h1 gradient
                 }}>
                     Give your pet the <br />
                     <span className="text-gradient">social life</span> they deserve.
@@ -97,7 +106,7 @@ const LandingPage = () => {
                         </Button>
                     </Link>
                     <Link to="/login">
-                        <Button size="lg" variant="outline" style={{ padding: '1.125rem 2.5rem', fontSize: '1.125rem', background: 'white' }}>
+                        <Button size="lg" variant="outline" style={{ padding: '1.125rem 2.5rem', fontSize: '1.125rem', background: 'rgba(255,255,255,0.8)' }}>
                             Log In
                         </Button>
                     </Link>

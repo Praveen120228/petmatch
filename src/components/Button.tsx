@@ -43,10 +43,10 @@ const Button: React.FC<ButtonProps> = ({
         switch (variant) {
             case 'primary':
                 return {
-                    background: 'var(--primary-600)',
+                    background: 'linear-gradient(135deg, var(--primary-600), var(--primary-500))',
                     color: 'white',
                     border: '1px solid transparent',
-                    boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.2)',
+                    boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.3)',
                 };
             case 'secondary':
                 return {
