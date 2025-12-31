@@ -836,7 +836,13 @@ const MatchFeed = () => {
                                             }}
                                         >
                                             <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', height: '100%', display: 'block' }}>
-                                                <div style={{ position: 'relative', height: '100%' }}>
+                                                <div style={{
+                                                    height: '100%',
+                                                    borderRadius: '16px',
+                                                    overflow: 'hidden',
+                                                    position: 'relative',
+                                                    boxShadow: 'var(--shadow-md)'
+                                                }}>
                                                     <img
                                                         src={pet.image || pet.images?.[0] || 'https://placehold.co/400x500/f3f4f6/9ca3af?text=No+Image'}
                                                         alt={pet.name}
@@ -847,22 +853,31 @@ const MatchFeed = () => {
                                                         bottom: 0,
                                                         left: 0,
                                                         right: 0,
-                                                        padding: '12px',
-                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                                                        color: 'white'
+                                                        padding: '1.25rem',
+                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)',
+                                                        color: 'white',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        justifyContent: 'flex-end',
+                                                        height: '60%'
                                                     }}>
-                                                        <div style={{ fontSize: '1.25rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{pet.name}, <span style={{ fontWeight: 400 }}>{pet.age}</span></div>
-                                                        <div style={{ fontSize: '0.9rem', opacity: 0.9, fontWeight: 500 }}>{pet.breed}</div>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.2rem' }}>
+                                                            <div style={{ fontSize: '1.35rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>
+                                                                {pet.name}, <span style={{ fontWeight: 400, fontSize: '1.1rem' }}>{pet.age}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.85rem', opacity: 0.9, fontWeight: 500, marginBottom: '0.35rem' }}>{pet.breed}</div>
                                                         {pet.score > 0 && (
                                                             <div style={{
                                                                 fontSize: '0.75rem',
-                                                                marginTop: '4px',
+                                                                marginTop: '2px',
                                                                 background: 'rgba(255,255,255,0.2)',
                                                                 backdropFilter: 'blur(4px)',
                                                                 width: 'fit-content',
                                                                 padding: '2px 8px',
                                                                 borderRadius: '12px',
-                                                                fontWeight: 600
+                                                                fontWeight: 600,
+                                                                border: '1px solid rgba(255,255,255,0.1)'
                                                             }}>
                                                                 {Math.round(pet.score)}% Match
                                                             </div>
@@ -910,7 +925,7 @@ const MatchFeed = () => {
                                             <Link to={`/pet/${pet.id}`} style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
                                                 <div style={{ position: 'relative', height: '100%' }}>
                                                     <img
-                                                        src={pet.images?.[0] || 'https://placehold.co/400x600/f3f4f6/9ca3af?text=No+Image'}
+                                                        src={pet.image || pet.images?.[0] || 'https://placehold.co/400x600/f3f4f6/9ca3af?text=No+Image'}
                                                         alt={pet.name}
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />
@@ -925,7 +940,7 @@ const MatchFeed = () => {
                                                         display: 'flex',
                                                         flexDirection: 'column',
                                                         justifyContent: 'flex-end',
-                                                        height: '60%' // Gradient height
+                                                        height: '60%'
                                                     }}>
                                                         <div style={{ transform: 'translateY(0)', transition: 'transform 0.3s' }}>
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.25rem' }}>
@@ -1010,12 +1025,7 @@ const MatchFeed = () => {
                             </div>
                         )}
 
-                        {/* Infinite Scroll Skeletons */}
-                        {isFetchingNextPage && (
-                            Array.from({ length: 4 }).map((_, i) => (
-                                <PetCardSkeleton key={`more-skeleton-${i}`} />
-                            ))
-                        )}
+                        {/* Infinite Scroll Skeletons - REMOVED (Duplicate) */}
 
                         {/* Infinite Scroll Sentinel */}
                         {hasNextPage && (
