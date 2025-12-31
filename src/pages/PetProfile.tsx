@@ -8,7 +8,7 @@ import { userService } from '../lib/userService';
 import { supabase } from '../lib/supabase';
 import Button from '../components/Button';
 import Card from '../components/Card';
-import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash, Sparkle, CaretRight } from '@phosphor-icons/react';
+import { CaretLeft, Heart, ChatCircle, ShareNetwork, Handshake, BookmarkSimple, X, Plus, Check, Trash, Sparkle, CaretRight, Flag, WarningCircle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { getDistance } from '../utils/distance';
 import { useToast } from '../context/ToastContext';
@@ -37,6 +37,12 @@ const PetProfile = () => {
     const [showCollectionModal, setShowCollectionModal] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Reporting State
+    const [isReporting, setIsReporting] = useState(false);
+    const [reportReason, setReportReason] = useState('spam');
+    const [reportDescription, setReportDescription] = useState('');
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -263,6 +269,38 @@ const PetProfile = () => {
         } catch (err) {
             console.error(err);
             showToast("Failed to break up", "error");
+        }
+    };
+
+    const handleSubmitReport = async () => {
+        if (!user) return showToast("Please login to report", "error");
+        if (!reportDescription.trim()) return showToast("Please provide a description", "error");
+
+        setIsSubmittingReport(true);
+        try {
+            // Validate owner id exists
+            const ownerId = pet.ownerId || pet.owner_id;
+            if (!ownerId) throw new Error("Owner ID missing");
+
+            const { error } = await supabase.from('reports').insert({
+                reporter_id: user.id,
+                reported_id: ownerId, // Link to owner too so we know who is responsible
+                reported_pet_id: pet.id,
+                reason: reportReason,
+                description: reportDescription
+            });
+
+            if (error) throw error;
+
+            showToast("Report submitted successfully.", "success");
+            setIsReporting(false);
+            setReportDescription('');
+            setReportReason('spam');
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to submit report", "error");
+        } finally {
+            setIsSubmittingReport(false);
         }
     };
 
@@ -548,6 +586,17 @@ const PetProfile = () => {
                                 <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleShare}>
                                     <ShareNetwork size={20} weight="bold" />
                                 </Button>
+                                <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleShare}>
+                                    <ShareNetwork size={20} weight="bold" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    style={{ padding: '0.75rem', color: '#ef4444' }}
+                                    onClick={() => setIsReporting(true)}
+                                    title="Report Pet"
+                                >
+                                    <Flag size={20} weight="bold" />
+                                </Button>
                             </div>
 
                             {/* Dating Button (Only if not owner and not already partnered) */}
@@ -798,29 +847,19 @@ const PetProfile = () => {
 
 
                             {/* Footer / Create New */}
-                            <div style={{ padding: '1.5rem', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
-                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <div style={{ padding: '1rem 1.5rem 1.5rem', borderTop: '1px solid #f3f4f6' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <input
                                         type="text"
-                                        placeholder="Create new collection..."
                                         value={newCollectionName}
                                         onChange={(e) => setNewCollectionName(e.target.value)}
-                                        style={{
-                                            flex: 1,
-                                            padding: '0.875rem 1rem',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '12px',
-                                            fontSize: '0.95rem',
-                                            outline: 'none',
-                                            transition: 'border-color 0.2s'
-                                        }}
-                                        onFocus={e => e.target.style.borderColor = '#3b82f6'}
-                                        onBlur={e => e.target.style.borderColor = '#d1d5db'}
+                                        placeholder="New collection..."
+                                        style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '0.9rem' }}
                                     />
                                     <Button
                                         onClick={handleCreateCollection}
                                         disabled={!newCollectionName.trim()}
-                                        style={{ borderRadius: '12px', padding: '0 1.25rem' }}
+                                        style={{ borderRadius: '12px', padding: '0 1rem' }}
                                     >
                                         <Plus size={20} weight="bold" />
                                     </Button>
@@ -831,36 +870,115 @@ const PetProfile = () => {
                 </>
             )}
 
-            {/* Date Request Modal */}
-            {showDateModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
-                    <div style={{ background: 'white', padding: '2rem', borderRadius: '24px', width: '90%', maxWidth: '400px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Pick your pet</h3>
-                            <button onClick={() => setShowDateModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={24} /></button>
+            {/* Report Modal */}
+            {isReporting && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+                    <div style={{ width: '90%', maxWidth: '500px', background: 'white', borderRadius: '16px', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
+                                <WarningCircle weight="fill" /> Report Pet
+                            </h3>
+                            <button onClick={() => setIsReporting(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
                         </div>
-                        <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Which of your pets would like to ask <strong>{pet.name}</strong> on a date?</p>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
-                            {myPetsForDate.map(p => (
-                                <div key={p.id}
-                                    onClick={() => handleSendDateRequest(p.id)}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
-                                        border: '1px solid #e5e7eb', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s'
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-                                    onMouseLeave={e => e.currentTarget.style.background = 'white'}
-                                >
-                                    <img src={p.image} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                                    <span style={{ fontWeight: 600 }}>{p.name}</span>
-                                </div>
-                            ))}
-                            {myPetsForDate.length === 0 && <p>You have no pets!</p>}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Reason</label>
+                            <select
+                                value={reportReason}
+                                onChange={(e) => setReportReason(e.target.value)}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db' }}
+                            >
+                                <option value="spam">Spam / Scam</option>
+                                <option value="inappropriate">Inappropriate Content</option>
+                                <option value="fake">Fake Profile</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>Description</label>
+                            <textarea
+                                value={reportDescription}
+                                onChange={(e) => setReportDescription(e.target.value)}
+                                placeholder="Please provide details..."
+                                rows={4}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'vertical' }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <Button variant="ghost" onClick={() => setIsReporting(false)}>Cancel</Button>
+                            <Button variant="primary" onClick={handleSubmitReport} loading={isSubmittingReport} style={{ background: '#dc2626', borderColor: '#dc2626' }}>Submit Report</Button>
                         </div>
                     </div>
                 </div>
             )}
+
+            <div style={{ padding: '1.5rem', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <input
+                        type="text"
+                        placeholder="Create new collection..."
+                        value={newCollectionName}
+                        onChange={(e) => setNewCollectionName(e.target.value)}
+                        style={{
+                            flex: 1,
+                            padding: '0.875rem 1rem',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '12px',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            transition: 'border-color 0.2s'
+                        }}
+                        onFocus={e => e.target.style.borderColor = '#3b82f6'}
+                        onBlur={e => e.target.style.borderColor = '#d1d5db'}
+                    />
+                    <Button
+                        onClick={handleCreateCollection}
+                        disabled={!newCollectionName.trim()}
+                        style={{ borderRadius: '12px', padding: '0 1.25rem' }}
+                    >
+                        <Plus size={20} weight="bold" />
+                    </Button>
+                </div>
+            </div>
+        </div>
+                    </div >
+                </>
+            )}
+
+{/* Date Request Modal */ }
+{
+    showDateModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+            <div style={{ background: 'white', padding: '2rem', borderRadius: '24px', width: '90%', maxWidth: '400px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Pick your pet</h3>
+                    <button onClick={() => setShowDateModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={24} /></button>
+                </div>
+                <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Which of your pets would like to ask <strong>{pet.name}</strong> on a date?</p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '300px', overflowY: 'auto' }}>
+                    {myPetsForDate.map(p => (
+                        <div key={p.id}
+                            onClick={() => handleSendDateRequest(p.id)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
+                                border: '1px solid #e5e7eb', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                        >
+                            <img src={p.image} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                            <span style={{ fontWeight: 600 }}>{p.name}</span>
+                        </div>
+                    ))}
+                    {myPetsForDate.length === 0 && <p>You have no pets!</p>}
+                </div>
+            </div>
+        </div>
+    )
+}
         </div >
     );
 };

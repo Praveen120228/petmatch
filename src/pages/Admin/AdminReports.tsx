@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, X, Flag, User, Prohibit } from '@phosphor-icons/react';
+import { Check, X, Flag, User, Prohibit, PawPrint, EyeSlash } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import { format } from 'date-fns';
@@ -20,7 +20,8 @@ const AdminReports = () => {
                 .select(`
                     *,
                     reporter:reporter_id(name, email),
-                    reported:reported_id(id, name, email, status)
+                    reported:reported_id(id, name, email, status),
+                    reported_pet:reported_pet_id(id, name, image, status)
                 `)
                 .order('created_at', { ascending: false });
 
@@ -157,15 +158,29 @@ const AdminReports = () => {
                                         </p>
 
                                         <div style={{ display: 'flex', gap: '2rem', fontSize: '0.9rem' }}>
-                                            <div>
-                                                <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported User</span>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                                                    <User weight="bold" />
-                                                    <span style={{ fontWeight: 600 }}>{report.reported?.name || 'Unknown'}</span>
-                                                    <span style={{ color: '#94a3b8' }}>({report.reported?.email})</span>
-                                                    {report.reported?.status === 'banned' && <span style={{ background: '#ef4444', color: 'white', fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px' }}>BANNED</span>}
+                                            {/* Logic to show Pet vs User report target */}
+                                            {report.reported_pet ? (
+                                                <div>
+                                                    <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported Pet</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                        <PawPrint weight="fill" color="#7c3aed" />
+                                                        <span style={{ fontWeight: 600 }}>{report.reported_pet.name}</span>
+                                                        {report.reported_pet.status === 'hidden' && <span style={{ background: '#f59e0b', color: 'white', fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px' }}>HIDDEN</span>}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Owned by: {report.reported?.name}</div>
                                                 </div>
-                                            </div>
+                                            ) : (
+                                                <div>
+                                                    <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported User</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                        <User weight="bold" />
+                                                        <span style={{ fontWeight: 600 }}>{report.reported?.name || 'Unknown'}</span>
+                                                        <span style={{ color: '#94a3b8' }}>({report.reported?.email})</span>
+                                                        {report.reported?.status === 'banned' && <span style={{ background: '#ef4444', color: 'white', fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px' }}>BANNED</span>}
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             <div>
                                                 <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reporter</span>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
