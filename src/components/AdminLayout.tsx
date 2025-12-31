@@ -6,7 +6,10 @@ import {
     SignOut,
     List,
     X,
-    ShieldCheck
+    ShieldCheck,
+    Users,
+    CalendarCheck,
+    PawPrint
 } from '@phosphor-icons/react';
 import { useState } from 'react';
 import Button from './Button';
@@ -25,6 +28,9 @@ const AdminLayout = () => {
     const navItems = [
         { path: '/admin/dashboard', icon: <ChartBar size={20} />, label: 'Dashboard' },
         { path: '/admin/shops', icon: <Storefront size={20} />, label: 'Manage Shops' },
+        { path: '/admin/users', icon: <Users size={20} />, label: 'Users' },
+        { path: '/admin/bookings', icon: <CalendarCheck size={20} />, label: 'Bookings' },
+        { path: '/admin/pets', icon: <PawPrint size={20} />, label: 'Pets' },
     ];
 
     const isActive = (path: string) => location.pathname === path;

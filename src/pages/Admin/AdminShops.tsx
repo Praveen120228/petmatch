@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, X, Storefront, MapPin } from '@phosphor-icons/react';
+import { Check, X, Storefront, MapPin, Prohibit, Trash } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 
@@ -8,12 +8,11 @@ const AdminShops = () => {
     const [shops, setShops] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'suspended'>('pending');
 
     const fetchShops = async () => {
         setLoading(true);
         try {
-            // Fetch all pending shops first, then approved/rejected maybe?
-            // For now, let's just fetch pending to streamline the workflow
             const { data, error } = await supabase
                 .from('shops')
                 .select('*')
@@ -32,8 +31,9 @@ const AdminShops = () => {
         fetchShops();
     }, []);
 
-    const handleStatusUpdate = async (shopId: string, status: 'approved' | 'rejected') => {
-        if (!confirm(`Are you sure you want to ${status} this shop?`)) return;
+    const handleStatusUpdate = async (shopId: string, status: 'approved' | 'rejected' | 'suspended') => {
+        const action = status === 'suspended' ? 'SUSPEND' : status.toUpperCase();
+        if (!confirm(`Are you sure you want to ${action} this shop?`)) return;
 
         setProcessingId(shopId);
         try {
@@ -41,18 +41,15 @@ const AdminShops = () => {
                 .from('shops')
                 .update({ status })
                 .eq('id', shopId)
-                .select(); // Critical: Return data to confirm update happened
+                .select();
 
             if (error) throw error;
 
             if (data.length === 0) {
-                // RLS blocked the update silently
-                alert('Action Failed: Permission Denied. Please Log Out and Log Back In to refresh your Admin privileges.');
-                // Revert local optimistic update if we did one (we haven't yet)
+                alert('Action Failed: Permission Denied. Please Log Out and Log Back In.');
                 return;
             }
 
-            // Update local state only if DB update confirmed
             setShops(prev => prev.map(s => s.id === shopId ? { ...s, status } : s));
 
         } catch (error) {
@@ -63,13 +60,44 @@ const AdminShops = () => {
         }
     };
 
+    const handleDelete = async (shopId: string) => {
+        if (!confirm('DANGER: This will permanently DELETE this shop and all its data.\n\nAre you sure?')) return;
+        if (!confirm('Double Check: This action cannot be undone. Confirm deletion?')) return;
+
+        setProcessingId(shopId);
+        try {
+            const { error } = await supabase.from('shops').delete().eq('id', shopId);
+            if (error) throw error;
+
+            setShops(prev => prev.filter(s => s.id !== shopId));
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete shop. Check if it has related records (bookings/pets) that prevent deletion.');
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'approved': return { bg: '#dcfce7', text: '#166534' };
             case 'rejected': return { bg: '#fee2e2', text: '#991b1b' };
+            case 'suspended': return { bg: '#f1f5f9', text: '#475569' };
             default: return { bg: '#fef3c7', text: '#92400e' };
         }
     };
+
+    const filteredShops = shops.filter(shop => {
+        if (activeTab === 'all') return true;
+        return (shop.status || 'pending') === activeTab;
+    });
+
+    const tabs = [
+        { id: 'pending', label: 'Pending' },
+        { id: 'approved', label: 'Approved' },
+        { id: 'suspended', label: 'Suspended' },
+        { id: 'all', label: 'All Shops' },
+    ] as const;
 
     return (
         <div className="fade-in">
@@ -78,13 +106,52 @@ const AdminShops = () => {
                 <Button variant="outline" onClick={fetchShops} disabled={loading}>Refresh</Button>
             </div>
 
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1px' }}>
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            background: activeTab === tab.id ? 'white' : 'transparent',
+                            border: '1px solid',
+                            borderColor: activeTab === tab.id ? '#e2e8f0' : 'transparent',
+                            borderBottomColor: activeTab === tab.id ? 'white' : 'transparent',
+                            borderRadius: '8px 8px 0 0',
+                            fontWeight: 600,
+                            color: activeTab === tab.id ? 'var(--primary-600)' : '#64748b',
+                            cursor: 'pointer',
+                            marginBottom: '-1px',
+                            position: 'relative',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        {tab.label}
+                        {tab.id === 'pending' && shops.filter(s => (s.status || 'pending') === 'pending').length > 0 && (
+                            <span style={{
+                                marginLeft: '0.5rem', background: '#ef4444', color: 'white',
+                                fontSize: '0.75rem', padding: '0.1rem 0.4rem', borderRadius: '99px'
+                            }}>
+                                {shops.filter(s => (s.status || 'pending') === 'pending').length}
+                            </span>
+                        )}
+                    </button>
+                ))}
+            </div>
+
             {loading ? (
                 <div>Loading shops...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {shops.length === 0 && <p>No shops found.</p>}
+                    {filteredShops.length === 0 && (
+                        <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
+                            <Storefront size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                            <p>No {activeTab === 'all' ? '' : activeTab} shops found.</p>
+                        </div>
+                    )}
 
-                    {shops.map(shop => {
+                    {filteredShops.map(shop => {
                         const statusColor = getStatusColor(shop.status || 'pending');
                         return (
                             <Card key={shop.id} padding="lg">
@@ -93,7 +160,8 @@ const AdminShops = () => {
                                         <div style={{
                                             width: '64px', height: '64px', borderRadius: '8px',
                                             background: shop.image_url ? `url(${shop.image_url}) center/cover` : '#f1f5f9',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            flexShrink: 0
                                         }}>
                                             {!shop.image_url && <Storefront size={32} color="#cbd5e1" />}
                                         </div>
@@ -102,37 +170,78 @@ const AdminShops = () => {
                                             <p style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.25rem' }}>
                                                 <MapPin /> {shop.city}, {shop.state}
                                             </p>
-                                            <div style={{ marginTop: '0.5rem', display: 'inline-block', padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, background: statusColor.bg, color: statusColor.text }}>
-                                                {(shop.status || 'pending').toUpperCase()}
+                                            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, background: statusColor.bg, color: statusColor.text }}>
+                                                    {(shop.status || 'pending').toUpperCase()}
+                                                </span>
+                                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                    Joined: {new Date(shop.created_at).toLocaleDateString()}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                        {shop.status !== 'approved' && (
+                                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                        {/* Actions based on Status */}
+                                        {shop.status === 'pending' && (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleStatusUpdate(shop.id, 'approved')}
+                                                    loading={processingId === shop.id}
+                                                    disabled={!!processingId}
+                                                    style={{ background: '#10b981', borderColor: '#10b981' }}
+                                                >
+                                                    <Check weight="bold" /> Approve
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleStatusUpdate(shop.id, 'rejected')}
+                                                    loading={processingId === shop.id}
+                                                    disabled={!!processingId}
+                                                    style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                                                >
+                                                    <X weight="bold" /> Reject
+                                                </Button>
+                                            </>
+                                        )}
+
+                                        {shop.status === 'approved' && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleStatusUpdate(shop.id, 'suspended')}
+                                                loading={processingId === shop.id}
+                                                disabled={!!processingId}
+                                                style={{ color: '#f59e0b', borderColor: '#f59e0b' }}
+                                            >
+                                                <Prohibit weight="bold" /> Suspend
+                                            </Button>
+                                        )}
+
+                                        {shop.status === 'suspended' && (
                                             <Button
                                                 variant="primary"
                                                 size="sm"
                                                 onClick={() => handleStatusUpdate(shop.id, 'approved')}
                                                 loading={processingId === shop.id}
                                                 disabled={!!processingId}
-                                                style={{ background: '#10b981', borderColor: '#10b981' }}
                                             >
-                                                <Check weight="bold" /> Approve
+                                                <Check weight="bold" /> Reactivate
                                             </Button>
                                         )}
-                                        {shop.status !== 'rejected' && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleStatusUpdate(shop.id, 'rejected')}
-                                                loading={processingId === shop.id}
-                                                disabled={!!processingId}
-                                                style={{ color: '#ef4444', borderColor: '#ef4444' }}
-                                            >
-                                                <X weight="bold" /> Reject
-                                            </Button>
-                                        )}
+
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDelete(shop.id)}
+                                            loading={processingId === shop.id}
+                                            disabled={!!processingId}
+                                            style={{ color: '#ef4444' }}
+                                        >
+                                            <Trash size={18} />
+                                        </Button>
                                     </div>
                                 </div>
                             </Card>

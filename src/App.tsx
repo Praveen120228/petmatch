@@ -17,6 +17,9 @@ import ShopDetails from './pages/ShopDetails';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminShops from './pages/Admin/AdminShops';
+import AdminUsers from './pages/Admin/AdminUsers';
+import AdminBookings from './pages/Admin/AdminBookings';
+import AdminPets from './pages/Admin/AdminPets';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -115,6 +118,9 @@ function App() {
                     <Route index element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="shops" element={<AdminShops />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="bookings" element={<AdminBookings />} />
+                    <Route path="pets" element={<AdminPets />} />
                   </Route>
 
                   {/* Shop Auth Routes */}
