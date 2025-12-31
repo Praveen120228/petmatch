@@ -32,6 +32,8 @@ const ShopDetails = () => {
     const [selectedService, setSelectedService] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [selectedSlot, setSelectedSlot] = useState<any>(null);
+    const [selectedPet, setSelectedPet] = useState<any>(null);
+    const [userPets, setUserPets] = useState<any[]>([]);
     const [bookingProcessing, setBookingProcessing] = useState(false);
 
     // Visual State
@@ -40,6 +42,15 @@ const ShopDetails = () => {
     useEffect(() => {
         if (id) fetchShopDetails();
     }, [id]);
+
+    useEffect(() => {
+        if (user) fetchUserPets();
+    }, [user]);
+
+    const fetchUserPets = async () => {
+        const { data } = await supabase.from('pets').select('*').eq('owner_id', user!.id);
+        if (data) setUserPets(data);
+    };
 
     const fetchShopDetails = async () => {
         try {
@@ -86,6 +97,7 @@ const ShopDetails = () => {
                 shop_id: shop.id,
                 service_id: selectedService.id,
                 slot_id: selectedSlot.id,
+                pet_id: selectedPet?.id,
                 status: 'pending'
             });
 
@@ -106,9 +118,19 @@ const ShopDetails = () => {
         }
     };
 
-    // Filter slots for selected Date
-    const availableSlotsForDate = slots.filter(s => isSameDay(parseISO(s.start_time), selectedDate))
-        .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+    // Filter slots for selected Date AND Service
+    const availableSlotsForDate = slots.filter(s => {
+        const isDateMatch = isSameDay(parseISO(s.start_time), selectedDate);
+        if (!isDateMatch) return false;
+
+        // Service Match Logic:
+        // 1. If no service is selected (edge case in UI), maybe show all? But UI enforces selection first.
+        // 2. If service selected, show Generic slots (service_id is null) OR specific slots (service_id matches)
+        if (selectedService) {
+            return s.service_id === null || s.service_id === selectedService.id;
+        }
+        return true;
+    }).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 
     if (loading) return <div className="page-container fade-in">Loading shop details...</div>;
     if (!shop) return <div className="page-container fade-in">Shop not found.</div>;
@@ -266,6 +288,35 @@ const ShopDetails = () => {
                             )}
                         </div>
                     )}
+
+                    {selectedSlot && userPets.length > 0 && (
+                        <div className="fade-in">
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Select Pet</h2>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '1rem' }}>
+                                {userPets.map(pet => (
+                                    <div
+                                        key={pet.id}
+                                        onClick={() => setSelectedPet(pet)}
+                                        style={{
+                                            border: selectedPet?.id === pet.id ? '2px solid var(--primary-600)' : '1px solid #e2e8f0',
+                                            borderRadius: '8px',
+                                            padding: '0.5rem',
+                                            cursor: 'pointer',
+                                            textAlign: 'center',
+                                            background: selectedPet?.id === pet.id ? '#eff6ff' : 'white'
+                                        }}
+                                    >
+                                        <div style={{
+                                            width: '50px', height: '50px', borderRadius: '50%',
+                                            background: pet.image ? `url(${pet.image}) center/cover` : '#e2e8f0',
+                                            margin: '0 auto 0.5rem'
+                                        }} />
+                                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{pet.name}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Column: Summary Card */}
@@ -288,6 +339,12 @@ const ShopDetails = () => {
                                     {selectedSlot ? format(parseISO(selectedSlot.start_time), 'HH:mm') : '-'}
                                 </span>
                             </div>
+                            {selectedPet && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#64748b' }}>Pet</span>
+                                    <span style={{ fontWeight: 600, textAlign: 'right' }}>{selectedPet.name}</span>
+                                </div>
+                            )}
                             <div style={{ height: '1px', background: '#e2e8f0', margin: '0.5rem 0' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 700 }}>
                                 <span>Total</span>
@@ -299,7 +356,7 @@ const ShopDetails = () => {
                             variant="primary"
                             fullWidth
                             size="lg"
-                            disabled={!selectedService || !selectedSlot || bookingProcessing}
+                            disabled={!selectedService || !selectedSlot || bookingProcessing || (userPets.length > 0 && !selectedPet)}
                             onClick={handleBook}
                         >
                             {bookingProcessing ? 'Processing...' : user ? 'Confirm Booking' : 'Log in to Book'}

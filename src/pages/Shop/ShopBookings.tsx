@@ -27,7 +27,8 @@ const ShopBookings = () => {
                         *,
                         slot:time_slots(*),
                         service:services(*),
-                        customer:profiles(*)
+                        customer:profiles(*),
+                        pet:pets(*)
                     `)
                     .eq('shop_id', shop.id)
                     .order('created_at', { ascending: false });
@@ -149,6 +150,9 @@ const ShopBookings = () => {
                                         <div>
                                             <div style={{ fontWeight: 600 }}>{booking.customer?.name || 'Unknown User'}</div>
                                             <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Customer</div>
+                                            {booking.customer?.email && (
+                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{booking.customer.email}</div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -157,10 +161,15 @@ const ShopBookings = () => {
                                         <div style={{ fontWeight: 600 }}>{booking.service?.name || 'Custom Service'}</div>
                                     </div>
 
-                                    {booking.pet_details && (
-                                        <div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Pet Details</div>
-                                            <div style={{ fontWeight: 600 }}>{booking.pet_details.name} ({booking.pet_details.breed})</div>
+                                    {booking.pet && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                                {booking.pet.image ? <img src={booking.pet.image} style={{ width: '100%' }} /> : <span style={{ fontSize: '1.2rem' }}>🐾</span>}
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Pet Details</div>
+                                                <div style={{ fontWeight: 600 }}>{booking.pet.name} ({booking.pet.breed})</div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

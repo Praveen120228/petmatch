@@ -18,6 +18,7 @@ const ShopSchedule = () => {
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
     const [duration, setDuration] = useState(30);
+    const [selectedServiceId, setSelectedServiceId] = useState<string>('all');
 
     useEffect(() => {
         fetchShopAndData();
@@ -45,7 +46,7 @@ const ShopSchedule = () => {
     const fetchSlots = async (sId: string) => {
         const { data } = await supabase
             .from('time_slots')
-            .select('*')
+            .select('*, service:services(name)')
             .eq('shop_id', sId)
             .order('start_time', { ascending: true });
 
@@ -70,7 +71,8 @@ const ShopSchedule = () => {
                 shop_id: shopId,
                 start_time: current.toISOString(),
                 end_time: next.toISOString(),
-                is_booked: false
+                is_booked: false,
+                service_id: selectedServiceId === 'all' ? null : selectedServiceId
             });
             current = next;
         }
@@ -115,6 +117,27 @@ const ShopSchedule = () => {
                         </h3>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Service (Optional)</label>
+                                <select
+                                    value={selectedServiceId}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSelectedServiceId(val);
+                                        if (val !== 'all') {
+                                            const svc = services.find(s => s.id === val);
+                                            if (svc) setDuration(svc.duration_minutes);
+                                        }
+                                    }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                                >
+                                    <option value="all">Any Service (Generic Slot)</option>
+                                    {services.map(s => (
+                                        <option key={s.id} value={s.id}>{s.name} ({s.duration_minutes}m)</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div>
                                 <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>Date</label>
                                 <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }} />
@@ -195,6 +218,7 @@ const ShopSchedule = () => {
                                         </div>
                                         <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: slot.is_booked ? '#ef4444' : '#16a34a', fontWeight: 600 }}>
                                             {slot.is_booked ? 'BOOKED' : 'AVAILABLE'}
+                                            {slot.service && <span style={{ marginLeft: '0.5rem', color: '#6366f1' }}>• {slot.service.name} Only</span>}
                                         </div>
 
                                         {!slot.is_booked && (
