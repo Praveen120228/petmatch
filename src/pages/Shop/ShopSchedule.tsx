@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Trash, Plus, MagicWand, CalendarBlank } from '@phosphor-icons/react';
+import { Trash, Plus, MagicWand, CalendarBlank, CaretDown, CaretRight } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import Select from '../../components/Select';
 import Card from '../../components/Card';
-import { format, addMinutes, parseISO, startOfToday } from 'date-fns';
+import { format, addMinutes, parseISO, startOfToday, differenceInCalendarDays } from 'date-fns';
 
 const ShopSchedule = () => {
     const { user } = useAuth();
@@ -20,6 +20,9 @@ const ShopSchedule = () => {
     const [endTime, setEndTime] = useState('17:00');
     const [duration, setDuration] = useState(30);
     const [selectedServiceId, setSelectedServiceId] = useState<string>('all');
+
+    // UI State
+    const [manuallyToggled, setManuallyToggled] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         fetchShopAndData();
@@ -84,6 +87,9 @@ const ShopSchedule = () => {
             alert('Failed to create slots: ' + error.message);
         } else {
             fetchSlots(shopId);
+            const dateKey = format(startDateTime, 'yyyy-MM-dd');
+            // Auto-expand the newly created date
+            setManuallyToggled(prev => ({ ...prev, [dateKey]: true }));
             alert(`Generated ${newSlots.length} slots!`);
         }
     };
@@ -109,6 +115,23 @@ const ShopSchedule = () => {
     }, [slots]);
 
     const sortedDates = Object.keys(groupedSlots).sort();
+
+    const toggleSection = (dateKey: string) => {
+        setManuallyToggled(prev => ({
+            ...prev,
+            [dateKey]: !isSectionExpanded(dateKey)
+        }));
+    };
+
+    const isSectionExpanded = (dateKey: string) => {
+        if (manuallyToggled[dateKey] !== undefined) return manuallyToggled[dateKey];
+
+        // Default logic: Expand Today and Tomorrow
+        const date = parseISO(dateKey);
+        const today = startOfToday();
+        const diff = differenceInCalendarDays(date, today);
+        return diff >= 0 && diff <= 1;
+    };
 
     if (loading) return <div>Loading...</div>;
     if (!shopId) return <div className="fade-in"><Card>Please set up your Shop Details in the Services/Profile tab first.</Card></div>;
@@ -221,78 +244,91 @@ const ShopSchedule = () => {
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                {sortedDates.map(dateKey => (
-                                    <div key={dateKey} className="fade-in">
-                                        <h4 style={{
-                                            fontSize: '1.1rem',
-                                            fontWeight: 700,
-                                            marginBottom: '1rem',
-                                            color: 'var(--gray-800)',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            borderBottom: '1px solid #e2e8f0',
-                                            paddingBottom: '0.5rem'
-                                        }}>
-                                            {format(parseISO(dateKey), 'EEEE, MMMM d')}
-                                            <span style={{ fontSize: '0.8rem', fontWeight: 600, background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px', color: '#64748b' }}>
-                                                {groupedSlots[dateKey].length} Slots
-                                            </span>
-                                        </h4>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
-                                            {groupedSlots[dateKey].map((slot: any) => (
-                                                <div key={slot.id} style={{
-                                                    padding: '0.75rem',
-                                                    borderRadius: '12px',
-                                                    border: '1px solid #e2e8f0',
-                                                    background: slot.is_booked ? '#fef2f2' : 'white',
-                                                    position: 'relative',
-                                                    transition: 'all 0.2s',
-                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                {sortedDates.map(dateKey => {
+                                    const expanded = isSectionExpanded(dateKey);
+                                    return (
+                                        <div key={dateKey} className="fade-in">
+                                            <h4
+                                                onClick={() => toggleSection(dateKey)}
+                                                style={{
+                                                    fontSize: '1.1rem',
+                                                    fontWeight: 700,
+                                                    marginBottom: '1rem',
+                                                    color: 'var(--gray-800)',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    borderBottom: '1px solid #e2e8f0',
+                                                    paddingBottom: '0.5rem',
+                                                    cursor: 'pointer',
+                                                    userSelect: 'none'
                                                 }}
-                                                    onMouseEnter={e => { if (!slot.is_booked) e.currentTarget.style.borderColor = 'var(--primary-300)'; }}
-                                                    onMouseLeave={e => { if (!slot.is_booked) e.currentTarget.style.borderColor = '#e2e8f0'; }}
-                                                >
-                                                    <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '1rem', marginBottom: '0.25rem' }}>
-                                                        {format(parseISO(slot.start_time), 'HH:mm')}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                                        {format(parseISO(slot.end_time), 'HH:mm')}
-                                                    </div>
+                                            >
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    {expanded ? <CaretDown /> : <CaretRight />}
+                                                    {format(parseISO(dateKey), 'EEEE, MMMM d')}
+                                                </span>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: 600, background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px', color: '#64748b' }}>
+                                                    {groupedSlots[dateKey].length} Slots
+                                                </span>
+                                            </h4>
 
-                                                    {slot.service && (
-                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--primary-600)', background: 'var(--primary-50)', padding: '2px 6px', borderRadius: '4px', width: 'fit-content' }}>
-                                                            {slot.service.name}
-                                                        </div>
-                                                    )}
-
-                                                    {slot.is_booked ? (
-                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }} /> BOOKED
-                                                        </div>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleDeleteSlot(slot.id)}
-                                                            style={{
-                                                                position: 'absolute', top: '8px', right: '8px',
-                                                                background: 'white', border: '1px solid #e2e8f0', color: '#94a3b8', cursor: 'pointer',
-                                                                width: '24px', height: '24px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                            }}
-                                                            title="Delete Slot"
+                                            {expanded && (
+                                                <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                                                    {groupedSlots[dateKey].map((slot: any) => (
+                                                        <div key={slot.id} style={{
+                                                            padding: '0.75rem',
+                                                            borderRadius: '12px',
+                                                            border: '1px solid #e2e8f0',
+                                                            background: slot.is_booked ? '#fef2f2' : 'white',
+                                                            position: 'relative',
+                                                            transition: 'all 0.2s',
+                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                        }}
+                                                            onMouseEnter={e => { if (!slot.is_booked) e.currentTarget.style.borderColor = 'var(--primary-300)'; }}
+                                                            onMouseLeave={e => { if (!slot.is_booked) e.currentTarget.style.borderColor = '#e2e8f0'; }}
                                                         >
-                                                            <Trash size={14} />
-                                                        </button>
-                                                    )}
+                                                            <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '1rem', marginBottom: '0.25rem' }}>
+                                                                {format(parseISO(slot.start_time), 'HH:mm')}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                                {format(parseISO(slot.end_time), 'HH:mm')}
+                                                            </div>
+
+                                                            {slot.service && (
+                                                                <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--primary-600)', background: 'var(--primary-50)', padding: '2px 6px', borderRadius: '4px', width: 'fit-content' }}>
+                                                                    {slot.service.name}
+                                                                </div>
+                                                            )}
+
+                                                            {slot.is_booked ? (
+                                                                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }} /> BOOKED
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleDeleteSlot(slot.id)}
+                                                                    style={{
+                                                                        position: 'absolute', top: '8px', right: '8px',
+                                                                        background: 'white', border: '1px solid #e2e8f0', color: '#94a3b8', cursor: 'pointer',
+                                                                        width: '24px', height: '24px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                                    }}
+                                                                    title="Delete Slot"
+                                                                >
+                                                                    <Trash size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </Card>
                 </div>
-
             </div>
 
             <style>{`
