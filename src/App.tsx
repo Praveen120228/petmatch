@@ -30,6 +30,7 @@ import Signup from './pages/Auth/Signup';
 import Onboarding from './pages/Onboarding';
 import AddPet from './pages/AddPet';
 import MatchFeed from './pages/MatchFeed';
+import Explore from './pages/Explore';
 import PetProfile from './pages/PetProfile';
 import Messages, { MessagesPlaceholder } from './pages/Messages';
 import Profile from './pages/Profile';
@@ -94,6 +95,7 @@ function App() {
                       <Route path="/onboarding" element={<Onboarding />} />
                       <Route path="/add-pet" element={<AddPet />} />
                       <Route path="/match" element={<MatchFeed />} />
+                      <Route path="/explore" element={<Explore />} />
                       <Route path="/pet/:id" element={<PetProfile />} />
                       <Route path="/messages" element={<Messages />}>
                         <Route index element={<MessagesPlaceholder />} />
