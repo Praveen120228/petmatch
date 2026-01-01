@@ -352,7 +352,7 @@ const AdminAnalytics = () => {
                                     </span>
                                 </h3>
                             </div>
-                            <div style={{ height: '300px', width: '100%' }}>
+                            <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={stats.eventsOverTime}>
                                         <defs>
@@ -377,7 +377,7 @@ const AdminAnalytics = () => {
                         {/* Top Pages */}
                         <Card padding="lg">
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '1.5rem' }}>Top Popular Pages</h3>
-                            <div style={{ height: '300px', width: '100%' }}>
+                            <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={stats.topPages} layout="vertical" margin={{ left: 10, right: 30 }}>
                                         <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
@@ -398,7 +398,7 @@ const AdminAnalytics = () => {
                         <Card padding="lg">
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '1.5rem' }}>Sessions by Device</h3>
                             {stats.deviceDistribution.length > 0 ? (
-                                <div style={{ height: '250px', width: '100%', position: 'relative' }}>
+                                <div style={{ height: '250px', width: '100%', position: 'relative', minWidth: 0 }}>
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie

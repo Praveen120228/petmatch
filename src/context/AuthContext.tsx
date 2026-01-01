@@ -54,16 +54,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         });
 
-        // Safety Timeout: Force loading to false after 8 seconds if DB hangs
+        // Safety Timeout: Force loading to false after 15 seconds if DB hangs (increased for cold starts)
         const timeoutId = setTimeout(() => {
             setLoading(prev => {
                 if (prev) {
-                    console.error('Auth loading timed out. Database might be slow or locked.');
+                    console.warn('Auth loading timed out. Database might be slow or just waking up.');
                     return false;
                 }
                 return prev;
             });
-        }, 8000);
+        }, 15000);
 
         return () => {
             subscription.unsubscribe();
