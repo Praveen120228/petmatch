@@ -124,24 +124,38 @@ const AdminReports = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>User Reports</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        style={{
-                            padding: '0.6rem 1rem',
-                            borderRadius: '8px',
-                            border: '1px solid #334155',
-                            background: '#1e293b',
-                            color: 'white',
-                            cursor: 'pointer',
-                            outline: 'none'
-                        }}
-                    >
-                        <option value="pending">Pending</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="dismissed">Dismissed</option>
-                        <option value="all">All Reports</option>
-                    </select>
+                    <div style={{ position: 'relative' }}>
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            style={{
+                                appearance: 'none',
+                                padding: '0.6rem 2.5rem 0.6rem 1rem',
+                                borderRadius: '8px',
+                                border: '1px solid #334155',
+                                background: '#1e293b',
+                                color: 'white',
+                                cursor: 'pointer',
+                                outline: 'none',
+                                fontSize: '0.9rem',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                minWidth: '150px'
+                            }}
+                        >
+                            <option value="pending">Pending</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="dismissed">Dismissed</option>
+                            <option value="all">All Reports</option>
+                        </select>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" fill="#94a3b8"
+                            viewBox="0 0 256 256"
+                            style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                        >
+                            <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path>
+                        </svg>
+                    </div>
                     <Button variant="outline" onClick={fetchReports} disabled={loading} style={{ borderColor: '#334155', color: '#94a3b8', background: '#1e293b' }}>Refresh</Button>
                 </div>
             </div>

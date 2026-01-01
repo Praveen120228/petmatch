@@ -56,18 +56,22 @@ const AdminBookings = () => {
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>Global Bookings</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <div style={{ position: 'relative' }}>
-                        <Funnel size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                        <Funnel size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             style={{
-                                padding: '0.6rem 1rem 0.6rem 2.5rem',
+                                appearance: 'none',
+                                padding: '0.6rem 2.5rem 0.6rem 2.5rem',
                                 borderRadius: '8px',
                                 border: '1px solid #334155',
                                 background: '#1e293b',
                                 color: 'white',
                                 cursor: 'pointer',
-                                outline: 'none'
+                                outline: 'none',
+                                fontSize: '0.9rem',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                minWidth: '160px'
                             }}
                         >
                             <option value="all">All Statuses</option>
@@ -76,6 +80,14 @@ const AdminBookings = () => {
                             <option value="completed">Completed</option>
                             <option value="cancelled">Cancelled</option>
                         </select>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" fill="#94a3b8"
+                            viewBox="0 0 256 256"
+                            style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                        >
+                            <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path>
+                        </svg>
                     </div>
                     <Button variant="outline" onClick={fetchBookings} disabled={loading} style={{ borderColor: '#334155', color: '#94a3b8', background: '#1e293b' }}>Refresh</Button>
                 </div>
