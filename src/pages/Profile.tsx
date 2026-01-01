@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { MapPin, PencilSimple, SignOut, Plus, Heart, ChatCircle, Trash, CaretLeft, Camera, X, Crop, Folder, CaretRight, PawPrint, CaretDown, Flag, WarningCircle } from '@phosphor-icons/react';
+import { Plus, PencilSimple, Trash, Heart, ChatCircle, MapPin, Folder, CaretRight, CaretLeft, SignOut, Flag, WarningCircle, X, Crop, Camera, CaretDown, PawPrint } from '@phosphor-icons/react';
+import CreatePostModal from '../components/CreatePostModal';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
@@ -195,6 +196,9 @@ const Profile = () => {
 
     // Booking State
     const [userBookings, setUserBookings] = useState<any[]>([]);
+
+    // Post State
+    const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -1234,6 +1238,72 @@ const Profile = () => {
                                 )
                             )}
 
+
+                            {activeTab === 'posts' && (
+                                userPosts.length > 0 ? (
+                                    userPosts.map((post: any) => (
+                                        <div key={post.id} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
+                                            <Card padding="0" style={{
+                                                borderRadius: '24px',
+                                                border: 'none',
+                                                boxShadow: 'var(--shadow-md)',
+                                                overflow: 'hidden',
+                                                background: 'var(--gray-900)',
+                                                height: '100%',
+                                                position: 'relative',
+                                                display: 'block'
+                                            }}>
+                                                <div style={{ display: 'block', width: '100%', height: '100%', position: 'relative' }}>
+                                                    <div className="group" style={{ width: '100%', height: '100%' }}>
+                                                        <img src={post.image_url} alt="Post" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} />
+                                                    </div>
+                                                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+                                                </div>
+
+                                                {/* Delete Action (Owner Only) */}
+                                                {!isPublic && (
+                                                    <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                                                        <button
+                                                            onClick={async (e) => {
+                                                                e.preventDefault(); e.stopPropagation();
+                                                                if (confirm('Delete this post?')) {
+                                                                    await postService.deletePost(post.id);
+                                                                    setUserPosts(prev => prev.filter(p => p.id !== post.id));
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                width: '36px', height: '36px', borderRadius: '50%',
+                                                                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)',
+                                                                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                color: '#ef4444', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                            }}
+                                                        >
+                                                            <Trash size={18} weight="bold" />
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'white', marginBottom: '4px' }}>
+                                                        <Heart weight="fill" color="#ec4899" /> <span>{post.likes_count || 0}</span>
+                                                    </div>
+                                                    {post.caption && (
+                                                        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                            {post.caption}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </Card>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center', color: '#9ca3af', background: '#f9fafb', borderRadius: '16px' }}>
+                                        <p>{isPublic ? 'No posts yet.' : "You haven't posted anything yet."}</p>
+                                        {!isPublic && <Button variant="ghost" onClick={() => setIsCreatePostOpen(true)} style={{ marginTop: '0.5rem', color: '#2563eb' }}>Create a post</Button>}
+                                    </div>
+                                )
+                            )}
+
                             {(activeTab === 'matches' || activeTab === 'likes') && (
                                 (activeTab === 'matches' ? myMatches : myLikes).map((pet) => (
                                     <div key={pet.id} style={{ height: '320px', width: '240px', margin: '0 auto' }}>
@@ -1719,12 +1789,28 @@ const Profile = () => {
                             )}
                         </div>
 
+                        {/* Image Cropper Modal */}
                         {cropImage && (
-                            <ImageCropper
-                                imageSrc={cropImage}
-                                onCropComplete={handleCropComplete}
-                                onCancel={() => setCropImage(null)}
-                                aspectRatio={1}
+                            <div className="modal-overlay">
+                                <div className="modal-content" style={{ width: '90%', maxWidth: '500px', padding: '0', background: 'white', borderRadius: '16px', overflow: 'hidden' }}>
+                                    <ImageCropper
+                                        imageSrc={cropImage}
+                                        aspectRatio={cropTarget === 'user' ? 1 : 1} // 1:1 for profile/pet
+                                        onCropComplete={handleCropComplete}
+                                        onCancel={() => setCropImage(null)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Create Post Modal */}
+                        {isCreatePostOpen && (
+                            <CreatePostModal
+                                onClose={() => setIsCreatePostOpen(false)}
+                                onSuccess={() => {
+                                    postService.getUserPosts(profileUser.id).then(posts => setUserPosts(posts));
+                                    setIsCreatePostOpen(false);
+                                }}
                             />
                         )}
                     </div>
