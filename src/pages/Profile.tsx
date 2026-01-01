@@ -1155,6 +1155,7 @@ const Profile = () => {
 
                     {/* Tab Content */}
                     <div style={{ minHeight: '300px' }}>
+                        {(() => { console.log("RENDER: activeTab=", activeTab, "userPosts.length=", userPosts.length, "userPosts=", userPosts); return null; })()}
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
 
