@@ -335,7 +335,7 @@ const Profile = () => {
                 .from('bookings')
                 .select(`
                      *,
-                     shop:shops (name, image, location),
+                     shop:shops (name, image_url, location),
                      service:services (name, duration_minutes),
                      slot:time_slots (start_time, end_time)
                  `)
