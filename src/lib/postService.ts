@@ -148,9 +148,6 @@ export const postService = {
 
             if (error) throw error;
 
-            // Decrement count
-            await this.incrementLikeCount(postId, -1);
-        } else {
             // Like
             const { error } = await supabase
                 .from('post_likes')
@@ -158,27 +155,11 @@ export const postService = {
 
             if (error) throw error;
 
-            // Increment count
-            await this.incrementLikeCount(postId, 1);
+            // Trigger will handle count update
         }
     },
 
-    async incrementLikeCount(postId: string, amount: number) {
-        // Using RPC is better for concurrency, but for now simple update:
-        // Or we can use a raw query if we had one.
-        // Actually, we can fetch first? No, let's just trigger? 
-        // For MVP, client-side optimistic + server refetch is fine.
-        // But to be consistent let's do a simple read-update (not atomic but simple).
-
-        // BETTER: database trigger.
-        // Let's assume we implement a DB trigger for this count in the migration, 
-        // but for now let's just update the row manually.
-
-        const { data } = await supabase.from('posts').select('likes_count').eq('id', postId).single();
-        if (data) {
-            await supabase.from('posts').update({ likes_count: (data.likes_count || 0) + amount }).eq('id', postId);
-        }
-    },
+    // incrementLikeCount removed - handled by DB trigger
 
     async deletePost(postId: string) {
         const { error } = await supabase
