@@ -76,6 +76,28 @@ export const postService = {
     },
 
     /**
+     * Get posts for a specific user
+     */
+    async getUserPosts(userId: string): Promise<Post[]> {
+        const { data, error } = await supabase
+            .from('posts')
+            .select(`
+                *,
+                profiles!posts_user_id_fkey (name, username, avatar_url),
+                post_likes (user_id)
+            `)
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return data.map((post: any) => ({
+            ...post,
+            liked_by_me: userId ? post.post_likes.some((l: any) => l.user_id === userId) : false,
+        })) as Post[];
+    },
+
+    /**
      * Upload image and create post
      */
     async createPost(userId: string, file: File, caption: string, tags: string[] = []) {

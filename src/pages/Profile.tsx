@@ -11,6 +11,7 @@ import { featureService } from '../lib/featureService';
 import type { Collection } from '../lib/featureService';
 
 import { petService } from '../lib/petService';
+import { postService } from '../lib/postService';
 import { userService } from '../lib/userService';
 import { storageService } from '../lib/storageService';
 import { dateService } from '../lib/dateService';
@@ -186,6 +187,7 @@ const Profile = () => {
     const [matchedPets, setMatchedPets] = useState<any[]>([]);
     const [collectionPets, setCollectionPets] = useState<any[]>([]);
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [userPosts, setUserPosts] = useState<any[]>([]); // Community posts
 
     // Dating State
     const [dateRequests, setDateRequests] = useState<any[]>([]);
@@ -201,15 +203,17 @@ const Profile = () => {
             try {
                 if (!isPublic && user) {
                     // Private View: Load own data
-                    const [userPets, userCols, userProfile] = await Promise.all([
+                    const [userPets, userCols, userProfile, userProfilePosts] = await Promise.all([
                         petService.getUserPets(user.id),
                         featureService.getCollections(user.id),
-                        userService.getProfile(user.id)
+                        userService.getProfile(user.id),
+                        postService.getUserPosts(user.id)
                     ]);
 
                     if (isMounted) {
                         setPets(userPets || []);
                         setCollections(userCols || []);
+                        setUserPosts(userProfilePosts || []);
 
                         // Only update if we got a valid profile, otherwise keep existing/fallback safely
                         if (userProfile) {
@@ -269,14 +273,16 @@ const Profile = () => {
 
                 } else if (isPublic && id) {
                     // Public View: Load other user's data
-                    const [targetProfile, targetPets] = await Promise.all([
+                    const [targetProfile, targetPets, targetPosts] = await Promise.all([
                         userService.getProfile(id),
-                        petService.getUserPets(id)
+                        petService.getUserPets(id),
+                        postService.getUserPosts(id)
                     ]);
 
                     if (isMounted) {
                         setProfileData(targetProfile);
                         setPets(targetPets || []);
+                        setUserPosts(targetPosts || []);
                         setLikedPets([]);
                         setMatchedPets([]);
                         setCollectionPets([]);
@@ -1106,7 +1112,7 @@ const Profile = () => {
                     }}>
                         <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', scrollbarWidth: 'none', marginBottom: '-1px', paddingRight: '1rem', flex: 1 }}>
                             {
-                                ['pets', 'matches', 'likes', 'collections', 'dates', 'services'].map((tab) => (
+                                ['pets', 'posts', 'matches', 'likes', 'collections', 'dates', 'services'].map((tab) => (
                                     (!isPublic || (tab !== 'matches' && tab !== 'likes' && tab !== 'dates')) && ( // Hide private tabs on public profile
                                         <button
                                             key={tab}
@@ -1126,9 +1132,9 @@ const Profile = () => {
                                                 flexShrink: 0
                                             }}
                                         >
-                                            {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab}
+                                            {tab === 'pets' ? (isPublic ? `${profileUser.name}'s Pets` : 'My Pets') : tab === 'posts' ? 'Posts' : tab}
                                             <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', background: '#f3f4f6', padding: '2px 8px', borderRadius: '10px', color: '#6b7280' }}>
-                                                {tab === 'pets' ? userPets.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : tab === 'dates' ? (dateRequests.length + myRelationships.length) : collections.length}
+                                                {tab === 'pets' ? userPets.length : tab === 'posts' ? userPosts.length : tab === 'matches' ? myMatches.length : tab === 'likes' ? myLikes.length : tab === 'dates' ? (dateRequests.length + myRelationships.length) : collections.length}
                                             </span>
                                         </button>
                                     )))
