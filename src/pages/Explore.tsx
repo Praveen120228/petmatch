@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { Plus } from '@phosphor-icons/react';
 import { postService } from '../lib/postService';
 import type { Post } from '../lib/postService';
@@ -30,7 +29,6 @@ const Explore = () => {
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--gray-50)', paddingBottom: '80px' }}>
-            <Navbar />
 
             <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '24px', color: 'var(--gray-900)' }}>Explore</h1>
