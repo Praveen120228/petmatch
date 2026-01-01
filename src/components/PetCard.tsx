@@ -82,6 +82,40 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                             pointerEvents: 'none'
                         }} />
 
+                        {/* Owner Info - Floating Badge */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '1.5rem',
+                            left: '1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            background: 'rgba(0, 0, 0, 0.4)',
+                            backdropFilter: 'blur(8px)',
+                            padding: '4px 10px 4px 4px',
+                            borderRadius: '30px',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                            zIndex: 10
+                        }}>
+                            <div style={{
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '50%',
+                                overflow: 'hidden',
+                                background: '#f3f4f6',
+                                flexShrink: 0
+                            }}>
+                                <img
+                                    src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'Owner'}&background=random`}
+                                    alt="Owner"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            </div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>
+                                {pet.owner_profile?.username || 'Pet Owner'}
+                            </span>
+                        </div>
+
                         {/* Content */}
                         <div style={{
                             position: 'absolute',
@@ -93,38 +127,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                             zIndex: 2,
                             fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif'
                         }}>
-                            {/* Owner Info - Floating Badge */}
-                            <div style={{
-                                position: 'absolute',
-                                top: '-280px', // Position at top of card
-                                left: '1.25rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                background: 'rgba(0, 0, 0, 0.4)',
-                                backdropFilter: 'blur(8px)',
-                                padding: '4px 10px 4px 4px',
-                                borderRadius: '30px',
-                                border: '1px solid rgba(255,255,255,0.15)'
-                            }}>
-                                <div style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    borderRadius: '50%',
-                                    overflow: 'hidden',
-                                    background: '#f3f4f6',
-                                    flexShrink: 0
-                                }}>
-                                    <img
-                                        src={pet.owner_profile?.avatar_url || `https://ui-avatars.com/api/?name=${pet.owner_profile?.username || 'Owner'}&background=random`}
-                                        alt="Owner"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                </div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>
-                                    {pet.owner_profile?.username || 'Pet Owner'}
-                                </span>
-                            </div>
+
 
                             {/* Name & Age */}
                             <div style={{

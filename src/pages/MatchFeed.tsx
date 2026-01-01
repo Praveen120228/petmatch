@@ -170,10 +170,10 @@ const MatchFeed = () => {
 
 
         // Filter out pets that are already liked
-        if (likes && likes.length > 0) {
-            const likedIds = new Set(likes);
-            filteredPets = filteredPets.filter(p => !likedIds.has(p.id));
-        }
+        // if (likes && likes.length > 0) {
+        //     const likedIds = new Set(likes);
+        //     filteredPets = filteredPets.filter(p => !likedIds.has(p.id));
+        // }
 
         return filteredPets;
     }, [data, likes]);
