@@ -10,6 +10,7 @@ interface PaginationControlsProps {
     hasPrev: boolean;
     loading?: boolean;
     totalItems?: number;
+    style?: React.CSSProperties;
 }
 
 const PaginationControls: React.FC<PaginationControlsProps> = ({
@@ -19,7 +20,8 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
     hasNext,
     hasPrev,
     loading = false,
-    totalItems
+    totalItems,
+    style
 }) => {
     return (
         <div style={{
@@ -32,10 +34,11 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
             borderBottomLeftRadius: '12px',
             borderBottomRightRadius: '12px',
             flexWrap: 'wrap',
-            gap: '1rem'
+            gap: '1rem',
+            ...style
         }}>
-            <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                Showing page <span style={{ fontWeight: 700, color: '#1e293b' }}>{currentPage}</span> of <span style={{ fontWeight: 700, color: '#1e293b' }}>{totalPages || 1}</span>
+            <div style={{ fontSize: '0.875rem', color: style?.color || '#64748b' }}>
+                Showing page <span style={{ fontWeight: 700, color: style?.color ? 'inherit' : '#1e293b' }}>{currentPage}</span> of <span style={{ fontWeight: 700, color: style?.color ? 'inherit' : '#1e293b' }}>{totalPages || 1}</span>
                 {totalItems !== undefined && (
                     <span> ({totalItems} total results)</span>
                 )}
@@ -47,12 +50,11 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
                     size="sm"
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={!hasPrev || loading}
-                    style={{ padding: '0.5rem 0.75rem' }}
+                    style={{ padding: '0.5rem 0.75rem', ...(style?.color ? { color: style.color, borderColor: '#334155' } : {}) }}
                 >
                     <CaretLeft weight="bold" /> Previous
                 </Button>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    {/* Simple logic: just show current page for now to avoid complexity with ellipsis */}
                     <button
                         style={{
                             width: '32px', height: '32px',
@@ -74,7 +76,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
                     size="sm"
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={!hasNext || loading}
-                    style={{ padding: '0.5rem 0.75rem' }}
+                    style={{ padding: '0.5rem 0.75rem', ...(style?.color ? { color: style.color, borderColor: '#334155' } : {}) }}
                 >
                     Next <CaretRight weight="bold" />
                 </Button>

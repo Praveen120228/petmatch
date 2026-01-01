@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, X, User, Prohibit, Trash, MagnifyingGlass } from '@phosphor-icons/react';
+import { Check, User, Prohibit, Trash, MagnifyingGlass, DotsThree } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import PaginationControls from '../../components/PaginationControls';
 
@@ -111,10 +111,10 @@ const AdminUsers = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'active': return { bg: '#dcfce7', text: '#166534' };
-            case 'suspended': return { bg: '#fef3c7', text: '#92400e' };
-            case 'banned': return { bg: '#fee2e2', text: '#991b1b' };
-            default: return { bg: '#f1f5f9', text: '#475569' };
+            case 'active': return { bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399', border: '#059669' };
+            case 'suspended': return { bg: 'rgba(245, 158, 11, 0.1)', text: '#fbbf24', border: '#d97706' };
+            case 'banned': return { bg: 'rgba(239, 68, 68, 0.1)', text: '#f87171', border: '#b91c1c' };
+            default: return { bg: 'rgba(148, 163, 184, 0.1)', text: '#94a3b8', border: '#475569' };
         }
     };
 
@@ -128,12 +128,12 @@ const AdminUsers = () => {
     return (
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b' }}>Manage Users</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>Manage Users</h1>
             </div>
 
             {/* Filter Tabs & Search */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', background: '#f1f5f9', padding: '0.25rem', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', background: '#1e293b', padding: '0.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
@@ -145,9 +145,8 @@ const AdminUsers = () => {
                                 fontWeight: 500,
                                 border: 'none',
                                 cursor: 'pointer',
-                                background: filterRole === tab.id ? 'white' : 'transparent',
-                                color: filterRole === tab.id ? '#0f172a' : '#64748b',
-                                boxShadow: filterRole === tab.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                background: filterRole === tab.id ? 'rgba(45, 212, 191, 0.1)' : 'transparent',
+                                color: filterRole === tab.id ? '#2dd4bf' : '#94a3b8',
                                 transition: 'all 0.2s'
                             }}
                         >
@@ -172,24 +171,38 @@ const AdminUsers = () => {
                                 width: '100%',
                                 padding: '0.75rem 1rem 0.75rem 2.5rem',
                                 borderRadius: '8px',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #334155',
+                                background: '#1e293b',
                                 fontSize: '0.9rem',
+                                color: 'white',
                                 outline: 'none'
                             }}
+                            onFocus={(e) => e.target.style.borderColor = '#2dd4bf'}
+                            onBlur={(e) => e.target.style.borderColor = '#334155'}
                         />
                     </div>
-                    <Button variant="outline" onClick={fetchUsers} disabled={loading}>Refresh</Button>
+                    <Button variant="outline" onClick={fetchUsers} disabled={loading} style={{ borderColor: '#334155', color: '#94a3b8', background: '#1e293b' }}>Refresh</Button>
                 </div>
             </div>
 
             {loading ? (
-                <div>Loading users...</div>
+                <div style={{ color: '#94a3b8' }}>Loading users...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                     {/* Wrap list in a nice border container */}
-                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+                    <div style={{ border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden', background: '#1e293b' }}>
+
+                        {/* Table Header Row (Simulated) */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 100px', padding: '1rem 1.5rem', background: '#0f172a', borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            <div>User</div>
+                            <div>Email</div>
+                            <div>Role</div>
+                            <div>Status</div>
+                            <div style={{ textAlign: 'right' }}>Actions</div>
+                        </div>
+
                         {users.length === 0 && (
-                            <div style={{ padding: '3rem', textAlign: 'center', background: 'white' }}>
+                            <div style={{ padding: '3rem', textAlign: 'center', background: '#1e293b', color: '#94a3b8' }}>
                                 <p>No users found matching filters.</p>
                             </div>
                         )}
@@ -199,82 +212,104 @@ const AdminUsers = () => {
                             const isLast = index === users.length - 1;
                             return (
                                 <div key={u.id} style={{
-                                    padding: '1.5rem',
-                                    background: 'white',
-                                    borderBottom: isLast ? 'none' : '1px solid #f1f5f9'
+                                    padding: '1rem 1.5rem',
+                                    background: '#1e293b',
+                                    borderBottom: isLast ? 'none' : '1px solid #334155',
+                                    display: 'grid',
+                                    gridTemplateColumns: '2fr 1.5fr 1fr 1fr 100px',
+                                    alignItems: 'center',
+                                    gap: '1rem'
                                 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-
-                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                            <div style={{
-                                                width: '50px', height: '50px', borderRadius: '50%',
-                                                background: u.avatar_url ? `url(${u.avatar_url}) center/cover` : '#e2e8f0',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                flexShrink: 0
-                                            }}>
-                                                {!u.avatar_url && <User size={24} color="#64748b" />}
-                                            </div>
-                                            <div>
-                                                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    {u.name || 'Unnamed User'}
-                                                    <span style={{ fontSize: '0.7rem', fontWeight: 500, padding: '0.1rem 0.5rem', borderRadius: '99px', background: statusColor.bg, color: statusColor.text }}>
-                                                        {(u.status || 'active').toUpperCase()}
-                                                    </span>
-                                                </h3>
-                                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{u.email}</p>
-                                                <p style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Role: <span style={{ fontWeight: 600, color: '#475569' }}>{u.role}</span></p>
-                                            </div>
+                                    {/* User Column */}
+                                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                        <div style={{
+                                            width: '40px', height: '40px', borderRadius: '50%',
+                                            background: u.avatar_url ? `url(${u.avatar_url}) center/cover` : '#334155',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            flexShrink: 0,
+                                            border: '1px solid #475569'
+                                        }}>
+                                            {!u.avatar_url && <User size={20} color="#94a3b8" />}
                                         </div>
+                                        <div style={{ overflow: 'hidden' }}>
+                                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                                                {u.name || 'Unnamed User'}
+                                            </p>
+                                        </div>
+                                    </div>
 
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            {(u.status || 'active') === 'active' && (
-                                                <>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleStatusUpdate(u.id, 'suspended')}
-                                                        loading={processingId === u.id}
-                                                        disabled={!!processingId}
-                                                        style={{ color: '#d97706', borderColor: '#d97706' }}
-                                                    >
-                                                        <Prohibit /> Suspend
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleStatusUpdate(u.id, 'banned')}
-                                                        loading={processingId === u.id}
-                                                        disabled={!!processingId}
-                                                        style={{ color: '#dc2626', borderColor: '#dc2626' }}
-                                                    >
-                                                        <X /> Ban
-                                                    </Button>
-                                                </>
-                                            )}
+                                    {/* Email Column */}
+                                    <div style={{ overflow: 'hidden' }}>
+                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{u.email}</p>
+                                    </div>
 
-                                            {(u.status === 'suspended' || u.status === 'banned') && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="primary"
-                                                    onClick={() => handleStatusUpdate(u.id, 'active')}
-                                                    loading={processingId === u.id}
-                                                    disabled={!!processingId}
-                                                >
-                                                    <Check /> Activate
-                                                </Button>
-                                            )}
+                                    {/* Role Column */}
+                                    <div>
+                                        <span style={{
+                                            fontSize: '0.85rem',
+                                            fontWeight: 500,
+                                            color: '#cbd5e1',
+                                            background: '#334155',
+                                            padding: '0.2rem 0.6rem',
+                                            borderRadius: '6px'
+                                        }}>
+                                            {u.role}
+                                        </span>
+                                    </div>
 
+                                    {/* Status Column */}
+                                    <div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColor.border }}></div>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 500, color: statusColor.text }}>
+                                                {(u.status || 'active').charAt(0).toUpperCase() + (u.status || 'active').slice(1)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Actions Column */}
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                        <div style={{ position: 'relative' }}>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => handleDelete(u.id)}
-                                                disabled={!!processingId}
-                                                style={{ color: '#94a3b8' }}
+                                                onClick={() => { /* Open Dropdown or something, for now just buttons */ }}
+                                                style={{ color: '#94a3b8', padding: '0.25rem' }}
                                             >
-                                                <Trash size={18} />
+                                                <DotsThree size={24} weight="bold" />
                                             </Button>
+                                            {/* Hidden hover menu logic implies complexity, simplify to just inline buttons if space permits or modal */}
                                         </div>
 
+                                        {/* Simplified Actions for this view */}
+                                        {(u.status || 'active') === 'active' && (
+                                            <button
+                                                onClick={() => handleStatusUpdate(u.id, 'suspended')}
+                                                disabled={!!processingId}
+                                                title="Suspend User"
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fbbf24' }}
+                                            >
+                                                <Prohibit size={20} />
+                                            </button>
+                                        )}
+                                        {(u.status === 'suspended' || u.status === 'banned') && (
+                                            <button
+                                                onClick={() => handleStatusUpdate(u.id, 'active')}
+                                                disabled={!!processingId}
+                                                title="Activate User"
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10b981' }}
+                                            >
+                                                <Check size={20} />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleDelete(u.id)}
+                                            disabled={!!processingId}
+                                            title="Delete User"
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
+                                        >
+                                            <Trash size={20} />
+                                        </button>
                                     </div>
                                 </div>
                             );
@@ -288,6 +323,7 @@ const AdminUsers = () => {
                         hasPrev={page > 1}
                         loading={loading}
                         totalItems={totalCount}
+                        style={{ marginTop: '1.5rem', color: '#94a3b8' }}
                     />
                 </div>
             )}

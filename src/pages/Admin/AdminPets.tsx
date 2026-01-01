@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Eye, EyeSlash, Trash, PawPrint, Funnel, X, User, ChartLineUp } from '@phosphor-icons/react';
 import Button from '../../components/Button';
-import Card from '../../components/Card';
 import PaginationControls from '../../components/PaginationControls';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 
@@ -149,7 +148,7 @@ const AdminPets = () => {
     return (
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b' }}>Moderate Pets</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>Moderate Pets</h1>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     <div style={{ position: 'relative', width: '250px' }}>
                         <MagnifyingGlass
@@ -166,24 +165,29 @@ const AdminPets = () => {
                                 width: '100%',
                                 padding: '0.6rem 1rem 0.6rem 2.5rem',
                                 borderRadius: '8px',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #334155',
+                                background: '#1e293b',
+                                color: 'white',
                                 fontSize: '0.9rem',
                                 outline: 'none'
                             }}
+                            onFocus={(e) => e.target.style.borderColor = '#2dd4bf'}
+                            onBlur={(e) => e.target.style.borderColor = '#334155'}
                         />
                     </div>
                     <div style={{ position: 'relative' }}>
-                        <Funnel size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                        <Funnel size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                         <select
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
                             style={{
                                 padding: '0.6rem 1rem 0.6rem 2.5rem',
                                 borderRadius: '8px',
-                                border: '1px solid #e2e8f0',
-                                background: 'white',
-                                color: '#1e293b',
-                                cursor: 'pointer'
+                                border: '1px solid #334155',
+                                background: '#1e293b',
+                                color: 'white',
+                                cursor: 'pointer',
+                                outline: 'none'
                             }}
                         >
                             <option value="all">All Pets</option>
@@ -192,39 +196,48 @@ const AdminPets = () => {
                             <option value="adopted">Adopted</option>
                         </select>
                     </div>
-                    <Button variant="outline" onClick={fetchPets} disabled={loading}>Refresh</Button>
+                    <Button variant="outline" onClick={fetchPets} disabled={loading} style={{ borderColor: '#334155', color: '#94a3b8', background: '#1e293b' }}>Refresh</Button>
                 </div>
             </div>
 
             {loading ? (
-                <div>Loading pets...</div>
+                <div style={{ color: '#94a3b8' }}>Loading pets...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                         {pets.length === 0 && (
-                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: '#94a3b8', background: '#1e293b', borderRadius: '12px', border: '1px solid #334155' }}>
                                 <PawPrint size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
                                 <p>No pets found.</p>
                             </div>
                         )}
 
                         {pets.map(pet => (
-                            <Card key={pet.id} padding="none" style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer', transition: 'transform 0.2s', border: selectedPet?.id === pet.id ? '2px solid #3b82f6' : 'none' }} onClick={() => setSelectedPet(pet)}>
-                                <div style={{ height: '200px', background: '#f1f5f9', position: 'relative' }}>
+                            <div key={pet.id} style={{
+                                overflow: 'hidden',
+                                position: 'relative',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s',
+                                border: selectedPet?.id === pet.id ? '2px solid #2dd4bf' : '1px solid #334155',
+                                background: '#1e293b',
+                                borderRadius: '12px',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                            }} onClick={() => setSelectedPet(pet)}>
+                                <div style={{ height: '200px', background: '#0f172a', position: 'relative' }}>
                                     {pet.image ? (
                                         <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                            <PawPrint size={48} color="#cbd5e1" />
+                                            <PawPrint size={48} color="#334155" />
                                         </div>
                                     )}
                                     {pet.status === 'hidden' && (
-                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, letterSpacing: '0.1em' }}>
+                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, letterSpacing: '0.1em' }}>
                                             HIDDEN
                                         </div>
                                     )}
                                     <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px' }}>
-                                        <span style={{ background: 'rgba(0,0,0,0.6)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
+                                        <span style={{ background: 'rgba(0,0,0,0.8)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
                                             {pet.status?.toUpperCase() || 'AVAILABLE'}
                                         </span>
                                     </div>
@@ -232,25 +245,25 @@ const AdminPets = () => {
 
                                 <div style={{ padding: '1rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{pet.name}</h3>
-                                        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{pet.breed}</span>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'white' }}>{pet.name}</h3>
+                                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{pet.breed}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#e2e8f0', overflow: 'hidden' }}>
+                                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#334155', overflow: 'hidden', border: '1px solid #475569' }}>
                                             {pet.profiles?.avatar_url ? (
                                                 <img src={pet.profiles.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             ) : (
-                                                <User size={16} style={{ margin: '4px' }} color="#94a3b8" />
+                                                <User size={14} style={{ margin: '4px' }} color="#94a3b8" />
                                             )}
                                         </div>
                                         <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{pet.profiles?.name || pet.profiles?.email || 'Unknown Owner'}</span>
                                     </div>
 
-                                    <Button size="sm" variant="outline" fullWidth style={{ marginTop: 'auto' }}>
+                                    <Button size="sm" variant="outline" fullWidth style={{ marginTop: 'auto', borderColor: '#334155', color: '#94a3b8' }}>
                                         View Details
                                     </Button>
                                 </div>
-                            </Card>
+                            </div>
                         ))}
                     </div>
                     <PaginationControls
@@ -261,6 +274,7 @@ const AdminPets = () => {
                         hasPrev={page > 1}
                         loading={loading}
                         totalItems={totalCount}
+                        style={{ marginTop: '1.5rem', color: '#94a3b8' }}
                     />
                 </div>
             )}
@@ -268,74 +282,74 @@ const AdminPets = () => {
             {/* Detailed Modal */}
             {selectedPet && (
                 <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
                     backdropFilter: 'blur(4px)'
                 }} onClick={() => setSelectedPet(null)}>
                     <div style={{
-                        background: 'white', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto',
-                        borderRadius: '16px', padding: '0', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                        background: '#1e293b', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto',
+                        borderRadius: '16px', padding: '0', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', border: '1px solid #334155'
                     }} onClick={e => e.stopPropagation()}>
 
                         <button
                             onClick={() => setSelectedPet(null)}
                             style={{
                                 position: 'absolute', top: '1rem', right: '1rem', zIndex: 10,
-                                background: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px',
+                                background: '#334155', border: 'none', borderRadius: '50%', width: '32px', height: '32px',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3)', color: 'white'
                             }}
                         >
                             <X size={20} />
                         </button>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '0' }}>
                             {/* Left: Image */}
-                            <div style={{ background: '#f8fafc', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ background: '#0f172a', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {selectedPet.image ? (
                                     <img src={selectedPet.image} alt={selectedPet.name} style={{ width: '100%', height: '100%', objectFit: 'contain', maxHeight: '500px' }} />
                                 ) : (
-                                    <PawPrint size={96} color="#cbd5e1" />
+                                    <PawPrint size={96} color="#334155" />
                                 )}
                             </div>
 
                             {/* Right: Details */}
                             <div style={{ padding: '2rem' }}>
                                 <div style={{ marginBottom: '1.5rem' }}>
-                                    <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b', marginBottom: '0.5rem' }}>{selectedPet.name}</h2>
+                                    <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'white', marginBottom: '0.5rem' }}>{selectedPet.name}</h2>
                                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                        <span style={{ padding: '0.25rem 0.75rem', background: '#f1f5f9', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>
+                                        <span style={{ padding: '0.25rem 0.75rem', background: '#334155', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, color: '#e2e8f0' }}>
                                             {selectedPet.breed}
                                         </span>
-                                        <span style={{ padding: '0.25rem 0.75rem', background: '#f1f5f9', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>
+                                        <span style={{ padding: '0.25rem 0.75rem', background: '#334155', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, color: '#e2e8f0' }}>
                                             {selectedPet.age}
                                         </span>
-                                        <span style={{ padding: '0.25rem 0.75rem', background: '#f1f5f9', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>
+                                        <span style={{ padding: '0.25rem 0.75rem', background: '#334155', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, color: '#e2e8f0' }}>
                                             {selectedPet.gender}
                                         </span>
                                     </div>
                                 </div>
 
                                 {/* Analytics Section */}
-                                <div style={{ marginBottom: '2rem', padding: '1rem', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                                    <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e40af', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                                    <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#60a5fa', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <ChartLineUp weight="bold" /> Performance Analytics
                                     </h4>
                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                                         {petAnalytics.loading ? (
                                             <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#94a3b8' }}>...</span>
                                         ) : (
-                                            <span style={{ fontSize: '2rem', fontWeight: 800, color: '#1e3a8a' }}>{petAnalytics.views.toLocaleString()}</span>
+                                            <span style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{petAnalytics.views.toLocaleString()}</span>
                                         )}
-                                        <span style={{ fontSize: '0.9rem', color: '#60a5fa', fontWeight: 500 }}>Total Views</span>
+                                        <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 500 }}>Total Views</span>
                                     </div>
                                 </div>
 
                                 {/* Owner Info */}
                                 <div style={{ marginBottom: '2rem' }}>
-                                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Owner</h4>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e2e8f0', overflow: 'hidden' }}>
+                                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Owner</h4>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', border: '1px solid #334155', borderRadius: '8px', background: '#0f172a' }}>
+                                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#334155', overflow: 'hidden' }}>
                                             {selectedPet.profiles?.avatar_url ? (
                                                 <img src={selectedPet.profiles.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             ) : (
@@ -343,16 +357,16 @@ const AdminPets = () => {
                                             )}
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: 700, color: '#1e293b' }}>{selectedPet.profiles?.name || 'Unnamed User'}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{selectedPet.profiles?.email}</div>
+                                            <div style={{ fontWeight: 700, color: 'white' }}>{selectedPet.profiles?.name || 'Unnamed User'}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{selectedPet.profiles?.email}</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Bio */}
                                 <div style={{ marginBottom: '2rem' }}>
-                                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>About</h4>
-                                    <p style={{ color: '#334155', lineHeight: '1.6' }}>{selectedPet.bio || 'No bio provided for this pet.'}</p>
+                                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>About</h4>
+                                    <p style={{ color: '#cbd5e1', lineHeight: '1.6' }}>{selectedPet.bio || 'No bio provided for this pet.'}</p>
                                 </div>
 
                                 {/* Actions */}
@@ -362,7 +376,7 @@ const AdminPets = () => {
                                             variant="outline"
                                             onClick={() => handleStatusUpdate(selectedPet.id, 'hidden')}
                                             loading={processingId === selectedPet.id}
-                                            style={{ color: '#d97706', borderColor: '#d97706' }}
+                                            style={{ color: '#fbbf24', borderColor: '#fbbf24', background: 'transparent' }}
                                         >
                                             <EyeSlash /> Hide Pet
                                         </Button>
@@ -371,6 +385,7 @@ const AdminPets = () => {
                                             variant="primary"
                                             onClick={() => handleStatusUpdate(selectedPet.id, 'available')}
                                             loading={processingId === selectedPet.id}
+                                            style={{ background: '#2dd4bf', borderColor: '#2dd4bf', color: '#0f172a' }}
                                         >
                                             <Eye /> Unhide Pet
                                         </Button>
@@ -379,7 +394,7 @@ const AdminPets = () => {
                                         variant="ghost"
                                         onClick={() => handleDelete(selectedPet.id)}
                                         loading={processingId === selectedPet.id}
-                                        style={{ color: '#ef4444', background: '#fef2f2' }}
+                                        style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)' }}
                                     >
                                         <Trash /> Delete
                                     </Button>
@@ -387,6 +402,13 @@ const AdminPets = () => {
 
                             </div>
                         </div>
+                        <style>{`
+                            @media (max-width: 768px) {
+                                div[style*="grid-template-columns: minmax(300px, 1fr) 1fr"] {
+                                    grid-template-columns: 1fr !important;
+                                }
+                            }
+                        `}</style>
                     </div>
                 </div>
             )}

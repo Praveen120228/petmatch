@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, X, Storefront, MapPin, Prohibit, Trash, MagnifyingGlass } from '@phosphor-icons/react';
 import Button from '../../components/Button';
-import Card from '../../components/Card';
 import PaginationControls from '../../components/PaginationControls';
 
 const PAGE_SIZE = 10;
@@ -116,10 +115,10 @@ const AdminShops = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'approved': return { bg: '#dcfce7', text: '#166534' };
-            case 'rejected': return { bg: '#fee2e2', text: '#991b1b' };
-            case 'suspended': return { bg: '#f1f5f9', text: '#475569' };
-            default: return { bg: '#fef3c7', text: '#92400e' };
+            case 'approved': return { bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399', border: '#059669' };
+            case 'rejected': return { bg: 'rgba(239, 68, 68, 0.1)', text: '#f87171', border: '#b91c1c' };
+            case 'suspended': return { bg: 'rgba(241, 245, 249, 0.1)', text: '#94a3b8', border: '#475569' };
+            default: return { bg: 'rgba(245, 158, 11, 0.1)', text: '#fbbf24', border: '#d97706' };
         }
     };
 
@@ -133,7 +132,7 @@ const AdminShops = () => {
     return (
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b' }}>Manage Shops</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>Manage Shops</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <div style={{ position: 'relative', width: '250px' }}>
                         <MagnifyingGlass
@@ -150,31 +149,35 @@ const AdminShops = () => {
                                 width: '100%',
                                 padding: '0.6rem 1rem 0.6rem 2.5rem',
                                 borderRadius: '8px',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #334155',
+                                background: '#1e293b',
+                                color: 'white',
                                 fontSize: '0.9rem',
                                 outline: 'none'
                             }}
+                            onFocus={(e) => e.target.style.borderColor = '#2dd4bf'}
+                            onBlur={(e) => e.target.style.borderColor = '#334155'}
                         />
                     </div>
-                    <Button variant="outline" onClick={fetchShops} disabled={loading}>Refresh</Button>
+                    <Button variant="outline" onClick={fetchShops} disabled={loading} style={{ borderColor: '#334155', color: '#94a3b8', background: '#1e293b' }}>Refresh</Button>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1px' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #334155', paddingBottom: '1px' }}>
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         style={{
                             padding: '0.75rem 1.5rem',
-                            background: activeTab === tab.id ? 'white' : 'transparent',
+                            background: activeTab === tab.id ? '#1e293b' : 'transparent',
                             border: '1px solid',
-                            borderColor: activeTab === tab.id ? '#e2e8f0' : 'transparent',
-                            borderBottomColor: activeTab === tab.id ? 'white' : 'transparent',
+                            borderColor: activeTab === tab.id ? '#334155' : 'transparent',
+                            borderBottomColor: activeTab === tab.id ? '#1e293b' : 'transparent',
                             borderRadius: '8px 8px 0 0',
                             fontWeight: 600,
-                            color: activeTab === tab.id ? 'var(--primary-600)' : '#64748b',
+                            color: activeTab === tab.id ? '#2dd4bf' : '#94a3b8',
                             cursor: 'pointer',
                             marginBottom: '-1px',
                             position: 'relative',
@@ -195,11 +198,11 @@ const AdminShops = () => {
             </div>
 
             {loading ? (
-                <div>Loading shops...</div>
+                <div style={{ color: '#94a3b8' }}>Loading shops...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {shops.length === 0 && (
-                        <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
+                        <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: '#1e293b', borderRadius: '12px', border: '1px solid #334155' }}>
                             <Storefront size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
                             <p>No {activeTab === 'all' ? '' : activeTab} shops found.</p>
                         </div>
@@ -208,27 +211,34 @@ const AdminShops = () => {
                     {shops.map(shop => {
                         const statusColor = getStatusColor(shop.status || 'pending');
                         return (
-                            <Card key={shop.id} padding="lg">
+                            <div key={shop.id} style={{
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: '12px',
+                                padding: '1.5rem',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                            }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                                     <div style={{ display: 'flex', gap: '1rem' }}>
                                         <div style={{
                                             width: '64px', height: '64px', borderRadius: '8px',
-                                            background: shop.image_url ? `url(${shop.image_url}) center/cover` : '#f1f5f9',
+                                            background: shop.image_url ? `url(${shop.image_url}) center/cover` : '#334155',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            flexShrink: 0
+                                            flexShrink: 0,
+                                            border: '1px solid #475569'
                                         }}>
-                                            {!shop.image_url && <Storefront size={32} color="#cbd5e1" />}
+                                            {!shop.image_url && <Storefront size={32} color="#94a3b8" />}
                                         </div>
                                         <div>
-                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>{shop.name}</h3>
-                                            <p style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>{shop.name}</h3>
+                                            <p style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#94a3b8', fontSize: '0.9rem', marginTop: '0.25rem' }}>
                                                 <MapPin /> {shop.city}, {shop.state}
                                             </p>
                                             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, background: statusColor.bg, color: statusColor.text }}>
+                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, background: statusColor.bg, color: statusColor.text, border: `1px solid ${statusColor.border}` }}>
                                                     {(shop.status || 'pending').toUpperCase()}
                                                 </span>
-                                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
                                                     Joined: {new Date(shop.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
@@ -244,7 +254,7 @@ const AdminShops = () => {
                                                     onClick={() => handleStatusUpdate(shop.id, 'approved')}
                                                     loading={processingId === shop.id}
                                                     disabled={!!processingId}
-                                                    style={{ background: '#10b981', borderColor: '#10b981' }}
+                                                    style={{ background: '#10b981', borderColor: '#10b981', color: 'white' }}
                                                 >
                                                     <Check weight="bold" /> Approve
                                                 </Button>
@@ -254,7 +264,7 @@ const AdminShops = () => {
                                                     onClick={() => handleStatusUpdate(shop.id, 'rejected')}
                                                     loading={processingId === shop.id}
                                                     disabled={!!processingId}
-                                                    style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                                                    style={{ color: '#ef4444', borderColor: '#ef4444', background: 'transparent' }}
                                                 >
                                                     <X weight="bold" /> Reject
                                                 </Button>
@@ -268,7 +278,7 @@ const AdminShops = () => {
                                                 onClick={() => handleStatusUpdate(shop.id, 'suspended')}
                                                 loading={processingId === shop.id}
                                                 disabled={!!processingId}
-                                                style={{ color: '#f59e0b', borderColor: '#f59e0b' }}
+                                                style={{ color: '#f59e0b', borderColor: '#f59e0b', background: 'transparent' }}
                                             >
                                                 <Prohibit weight="bold" /> Suspend
                                             </Button>
@@ -298,7 +308,7 @@ const AdminShops = () => {
                                         </Button>
                                     </div>
                                 </div>
-                            </Card>
+                            </div>
                         );
                     })}
 
@@ -310,6 +320,7 @@ const AdminShops = () => {
                         hasPrev={page > 1}
                         loading={loading}
                         totalItems={totalCount}
+                        style={{ marginTop: '1.5rem', color: '#94a3b8' }}
                     />
                 </div>
             )}

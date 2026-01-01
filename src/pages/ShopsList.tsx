@@ -39,30 +39,9 @@ const ShopsList = () => {
         <div className="fade-in page-container">
             <SEO title="Find Pet Shops & Services" description="Discover the best grooming, vet, and daycare services for your pet." />
 
-            {/* Hero Section */}
-            <div style={{
-                textAlign: 'center',
-                marginBottom: '4rem',
-                padding: '4rem 1rem',
-                background: 'linear-gradient(to bottom, var(--primary-50), rgba(255,255,255,0))',
-                borderRadius: '0 0 2rem 2rem',
-                margin: '-2rem -2rem 3rem -2rem'
-            }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'white', padding: '0.5rem 1rem', borderRadius: '99px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', marginBottom: '1.5rem', color: 'var(--primary-600)', fontWeight: 600, fontSize: '0.9rem' }}>
-                    <Storefront size={16} weight="fill" />
-                    <span>Pet Services Directory</span>
-                </div>
-                <h1 style={{ fontSize: '3rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem', lineHeight: 1.2 }}>
-                    Find the Perfect <span className="text-gradient">Care</span><br />for Your Pet
-                </h1>
-                <p style={{ fontSize: '1.2rem', color: '#64748b', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-                    Connect with top-rated local veterinarians, groomers, and pet daycares bonded by trust.
-                </p>
-            </div>
-
             {/* Search Bar */}
-            <div style={{ maxWidth: '700px', margin: '-5rem auto 4rem auto', position: 'relative', zIndex: 10, padding: '0 1rem' }}>
-                <div style={{ position: 'relative', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', borderRadius: '99px', background: 'white' }}>
+            <div style={{ maxWidth: '700px', margin: '2rem auto 4rem auto', position: 'relative', zIndex: 10, padding: '0 1rem' }}>
+                <div style={{ position: 'relative', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', borderRadius: '99px', background: 'white', border: '1px solid #e2e8f0' }}>
                     <MagnifyingGlass size={24} color="var(--primary-400)" style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)' }} />
                     <input
                         type="text"
@@ -73,13 +52,11 @@ const ShopsList = () => {
                             width: '100%',
                             padding: '1.25rem 1.5rem 1.25rem 4rem',
                             borderRadius: '99px',
-                            border: '1px solid #e2e8f0',
+                            border: 'none',
                             fontSize: '1.1rem',
                             outline: 'none',
-                            transition: 'border-color 0.2s'
+                            background: 'transparent'
                         }}
-                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-400)'}
-                        onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     />
                 </div>
             </div>

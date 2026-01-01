@@ -99,10 +99,30 @@ const AdminDashboard = () => {
     }, []);
 
     const cards = [
-        { label: 'Total Users', value: stats.totalUsers, icon: <Users size={32} weight="duotone" color="#3b82f6" />, bg: '#eff6ff' },
-        { label: 'Total Shops', value: stats.totalShops, icon: <Storefront size={32} weight="duotone" color="#10b981" />, bg: '#ecfdf5' },
-        { label: 'Pending Approvals', value: stats.pendingShops, icon: <WarningCircle size={32} weight="duotone" color="#f59e0b" />, bg: '#fffbeb' },
-        { label: 'Total Bookings', value: stats.totalBookings, icon: <CalendarCheck size={32} weight="duotone" color="#8b5cf6" />, bg: '#f5f3ff' },
+        {
+            label: 'Total Users',
+            value: stats.totalUsers,
+            icon: <Users size={32} weight="duotone" color="rgba(255,255,255,0.8)" />,
+            gradient: 'linear-gradient(135deg, #06b6d4 0%, #2dd4bf 100%)' // Teal/Cyan
+        },
+        {
+            label: 'Active Shops',
+            value: stats.totalShops,
+            icon: <Storefront size={32} weight="duotone" color="rgba(255,255,255,0.8)" />,
+            gradient: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' // Blue/Purple
+        },
+        {
+            label: 'Pending Approvals',
+            value: stats.pendingShops,
+            icon: <WarningCircle size={32} weight="duotone" color="rgba(255,255,255,0.8)" />,
+            gradient: 'linear-gradient(135deg, #f97316 0%, #fbbf24 100%)' // Orange/Amber
+        },
+        {
+            label: 'Total Bookings',
+            value: stats.totalBookings,
+            icon: <CalendarCheck size={32} weight="duotone" color="rgba(255,255,255,0.8)" />,
+            gradient: 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)' // Pink/Rose
+        },
     ];
 
     const pieData = [
@@ -111,32 +131,41 @@ const AdminDashboard = () => {
         { name: 'Admins', value: stats.admins, color: '#8b5cf6' }
     ].filter(d => d.value > 0);
 
-    if (loading) return <div className="fade-in p-8">Loading stats...</div>;
+    if (loading) return <div className="fade-in p-8 text-white">Loading stats...</div>;
 
     return (
         <div className="fade-in">
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b', marginBottom: '2rem' }}>Admin Dashboard</h1>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '2rem' }}>Admin Dashboard</h1>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                 {cards.map((card, i) => (
-                    <div key={i} style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                        <div style={{ padding: '1rem', borderRadius: '12px', background: card.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div key={i} style={{
+                        background: card.gradient,
+                        padding: '1.5rem',
+                        borderRadius: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
                             {card.icon}
                         </div>
                         <div>
-                            <p style={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 600 }}>{card.label}</p>
-                            <h3 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>{card.value}</h3>
+                            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.875rem', fontWeight: 600 }}>{card.label}</p>
+                            <h3 style={{ fontSize: '2rem', fontWeight: 800, color: 'white', lineHeight: 1, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{card.value}</h3>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
                 {/* Traffic Chart */}
-                <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', minHeight: '300px' }}>
+                <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '16px', border: '1px solid #334155', minHeight: '300px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Analytics Overview</h3>
-                        <span style={{ fontSize: '0.8rem', color: '#64748b', background: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>Last 7 Days</span>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>Analytics Overview</h3>
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8', background: '#334155', padding: '0.2rem 0.6rem', borderRadius: '6px', border: '1px solid #475569' }}>Last 7 Days</span>
                     </div>
 
                     <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
@@ -144,26 +173,26 @@ const AdminDashboard = () => {
                             <AreaChart data={trafficData}>
                                 <defs>
                                     <linearGradient id="colorTraffic" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                <XAxis dataKey="date" axisLine={false} tickLine={false} style={{ fontSize: '0.75rem', fill: '#64748b' }} tickMargin={10} />
-                                <YAxis axisLine={false} tickLine={false} style={{ fontSize: '0.75rem', fill: '#64748b' }} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                                <XAxis dataKey="date" axisLine={false} tickLine={false} style={{ fontSize: '0.75rem', fill: '#94a3b8' }} tickMargin={10} />
+                                <YAxis axisLine={false} tickLine={false} style={{ fontSize: '0.75rem', fill: '#94a3b8' }} />
                                 <Tooltip
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
-                                    cursor={{ stroke: '#3b82f6', strokeWidth: 1 }}
+                                    contentStyle={{ borderRadius: '8px', border: '1px solid #334155', background: '#0f172a', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3)', color: 'white' }}
+                                    cursor={{ stroke: '#2dd4bf', strokeWidth: 1 }}
                                 />
-                                <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTraffic)" />
+                                <Area type="monotone" dataKey="count" stroke="#2dd4bf" strokeWidth={3} fillOpacity={1} fill="url(#colorTraffic)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* User Distribution */}
-                <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', minHeight: '300px' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>User Distribution</h3>
+                <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '16px', border: '1px solid #334155', minHeight: '300px' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'white' }}>User Distribution</h3>
                     <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -175,13 +204,14 @@ const AdminDashboard = () => {
                                     outerRadius={80}
                                     paddingAngle={5}
                                     dataKey="value"
+                                    stroke="none"
                                 >
                                     {pieData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #334155', background: '#0f172a', color: 'white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3)' }} />
+                                <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ color: '#94a3b8' }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
