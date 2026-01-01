@@ -1819,13 +1819,17 @@ const Profile = () => {
                         {/* Post Detail Modal */}
                         {selectedPost && (
                             <PostDetailModal
-                                post={selectedPost}
+                                posts={userPosts}
+                                initialIndex={userPosts.findIndex(p => p.id === selectedPost.id)}
                                 isOpen={!!selectedPost}
                                 onClose={() => setSelectedPost(null)}
                                 onDelete={async (postId) => {
                                     await postService.deletePost(postId);
                                     setUserPosts(prev => prev.filter(p => p.id !== postId));
-                                    setSelectedPost(null);
+                                    // If we delete the current one, the modal logic handles it or we close?
+                                    // For simplicity, if deleting from modal, we might want to close or stay. 
+                                    // The modal props update, showing next post. 
+                                    // But since we pass 'posts', we rely on parent update.
                                 }}
                                 onLikeToggle={(postId, newStatus) => {
                                     setUserPosts(prev => prev.map(p => p.id === postId ? { ...p, liked_by_me: newStatus, likes_count: p.likes_count + (newStatus ? 1 : -1) } : p));

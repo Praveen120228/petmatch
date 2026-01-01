@@ -150,7 +150,8 @@ const Explore = () => {
 
             {selectedPost && (
                 <PostDetailModal
-                    post={selectedPost}
+                    posts={posts}
+                    initialIndex={posts.findIndex(p => p.id === selectedPost.id)}
                     isOpen={!!selectedPost}
                     onClose={() => setSelectedPost(null)}
                     onLikeToggle={(postId, newStatus) => {
