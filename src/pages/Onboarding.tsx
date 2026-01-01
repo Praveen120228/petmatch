@@ -7,18 +7,18 @@ import { User, MapPin, Camera, Crop } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../lib/userService';
 import ImageCropper from '../components/ImageCropper';
-import { celebrateOnboarding } from '../utils/delight';
+import SuccessOverlay from '../components/SuccessOverlay';
 
 const Onboarding = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
     const [username, setUsername] = useState('');
-    const [name, setName] = useState(''); // Added name state
-    const [phoneNumber, setPhoneNumber] = useState(''); // Added phone state
+    const [name, setName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
-    const [state, setState] = useState(''); // Added state
+    const [state, setState] = useState('');
     const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [image, setImage] = useState<string | null>(null);
     const [croppingImage, setCroppingImage] = useState<string | null>(null);
@@ -26,6 +26,7 @@ const Onboarding = () => {
 
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false); // Premium Delight
 
     // Load existing profile if available
     useEffect(() => {
@@ -37,7 +38,7 @@ const Onboarding = () => {
                     if (p.phone_number) setPhoneNumber(p.phone_number);
                     setLocation(p.location || '');
                     setCountry(p.country || '');
-                    setState(p.state || ''); // Load state
+                    setState(p.state || '');
                     if (p.avatar_url) setImage(p.avatar_url);
                     if (p.latitude && p.longitude) setCoords({ lat: p.latitude, lng: p.longitude });
                 }
@@ -86,7 +87,7 @@ const Onboarding = () => {
                 }
 
                 if (countryName) setCountry(countryName);
-                if (state) setState(state); // Set state
+                if (state) setState(state);
 
                 if (city) {
                     setLocation(state ? `${city}, ${state}` : city);
@@ -130,23 +131,25 @@ const Onboarding = () => {
                 phone_number: phoneNumber,
                 location: location,
                 country: country,
-                state: state, // Save state
+                state: state,
                 latitude: coords?.lat,
                 longitude: coords?.lng,
                 avatar_url: image || undefined
             });
 
-            celebrateOnboarding(); // Delight!
+            // Trigger Delight Overlay
+            setShowSuccess(true);
 
-            // Redirect to Profile (where they can add pets)
-            setTimeout(() => {
-                navigate('/profile');
-            }, 1000); // Small delay to see fireworks?
         } catch (error) {
             console.error("Error updating profile:", error);
             alert("Failed to complete setup. Please try again.");
             setIsSubmitting(false);
         }
+    };
+
+    // Controlled navigation after overlay animation
+    const handleSuccessComplete = () => {
+        navigate('/profile');
     };
 
     return (
@@ -158,6 +161,9 @@ const Onboarding = () => {
             padding: '1rem',
             position: 'relative'
         }}>
+            {showSuccess && (
+                <SuccessOverlay type="onboarding" onComplete={handleSuccessComplete} />
+            )}
             <Card style={{
                 width: '100%',
                 maxWidth: '500px',

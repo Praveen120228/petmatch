@@ -1,60 +1,70 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { PawPrint } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
-import { celebrateAccountCreation } from '../../utils/delight';
+import SuccessOverlay from '../../components/SuccessOverlay';
 
 const Signup = () => {
     const navigate = useNavigate();
-    const { signup, isAuthenticated, loading } = useAuth();
+    const { signup } = useAuth();
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const isSigningUp = useRef(false);
-
-    // Redirect if already logged in (but not if just signed up)
-    useEffect(() => {
-        if (!loading && isAuthenticated && !isSigningUp.current) {
-            navigate('/match');
-        }
-    }, [isAuthenticated, loading, navigate]);
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false); // Premium Delight State
+    const [confirmationPending, setConfirmationPending] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        isSigningUp.current = true;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+
+        setIsLoading(true);
         const { success, error, confirmationRequired } = await signup(name, email, password, 'user');
 
         if (success) {
-            celebrateAccountCreation(); // Trigger delight!
-            if (confirmationRequired) {
-                alert('Please check your email to confirm your account before logging in.');
-                navigate('/login');
-            } else {
-                // Short delay to let them see the explosion? No, let it explode on the new page or during transition?
-                // Actually, if we navigate immediately it might cut off. 
-                // But typically confetti canvas is on body or fixed. 
-                // Let's navigate immediately for snappy feel, confetti often persists if configured right or just explodes.
-                navigate('/onboarding');
-            }
+            // Trigger Premium Delight Overlay
+            setShowSuccess(true);
+            if (confirmationRequired) setConfirmationPending(true);
         } else {
-            alert(error || 'Signup failed');
+            alert(error || 'Failed to sign up');
+            setIsLoading(false);
+        }
+    };
+
+    const handleSuccessComplete = () => {
+        if (confirmationPending) {
+            alert('Please check your email to confirm your account before logging in.');
+            navigate('/login');
+        } else {
+            navigate('/onboarding');
         }
     };
 
     return (
         <div style={{
+            minHeight: '100vh',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: '100vh',
             padding: '1rem',
             position: 'relative',
             overflow: 'hidden',
             background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 70%)'
         }} className="fade-in">
+            {/* Show Success Overlay if active */}
+            {showSuccess && (
+                <SuccessOverlay type="signup" onComplete={handleSuccessComplete} />
+            )}
+
             {/* Moving Paws Background - Overlaying (Z-Index 20) */}
             <div className="paw-print paw-left" style={{ left: '5%', animationDelay: '0s', fontSize: 'clamp(1.5rem, 4vw, 3rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
             <div className="paw-print paw-right" style={{ left: '85%', animationDelay: '5s', fontSize: 'clamp(1.2rem, 3vw, 2rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
@@ -106,7 +116,16 @@ const Signup = () => {
                         required
                         fullWidth
                     />
-                    <Button type="submit" fullWidth size="lg" style={{ marginTop: '0.5rem' }} variant="primary">
+                    <Input
+                        label="Confirm Password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        fullWidth
+                    />
+                    <Button type="submit" fullWidth size="lg" style={{ marginTop: '0.5rem' }} variant="primary" loading={isLoading} disabled={isLoading}>
                         Create Account
                     </Button>
                 </form>
@@ -118,11 +137,9 @@ const Signup = () => {
 
             <style>{`
                 @media (max-width: 768px) {
-                    /* On mobile, push elements to the edges */
                     .paw-left { left: 5% !important; }
                     .paw-right { left: 88% !important; }
-                    /* Hide center elements if they interfere, or keep them subtle */
-                    .float-item { opacity: 0.5 !important; }
+                    .float-item { opacity: 0.3 !important; }
                 }
             `}</style>
         </div>
