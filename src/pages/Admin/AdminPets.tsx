@@ -36,7 +36,9 @@ const AdminPets = () => {
             }
 
             if (search) {
-                query = query.or(`name.ilike.%${search}%,breed.ilike.%${search}%`);
+                // Search across pet details and owner details
+                // Note: referencing foreign table columns in OR requires the table name (profiles)
+                query = query.or(`name.ilike.%${search}%,breed.ilike.%${search}%,type.ilike.%${search}%,profiles.name.ilike.%${search}%,profiles.username.ilike.%${search}%`);
             }
 
             const { data, error, count } = await query;
