@@ -13,15 +13,87 @@ import {
     ChartLineUp,
     Flag,
     MagnifyingGlass,
-    Bell
+    Bell,
+    Check
 } from '@phosphor-icons/react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabase';
 import Button from './Button';
 
 const AdminLayout = () => {
     const { user, isAuthenticated, logout, loading } = useAuth();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Notifications State
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const notificationRef = useRef<HTMLDivElement>(null);
+
+    // Fetch and Subscribe to Notifications
+    useEffect(() => {
+        if (!user || user.role !== 'admin') return;
+
+        const fetchNotifications = async () => {
+            const { data } = await supabase
+                .from('admin_notifications')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (data) {
+                setNotifications(data);
+                setUnreadCount(data.filter(n => !n.is_read).length);
+            }
+        };
+
+        fetchNotifications();
+
+        // Realtime Subscription
+        const channel = supabase
+            .channel('admin-notifications')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'admin_notifications' },
+                (payload) => {
+                    const newNotification = payload.new;
+                    setNotifications(prev => [newNotification, ...prev]);
+                    setUnreadCount(prev => prev + 1);
+                    // Optional: Play sound or toast
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user]);
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+                setShowNotifications(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const markAsRead = async (id: string) => {
+        // Optimistic update
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+
+        await supabase.from('admin_notifications').update({ is_read: true }).eq('id', id);
+    };
+
+    const markAllRead = async () => {
+        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+        await supabase.from('admin_notifications').update({ is_read: true }).eq('is_read', false);
+    };
 
     if (loading) return <div>Loading...</div>;
 
@@ -172,9 +244,130 @@ const AdminLayout = () => {
 
                     {/* Right Actions */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <button style={{ background: '#1e293b', border: 'none', borderRadius: '8px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8' }}>
-                            <Bell size={20} />
-                        </button>
+
+                        {/* Notification Bell */}
+                        <div style={{ position: 'relative' }} ref={notificationRef}>
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                style={{
+                                    background: showNotifications ? '#334155' : '#1e293b',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    width: '36px',
+                                    height: '36px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    color: showNotifications ? 'white' : '#94a3b8',
+                                    position: 'relative',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <Bell size={20} weight={unreadCount > 0 ? "fill" : "regular"} />
+                                {unreadCount > 0 && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '-4px',
+                                        right: '-4px',
+                                        background: '#ef4444',
+                                        color: 'white',
+                                        fontSize: '0.65rem',
+                                        fontWeight: 800,
+                                        minWidth: '16px',
+                                        height: '16px',
+                                        borderRadius: '8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: '2px solid #0f172a'
+                                    }}>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Dropdown */}
+                            {showNotifications && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '120%',
+                                    right: 0,
+                                    width: '320px',
+                                    background: '#1e293b',
+                                    border: '1px solid #334155',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)',
+                                    zIndex: 100,
+                                    overflow: 'hidden',
+                                    animation: 'fadeIn 0.2s ease-out'
+                                }}>
+                                    <div style={{ padding: '1rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>Notifications</h4>
+                                        {unreadCount > 0 && (
+                                            <button
+                                                onClick={markAllRead}
+                                                style={{ background: 'none', border: 'none', color: '#2dd4bf', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                                            >
+                                                Mark all read
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                        {notifications.length === 0 ? (
+                                            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
+                                                No notifications
+                                            </div>
+                                        ) : (
+                                            notifications.map(notif => (
+                                                <div
+                                                    key={notif.id}
+                                                    style={{
+                                                        padding: '1rem',
+                                                        borderBottom: '1px solid #334155',
+                                                        background: notif.is_read ? 'transparent' : 'rgba(45, 212, 191, 0.05)',
+                                                        transition: 'background 0.2s'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'start' }}>
+                                                        <div style={{ marginTop: '2px' }}>
+                                                            {notif.type === 'report' ? <Flag color="#ef4444" weight="fill" /> : <Check color="#2dd4bf" weight="bold" />}
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <p style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: notif.is_read ? '#94a3b8' : '#f8fafc', lineHeight: 1.4 }}>
+                                                                {notif.message}
+                                                            </p>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                                                    {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                </span>
+                                                                {!notif.is_read && (
+                                                                    <button
+                                                                        onClick={() => markAsRead(notif.id)}
+                                                                        style={{ background: 'none', border: 'none', color: '#2dd4bf', fontSize: '0.7rem', cursor: 'pointer' }}
+                                                                    >
+                                                                        Mark read
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                            {notif.link && (
+                                                                <Link
+                                                                    to={notif.link}
+                                                                    onClick={() => setShowNotifications(false)}
+                                                                    style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.75rem', color: '#60a5fa', textDecoration: 'none' }}
+                                                                >
+                                                                    View Details →
+                                                                </Link>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#334155', overflow: 'hidden', border: '2px solid #1e293b' }}>
