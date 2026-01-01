@@ -257,6 +257,82 @@ h1 {
   }
 }
 
+.animate-drift {
+  animation: drift 20s infinite linear;
+}
+
+.animate-drift-slow {
+  animation: drift 30s infinite linear;
+}
+
+.animate-drift-reverse {
+  animation: driftReverse 25s infinite linear;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(10px, -10px) rotate(5deg);
+  }
+
+  50% {
+    transform: translate(20px, 0) rotate(0deg);
+  }
+
+  75% {
+    transform: translate(10px, 10px) rotate(-5deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes driftReverse {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(-20px, -15px) rotate(-10deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.paw-print {
+  font-size: 2rem;
+  opacity: 0.1;
+  position: absolute;
+  pointer-events: none;
+  animation: pawWalk 15s infinite linear;
+}
+
+@keyframes pawWalk {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.15;
+  }
+
+  90% {
+    opacity: 0.15;
+  }
+
+  100% {
+    transform: translateY(-20vh) rotate(20deg);
+    opacity: 0;
+  }
+}
+
 /* Card Hover Effects */
 .card-hover {
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
