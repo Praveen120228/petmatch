@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ChartBar, Eye, Clock, ArrowUpRight, ArrowDownRight } from '@phosphor-icons/react';
-import Card from '../../components/Card';
-import { format, subDays, startOfDay } from 'date-fns';
+import { startOfDay, subDays, format } from 'date-fns';
 import {
     BarChart,
     Bar,
@@ -60,20 +59,10 @@ const AdminAnalytics = () => {
                 pageViews++;
                 const path = event.payload?.path || 'unknown';
                 pageCounts[path] = (pageCounts[path] || 0) + 1;
-
-                // Track device from page_view as well (fallback)
-                if (event.payload?.device) {
-                    // We prioritize page_view device info as it's more frequent with new code
-                    // But we should count unique sessions per device ideally. 
-                    // Simplification: Count hits for now to show "Active Usage"
-                    // Or better: Map session_id -> device
-                }
             }
 
-            // Capture Device Info (Session Start OR Page View)
             if (event.payload?.device) {
                 const device = event.payload.device;
-                // Simple count of events by device for now
                 deviceCounts[device] = (deviceCounts[device] || 0) + 1;
             }
 
@@ -87,9 +76,6 @@ const AdminAnalytics = () => {
 
             // Bucketing (Time-based aggregation)
             const date = new Date(event.created_at);
-            // Format depends on range. 
-            // 24h -> Hour:00
-            // 7d/30d -> MM/DD
             let key = '';
             if (timeRange === '24h') {
                 key = `${date.getHours()}:00`;
@@ -132,11 +118,7 @@ const AdminAnalytics = () => {
         const deviceDist = Object.entries(deviceCounts)
             .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
 
-        // Transform buckets to array
-        // Ideally sorting by date.
         const overTime = Object.entries(buckets).map(([time, count]) => ({ time, count }));
-        // Ensure chronological sort isn't completely broken by object key order (browsers usually preserve insertion order for non-integers, but dates need care)
-        // For '24h' (Hours), simple sort works. For 'MM/dd', it works if month first.
 
         setStats({
             totalVisits: sessions.size,
@@ -157,10 +139,10 @@ const AdminAnalytics = () => {
         // Calculate Date Ranges
         const now = new Date();
         let startDate = startOfDay(now);
-        let prevDate = startOfDay(subDays(now, 1)); // Default previous is yesterday
+        let prevDate = startOfDay(subDays(now, 1));
 
         if (timeRange === '24h') {
-            startDate = subDays(now, 1); // Last 24 hours rolling
+            startDate = subDays(now, 1);
             prevDate = subDays(now, 2);
         } else if (timeRange === '7d') {
             startDate = subDays(now, 7);
@@ -169,7 +151,7 @@ const AdminAnalytics = () => {
             startDate = subDays(now, 30);
             prevDate = subDays(now, 60);
         } else if (timeRange === 'all') {
-            startDate = new Date(0); // Epoch
+            startDate = new Date(0);
             prevDate = new Date(0);
         }
 
@@ -179,7 +161,7 @@ const AdminAnalytics = () => {
                 .from('analytics_events')
                 .select('*')
                 .gte('created_at', startDate.toISOString())
-                .order('created_at', { ascending: true }) // Ascending for easier chronological graphing
+                .order('created_at', { ascending: true })
                 .limit(10000);
 
             if (currentError) throw currentError;
@@ -189,7 +171,7 @@ const AdminAnalytics = () => {
             if (timeRange !== 'all') {
                 const { data: prev, error: prevError } = await supabase
                     .from('analytics_events')
-                    .select('session_id, event_type') // Optimize select
+                    .select('session_id, event_type')
                     .gte('created_at', prevDate.toISOString())
                     .lt('created_at', startDate.toISOString())
                     .limit(10000);
@@ -208,17 +190,12 @@ const AdminAnalytics = () => {
 
     useEffect(() => {
         fetchAnalytics();
-        // Real-time subscription - Optimistic update or refetch?
-        // Refetching respects filters easier.
         const channel = supabase
             .channel('analytics-realtime-v2')
             .on(
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'analytics_events' },
                 () => {
-                    // Only refetch if filter includes NOW.
-                    // Since all filters end at NOW, yes.
-                    // Debounce?
                     setTimeout(fetchAnalytics, 1000);
                 }
             )
@@ -240,11 +217,11 @@ const AdminAnalytics = () => {
         if (timeRange === 'all') return null;
         const change = calculatePercentageChange(current, prev);
         const isPositive = change >= 0;
-        const color = isPositive ? '#10B981' : '#EF4444';
+        const color = isPositive ? '#34d399' : '#f87171';
         const Icon = isPositive ? ArrowUpRight : ArrowDownRight;
 
         return (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color, marginTop: '0.5rem', background: isPositive ? '#ecfdf5' : '#fef2f2', padding: '0.1rem 0.5rem', borderRadius: '4px', alignSelf: 'flex-start' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color, marginTop: '0.5rem', background: isPositive ? 'rgba(52, 211, 153, 0.1)' : 'rgba(248, 113, 113, 0.1)', padding: '0.1rem 0.5rem', borderRadius: '4px', alignSelf: 'flex-start' }}>
                 <Icon weight="bold" />
                 <span>{Math.abs(change)}% vs prev</span>
             </div>
@@ -257,16 +234,16 @@ const AdminAnalytics = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             Analytics
-                            <span style={{ fontSize: '0.8rem', background: '#dcfce7', color: '#166534', padding: '0.2rem 0.6rem', borderRadius: '99px', fontWeight: 600 }}>
+                            <span style={{ fontSize: '0.8rem', background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', padding: '0.2rem 0.6rem', borderRadius: '99px', fontWeight: 600 }}>
                                 ● Live
                             </span>
                         </h1>
-                        <p style={{ color: '#64748b', marginTop: '0.25rem' }}>Track your platform's performance and usage</p>
+                        <p style={{ color: '#94a3b8', marginTop: '0.25rem' }}>Track your platform's performance and usage</p>
                     </div>
 
-                    <div style={{ display: 'flex', background: 'white', padding: '0.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', background: '#1e293b', padding: '0.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
                         {(['24h', '7d', '30d', 'all'] as const).map((r) => (
                             <button
                                 key={r}
@@ -275,8 +252,8 @@ const AdminAnalytics = () => {
                                     padding: '0.5rem 1rem',
                                     borderRadius: '6px',
                                     border: 'none',
-                                    background: timeRange === r ? '#f1f5f9' : 'transparent',
-                                    color: timeRange === r ? '#0f172a' : '#64748b',
+                                    background: timeRange === r ? '#334155' : 'transparent',
+                                    color: timeRange === r ? 'white' : '#94a3b8',
                                     fontWeight: 600,
                                     cursor: 'pointer',
                                     transition: 'all 0.2s'
@@ -296,58 +273,58 @@ const AdminAnalytics = () => {
 
                     {/* KPI Cards */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                        <Card padding="lg">
+                        <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '12px', border: '1px solid #334155' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ background: '#dbeafe', padding: '0.75rem', borderRadius: '12px', color: '#1e40af' }}>
+                                    <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: '12px', color: '#60a5fa' }}>
                                         <ChartBar size={32} weight="duotone" />
                                     </div>
                                     <div>
-                                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Total Visits</p>
-                                        <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>{stats.totalVisits.toLocaleString()}</h3>
+                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Total Visits</p>
+                                        <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', margin: 0 }}>{stats.totalVisits.toLocaleString()}</h3>
                                     </div>
                                 </div>
                                 {renderMetricChange(stats.totalVisits, stats.prevTotalVisits)}
                             </div>
-                        </Card>
+                        </div>
 
-                        <Card padding="lg">
+                        <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '12px', border: '1px solid #334155' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ background: '#d1fae5', padding: '0.75rem', borderRadius: '12px', color: '#065f46' }}>
+                                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '12px', color: '#34d399' }}>
                                         <Eye size={32} weight="duotone" />
                                     </div>
                                     <div>
-                                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Page Views</p>
-                                        <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>{stats.totalPageViews.toLocaleString()}</h3>
+                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Page Views</p>
+                                        <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', margin: 0 }}>{stats.totalPageViews.toLocaleString()}</h3>
                                     </div>
                                 </div>
                                 {renderMetricChange(stats.totalPageViews, stats.prevTotalPageViews)}
                             </div>
-                        </Card>
+                        </div>
 
-                        <Card padding="lg">
+                        <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '12px', border: '1px solid #334155' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <div style={{ background: '#fef3c7', padding: '0.75rem', borderRadius: '12px', color: '#92400e' }}>
+                                <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.75rem', borderRadius: '12px', color: '#fbbf24' }}>
                                     <Clock size={32} weight="duotone" />
                                 </div>
                                 <div>
-                                    <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Avg. Session Duration</p>
-                                    <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>{formatDuration(stats.avgSessionDuration)}</h3>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Avg. Session Duration</p>
+                                    <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', margin: 0 }}>{formatDuration(stats.avgSessionDuration)}</h3>
                                 </div>
                             </div>
-                        </Card>
+                        </div>
                     </div>
 
                     {/* Charts Grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
 
                         {/* Traffic Trend */}
-                        <Card padding="lg">
+                        <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '12px', border: '1px solid #334155' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>
                                     Traffic Trend
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#64748b', marginLeft: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 400, color: '#94a3b8', marginLeft: '0.5rem' }}>
                                         ({timeRange === '24h' ? 'Last 24 Hours' : 'Visits over time'})
                                     </span>
                                 </h3>
@@ -357,46 +334,46 @@ const AdminAnalytics = () => {
                                     <AreaChart data={stats.eventsOverTime}>
                                         <defs>
                                             <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.8} />
-                                                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                        <XAxis dataKey="time" style={{ fontSize: '0.75rem' }} tickMargin={10} axisLine={false} tickLine={false} />
-                                        <YAxis style={{ fontSize: '0.75rem' }} axisLine={false} tickLine={false} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                                        <XAxis dataKey="time" style={{ fontSize: '0.75rem', fill: '#94a3b8' }} tickMargin={10} axisLine={false} tickLine={false} />
+                                        <YAxis style={{ fontSize: '0.75rem', fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                                         <Tooltip
-                                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                                            contentStyle={{ borderRadius: '8px', border: 'none', background: '#334155', color: '#fff', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.5)' }}
                                             cursor={{ stroke: '#6366f1', strokeWidth: 1 }}
                                         />
-                                        <Area type="monotone" dataKey="count" stroke="#4F46E5" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                                        <Area type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
-                        </Card>
+                        </div>
 
                         {/* Top Pages */}
-                        <Card padding="lg">
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '1.5rem' }}>Top Popular Pages</h3>
+                        <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '12px', border: '1px solid #334155' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', marginBottom: '1.5rem' }}>Top Popular Pages</h3>
                             <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={stats.topPages} layout="vertical" margin={{ left: 10, right: 30 }}>
-                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
-                                        <XAxis type="number" style={{ fontSize: '0.75rem' }} hide />
-                                        <YAxis dataKey="path" type="category" width={110} style={{ fontSize: '0.75rem', fontWeight: 500 }} axisLine={false} tickLine={false} />
-                                        <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none' }} />
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
+                                        <XAxis type="number" style={{ fontSize: '0.75rem', fill: '#94a3b8' }} hide />
+                                        <YAxis dataKey="path" type="category" width={110} style={{ fontSize: '0.75rem', fontWeight: 500, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
+                                        <Tooltip cursor={{ fill: '#334155' }} contentStyle={{ borderRadius: '8px', border: 'none', background: '#334155', color: 'white' }} />
                                         <Bar dataKey="count" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={24}>
                                             {stats.topPages.map((_, index) => (
-                                                <Cell key={`cell-${index}`} fill={index === 0 ? '#4F46E5' : '#94a3b8'} />
+                                                <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : '#94a3b8'} />
                                             ))}
                                         </Bar>
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
-                        </Card>
+                        </div>
 
                         {/* Device Distribution */}
-                        <Card padding="lg">
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '1.5rem' }}>Sessions by Device</h3>
+                        <div style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '12px', border: '1px solid #334155' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', marginBottom: '1.5rem' }}>Sessions by Device</h3>
                             {stats.deviceDistribution.length > 0 ? (
                                 <div style={{ height: '250px', width: '100%', position: 'relative', minWidth: 0 }}>
                                     <ResponsiveContainer width="100%" height="100%">
@@ -409,12 +386,13 @@ const AdminAnalytics = () => {
                                                 outerRadius={80}
                                                 paddingAngle={5}
                                                 dataKey="value"
+                                                stroke="none"
                                             >
                                                 {stats.deviceDistribution.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={entry.name === 'Mobile' ? '#F59E0B' : '#6366F1'} />
                                                 ))}
                                             </Pie>
-                                            <Tooltip />
+                                            <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', background: '#334155', color: 'white' }} />
                                         </PieChart>
                                     </ResponsiveContainer>
                                     {/* Legend */}
@@ -422,20 +400,20 @@ const AdminAnalytics = () => {
                                         {stats.deviceDistribution.map((entry, index) => (
                                             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
                                                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: entry.name === 'Mobile' ? '#F59E0B' : '#6366F1' }} />
-                                                <span style={{ color: '#475569', fontWeight: 500 }}>{entry.name}: {entry.value}</span>
+                                                <span style={{ color: '#cbd5e1', fontWeight: 500 }}>{entry.name}: {entry.value}</span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             ) : (
-                                <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '12px' }}>
+                                <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', background: '#0f172a', borderRadius: '12px' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <p>No device data specifically recorded yet.</p>
                                         <p style={{ fontSize: '0.8rem' }}>Visit pages to populate.</p>
                                     </div>
                                 </div>
                             )}
-                        </Card>
+                        </div>
 
                     </div>
 

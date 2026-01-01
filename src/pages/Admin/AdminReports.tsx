@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, X, Flag, User, Prohibit, PawPrint, EyeSlash } from '@phosphor-icons/react';
 import Button from '../../components/Button';
-import Card from '../../components/Card';
 import { format } from 'date-fns';
 
 const AdminReports = () => {
@@ -113,17 +112,17 @@ const AdminReports = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'pending': return { bg: '#fee2e2', text: '#ef4444' };
-            case 'resolved': return { bg: '#dcfce7', text: '#166534' };
-            case 'dismissed': return { bg: '#f1f5f9', text: '#64748b' };
-            default: return { bg: '#f1f5f9', text: '#64748b' };
+            case 'pending': return { bg: 'rgba(239, 68, 68, 0.1)', text: '#f87171', border: '#b91c1c' };
+            case 'resolved': return { bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399', border: '#059669' };
+            case 'dismissed': return { bg: 'rgba(148, 163, 184, 0.1)', text: '#94a3b8', border: '#475569' };
+            default: return { bg: 'rgba(148, 163, 184, 0.1)', text: '#94a3b8', border: '#475569' };
         }
     };
 
     return (
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#1e293b' }}>User Reports</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>User Reports</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <select
                         value={filter}
@@ -131,10 +130,11 @@ const AdminReports = () => {
                         style={{
                             padding: '0.6rem 1rem',
                             borderRadius: '8px',
-                            border: '1px solid #e2e8f0',
-                            background: 'white',
-                            color: '#1e293b',
-                            cursor: 'pointer'
+                            border: '1px solid #334155',
+                            background: '#1e293b',
+                            color: 'white',
+                            cursor: 'pointer',
+                            outline: 'none'
                         }}
                     >
                         <option value="pending">Pending</option>
@@ -142,16 +142,16 @@ const AdminReports = () => {
                         <option value="dismissed">Dismissed</option>
                         <option value="all">All Reports</option>
                     </select>
-                    <Button variant="outline" onClick={fetchReports} disabled={loading}>Refresh</Button>
+                    <Button variant="outline" onClick={fetchReports} disabled={loading} style={{ borderColor: '#334155', color: '#94a3b8', background: '#1e293b' }}>Refresh</Button>
                 </div>
             </div>
 
             {loading ? (
-                <div>Loading reports...</div>
+                <div style={{ color: '#94a3b8' }}>Loading reports...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {reports.length === 0 && (
-                        <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
+                        <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: '#1e293b', borderRadius: '12px', border: '1px solid #334155' }}>
                             <Flag size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
                             <p>No reports found.</p>
                         </div>
@@ -160,12 +160,18 @@ const AdminReports = () => {
                     {reports.map(report => {
                         const statusColor = getStatusColor(report.status);
                         return (
-                            <Card key={report.id} padding="lg">
+                            <div key={report.id} style={{
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: '12px',
+                                padding: '1.5rem',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                            }}>
                                 <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                                             <div>
-                                                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f87171', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                     <Flag weight="fill" />
                                                     {report.reason.toUpperCase()}
                                                 </h3>
@@ -173,12 +179,12 @@ const AdminReports = () => {
                                                     Reported on {format(new Date(report.created_at), 'PPP p')}
                                                 </span>
                                             </div>
-                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, background: statusColor.bg, color: statusColor.text }}>
+                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, background: statusColor.bg, color: statusColor.text, border: `1px solid ${statusColor.border}` }}>
                                                 {report.status.toUpperCase()}
                                             </span>
                                         </div>
 
-                                        <p style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', color: '#334155', marginBottom: '1.5rem', border: '1px solid #f1f5f9' }}>
+                                        <p style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', color: '#e2e8f0', marginBottom: '1.5rem', border: '1px solid #334155' }}>
                                             "{report.description}"
                                         </p>
 
@@ -186,31 +192,31 @@ const AdminReports = () => {
                                             {/* Logic to show Pet vs User report target */}
                                             {report.reported_pet ? (
                                                 <div>
-                                                    <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported Pet</span>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                                                        <PawPrint weight="fill" color="#7c3aed" />
+                                                    <span style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported Pet</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', color: '#cbd5e1' }}>
+                                                        <PawPrint weight="fill" color="#c084fc" />
                                                         <span style={{ fontWeight: 600 }}>{report.reported_pet.name}</span>
-                                                        {report.reported_pet.status === 'hidden' && <span style={{ background: '#f59e0b', color: 'white', fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px' }}>HIDDEN</span>}
+                                                        {report.reported_pet.status === 'hidden' && <span style={{ background: '#d97706', color: 'white', fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px' }}>HIDDEN</span>}
                                                     </div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Owned by: {report.reported?.name}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>Owned by: {report.reported?.name}</div>
                                                 </div>
                                             ) : (
                                                 <div>
-                                                    <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported User</span>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                    <span style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reported User</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', color: '#cbd5e1' }}>
                                                         <User weight="bold" />
                                                         <span style={{ fontWeight: 600 }}>{report.reported?.name || 'Unknown'}</span>
-                                                        <span style={{ color: '#94a3b8' }}>({report.reported?.email})</span>
+                                                        <span style={{ color: '#64748b' }}>({report.reported?.email})</span>
                                                         {report.reported?.status === 'banned' && <span style={{ background: '#ef4444', color: 'white', fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px' }}>BANNED</span>}
                                                     </div>
                                                 </div>
                                             )}
 
                                             <div>
-                                                <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reporter</span>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                <span style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Reporter</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', color: '#cbd5e1' }}>
                                                     <span style={{ fontWeight: 500 }}>{report.reporter?.name || 'Unknown'}</span>
-                                                    <span style={{ color: '#94a3b8' }}>({report.reporter?.email})</span>
+                                                    <span style={{ color: '#64748b' }}>({report.reporter?.email})</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -223,7 +229,7 @@ const AdminReports = () => {
                                                 <Button
                                                     size="sm"
                                                     onClick={() => handleUpdateStatus(report.id, 'resolved')}
-                                                    style={{ background: '#10b981', borderColor: '#10b981' }}
+                                                    style={{ background: '#10b981', borderColor: '#10b981', color: '#0f172a' }}
                                                     disabled={!!processingId}
                                                 >
                                                     <Check weight="bold" /> Resolve
@@ -233,6 +239,7 @@ const AdminReports = () => {
                                                     variant="outline"
                                                     onClick={() => handleUpdateStatus(report.id, 'dismissed')}
                                                     disabled={!!processingId}
+                                                    style={{ borderColor: '#334155', color: '#94a3b8' }}
                                                 >
                                                     <X weight="bold" /> Dismiss
                                                 </Button>
@@ -240,7 +247,7 @@ const AdminReports = () => {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        style={{ color: '#d97706', borderColor: '#fcd34d' }}
+                                                        style={{ color: '#fbbf24', borderColor: '#d97706' }}
                                                         onClick={() => handleHidePet(report)}
                                                         disabled={!!processingId}
                                                     >
@@ -250,7 +257,7 @@ const AdminReports = () => {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        style={{ color: '#dc2626', borderColor: '#fee2e2' }}
+                                                        style={{ color: '#f87171', borderColor: '#dc2626' }}
                                                         onClick={() => handleBanUser(report)}
                                                         disabled={!!processingId}
                                                     >
@@ -265,13 +272,14 @@ const AdminReports = () => {
                                                 variant="ghost"
                                                 onClick={() => handleUpdateStatus(report.id, 'pending')}
                                                 disabled={!!processingId}
+                                                style={{ color: '#94a3b8' }}
                                             >
                                                 Reopen
                                             </Button>
                                         )}
                                     </div>
                                 </div>
-                            </Card>
+                            </div>
                         );
                     })}
                 </div>

@@ -323,7 +323,7 @@ const AdminUsers = () => {
                         hasPrev={page > 1}
                         loading={loading}
                         totalItems={totalCount}
-                        style={{ marginTop: '1.5rem', color: '#94a3b8' }}
+                        style={{ marginTop: '1.5rem', color: '#94a3b8', background: 'transparent', borderTop: '1px solid #334155' }}
                     />
                 </div>
             )}
