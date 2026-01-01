@@ -134,7 +134,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                                 marginBottom: '0.5rem',
                                 textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                             }}>
-                                <h3 style={{ margin: 0, fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>
+                                <h3 style={{ margin: 0, fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1, color: '#ffffff' }}>
                                     {pet.name},
                                 </h3>
                                 <div style={{
@@ -156,7 +156,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                                 gap: '0.35rem',
                                 marginBottom: '0.75rem'
                             }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.95rem', fontWeight: 600, color: 'rgba(255,255,255,0.95)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>
                                     <MapPin size={18} weight="fill" color="#f43f5e" />
                                     {userLoc && pet.owner_profile?.latitude && pet.owner_profile?.longitude ? (
                                         <span>{getDistance(userLoc.lat, userLoc.lng, Number(pet.owner_profile.latitude), Number(pet.owner_profile.longitude))} away</span>
@@ -164,7 +164,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                                         <span>{pet.owner_profile?.location || pet.owner_profile?.state || pet.owner_profile?.country || 'Location hidden'}</span>
                                     )}
                                 </div>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 500, opacity: 0.9, paddingLeft: '4px' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 500, opacity: 0.9, paddingLeft: '4px', color: '#e2e8f0' }}>
                                     {pet.breed}
                                 </div>
                             </div>
