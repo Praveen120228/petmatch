@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Card } from './Card'; // Assuming specific export or default
-import { MagicWand, X, ArrowRight, CheckCircle } from '@phosphor-icons/react';
+import { MagicWand, X, ArrowRight } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
-import { journeyService, Milestone, UserProgress } from '../lib/journeyService';
+import { journeyService } from '../lib/journeyService';
+import type { Milestone, UserProgress } from '../lib/journeyService';
 import { Link } from 'react-router-dom';
 
 const JourneyWidget = () => {
