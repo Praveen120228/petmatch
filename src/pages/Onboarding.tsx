@@ -10,7 +10,7 @@ import ImageCropper from '../components/ImageCropper';
 
 const Onboarding = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
 
     const [username, setUsername] = useState('');
     const [name, setName] = useState('');
@@ -133,6 +133,13 @@ const Onboarding = () => {
                 latitude: coords?.lat,
                 longitude: coords?.lng,
                 avatar_url: image || undefined
+            });
+
+            // Sync with AuthContext to fix race condition
+            await updateUser({
+                username: username,
+                name: name,
+                image: image || undefined
             });
 
             // Navigate immediately
