@@ -9,6 +9,14 @@ create table if not exists public.posts (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Add tags column if it doesn't exist (Migration support)
+do $$
+begin
+    if not exists (select 1 from information_schema.columns where table_name = 'posts' and column_name = 'tags') then
+        alter table public.posts add column tags text[] default '{}';
+    end if;
+end $$;
+
 -- RLS for Posts
 alter table public.posts enable row level security;
 drop policy if exists "Posts are viewable by everyone." on public.posts;
@@ -41,8 +49,16 @@ drop policy if exists "Users can unlike posts." on public.post_likes;
 create policy "Users can unlike posts." on public.post_likes for delete using (auth.uid() = user_id);
 
 
--- Storage Bucket Policies (If not using UI)
--- NOTE: You likely need to create the 'posts' bucket manually in Supabase Dashboard or via Storage API if not existing.
--- This SQL attempts to insert bucket config but usually requires storage schema access.
--- We will assume the bucket 'posts' exists or user will create it. 
--- We can add policies for objects in 'posts' bucket if the storage.objects table is accessible.
+-- Storage Bucket Configuration
+insert into storage.buckets (id, name, public)
+values ('posts', 'posts', true)
+on conflict (id) do nothing;
+
+-- Storage Policies
+create policy "Public Access"
+  on storage.objects for select
+  using ( bucket_id = 'posts' );
+
+create policy "Authenticated Upload"
+  on storage.objects for insert
+  with check ( bucket_id = 'posts' and auth.role() = 'authenticated' );

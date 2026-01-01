@@ -39,7 +39,7 @@ export const postService = {
             .from('posts')
             .select(`
                 *,
-                profiles (name, username, avatar_url),
+                profiles!posts_user_id_fkey (name, username, avatar_url),
                 post_likes (user_id)
             `)
             .order('created_at', { ascending: false })
