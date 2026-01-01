@@ -7,7 +7,6 @@ import { User, MapPin, Camera, Crop } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../lib/userService';
 import ImageCropper from '../components/ImageCropper';
-import SuccessOverlay from '../components/SuccessOverlay';
 
 const Onboarding = () => {
     const navigate = useNavigate();
@@ -26,7 +25,6 @@ const Onboarding = () => {
 
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false); // Premium Delight
 
     // Load existing profile if available
     useEffect(() => {
@@ -137,19 +135,14 @@ const Onboarding = () => {
                 avatar_url: image || undefined
             });
 
-            // Trigger Delight Overlay
-            setShowSuccess(true);
+            // Navigate immediately
+            navigate('/profile');
 
         } catch (error) {
             console.error("Error updating profile:", error);
             alert("Failed to complete setup. Please try again.");
             setIsSubmitting(false);
         }
-    };
-
-    // Controlled navigation after overlay animation
-    const handleSuccessComplete = () => {
-        navigate('/profile');
     };
 
     return (
@@ -161,9 +154,6 @@ const Onboarding = () => {
             padding: '1rem',
             position: 'relative'
         }}>
-            {showSuccess && (
-                <SuccessOverlay type="onboarding" onComplete={handleSuccessComplete} />
-            )}
             <Card style={{
                 width: '100%',
                 maxWidth: '500px',

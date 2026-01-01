@@ -5,7 +5,6 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { PawPrint } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
-import SuccessOverlay from '../../components/SuccessOverlay';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -16,8 +15,6 @@ const Signup = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false); // Premium Delight State
-    const [confirmationPending, setConfirmationPending] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,21 +28,15 @@ const Signup = () => {
         const { success, error, confirmationRequired } = await signup(name, email, password, 'user');
 
         if (success) {
-            // Trigger Premium Delight Overlay
-            setShowSuccess(true);
-            if (confirmationRequired) setConfirmationPending(true);
+            if (confirmationRequired) {
+                alert('Please check your email to confirm your account before logging in.');
+                navigate('/login');
+            } else {
+                navigate('/onboarding');
+            }
         } else {
             alert(error || 'Failed to sign up');
             setIsLoading(false);
-        }
-    };
-
-    const handleSuccessComplete = () => {
-        if (confirmationPending) {
-            alert('Please check your email to confirm your account before logging in.');
-            navigate('/login');
-        } else {
-            navigate('/onboarding');
         }
     };
 
@@ -60,11 +51,6 @@ const Signup = () => {
             overflow: 'hidden',
             background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 70%)'
         }} className="fade-in">
-            {/* Show Success Overlay if active */}
-            {showSuccess && (
-                <SuccessOverlay type="signup" onComplete={handleSuccessComplete} />
-            )}
-
             {/* Moving Paws Background - Overlaying (Z-Index 20) */}
             <div className="paw-print paw-left" style={{ left: '5%', animationDelay: '0s', fontSize: 'clamp(1.5rem, 4vw, 3rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
             <div className="paw-print paw-right" style={{ left: '85%', animationDelay: '5s', fontSize: 'clamp(1.2rem, 3vw, 2rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
