@@ -15,6 +15,7 @@ const CreatePostModal = ({ onClose, onSuccess }: CreatePostModalProps) => {
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [caption, setCaption] = useState('');
+    const [category, setCategory] = useState('Dog');
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,7 +32,7 @@ const CreatePostModal = ({ onClose, onSuccess }: CreatePostModalProps) => {
 
         setLoading(true);
         try {
-            await postService.createPost(user.id, image, caption);
+            await postService.createPost(user.id, image, caption, [category.toLowerCase()]);
             setLoading(false);
             onSuccess();
         } catch (error) {
@@ -128,6 +129,29 @@ const CreatePostModal = ({ onClose, onSuccess }: CreatePostModalProps) => {
                         </div>
                     )}
 
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--gray-700)' }}>Category</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {['Dog', 'Cat', 'Bird', 'Other'].map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setCategory(cat)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        borderRadius: '20px',
+                                        border: `1px solid ${category === cat ? 'var(--primary-600)' : 'var(--gray-300)'}`,
+                                        background: category === cat ? 'var(--primary-50)' : 'white',
+                                        color: category === cat ? 'var(--primary-700)' : 'var(--gray-600)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div style={{ marginBottom: '24px' }}>
                         <Input
                             placeholder="Write a caption..."
@@ -140,7 +164,7 @@ const CreatePostModal = ({ onClose, onSuccess }: CreatePostModalProps) => {
                     <Button
                         fullWidth
                         onClick={handleSubmit}
-                        disabled={!image || loading}
+                        disabled={!image || !category || loading}
                         variant="primary"
                         loading={loading}
                     >

@@ -5,6 +5,7 @@ export interface Post {
     user_id: string;
     image_url: string;
     caption: string;
+    tags?: string[];
     likes_count: number;
     created_at: string;
     profiles?: {
@@ -20,6 +21,20 @@ export const postService = {
      * Get the community feed
      */
     async getFeed(currentUserId?: string): Promise<Post[]> {
+        // 1. Fetch User's Pet Types (Preferences)
+        let userPetTypes: string[] = [];
+        if (currentUserId) {
+            const { data: pets } = await supabase
+                .from('pets')
+                .select('type')
+                .eq('owner_id', currentUserId);
+
+            if (pets) {
+                userPetTypes = pets.map((p: any) => p.type?.toLowerCase()).filter(Boolean);
+            }
+        }
+
+        // 2. Fetch Recent Posts
         const { data, error } = await supabase
             .from('posts')
             .select(`
@@ -27,22 +42,43 @@ export const postService = {
                 profiles (name, username, avatar_url),
                 post_likes (user_id)
             `)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(100); // Fetch mostly recent to rank
 
         if (error) throw error;
 
-        // Transform to include 'liked_by_me'
-        return data.map((post: any) => ({
-            ...post,
-            liked_by_me: currentUserId ? post.post_likes.some((l: any) => l.user_id === currentUserId) : false,
-            // Clean up the joins if needed, but keeping them for now is fine
-        })) as Post[];
+        // 3. Rank Posts
+        const rankedPosts = data.map((post: any) => {
+            let score = 1.0;
+            const postTags = (post.tags || []).map((t: string) => t.toLowerCase());
+
+            // Relevance: Does post tag match user's pet type?
+            const matchesType = postTags.some((tag: string) => userPetTypes.includes(tag));
+            if (matchesType) score += 10;
+
+            // Popularity: Likes boost
+            score += (post.likes_count || 0) * 0.5;
+
+            // Freshness is implicitly handled by the initial sort limit, 
+            // but we could add decay here if we fetched older posts.
+
+            return {
+                ...post,
+                liked_by_me: currentUserId ? post.post_likes.some((l: any) => l.user_id === currentUserId) : false,
+                _score: score
+            };
+        });
+
+        // Sort by calculated score DESC
+        rankedPosts.sort((a, b) => b._score - a._score);
+
+        return rankedPosts as Post[];
     },
 
     /**
      * Upload image and create post
      */
-    async createPost(userId: string, file: File, caption: string) {
+    async createPost(userId: string, file: File, caption: string, tags: string[] = []) {
         // 1. Upload Image
         const fileExt = file.name.split('.').pop();
         const fileName = `${userId}/${Math.random()}.${fileExt}`;
@@ -65,7 +101,8 @@ export const postService = {
             .insert({
                 user_id: userId,
                 image_url: publicUrl,
-                caption
+                caption,
+                tags
             })
             .select()
             .single();

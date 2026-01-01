@@ -4,6 +4,7 @@ create table if not exists public.posts (
   user_id uuid references public.profiles(id) on delete cascade not null,
   image_url text not null,
   caption text,
+  tags text[] default '{}',
   likes_count int default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
