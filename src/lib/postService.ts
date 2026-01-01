@@ -140,20 +140,20 @@ export const postService = {
     async toggleLike(userId: string, postId: string, isCurrentlyLiked: boolean) {
         if (isCurrentlyLiked) {
             // Unlike
-            const { error } = await supabase
+            const { error: unlikeError } = await supabase
                 .from('post_likes')
                 .delete()
                 .eq('post_id', postId)
                 .eq('user_id', userId);
 
-            if (error) throw error;
-
+            if (unlikeError) throw unlikeError;
+        } else {
             // Like
-            const { error } = await supabase
+            const { error: likeError } = await supabase
                 .from('post_likes')
                 .insert({ post_id: postId, user_id: userId });
 
-            if (error) throw error;
+            if (likeError) throw likeError;
 
             // Trigger will handle count update
         }
