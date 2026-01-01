@@ -1159,7 +1159,6 @@ const Profile = () => {
 
                     {/* Tab Content */}
                     <div style={{ minHeight: '300px' }}>
-                        {(() => { console.log("RENDER: activeTab=", activeTab, "count=", userPosts.length, "UserID=", profileUser?.id, "Posts=", userPosts); return null; })()}
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
 
