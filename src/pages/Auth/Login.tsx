@@ -63,10 +63,20 @@ const Login = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: '80vh',
-            padding: '1rem'
-        }}>
-            <Card style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            minHeight: '100vh',
+            padding: '1rem',
+            position: 'relative',
+            overflow: 'hidden',
+            background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 70%)'
+        }} className="fade-in">
+            {/* Background Decoration (Floating Elements) */}
+            <div style={{ position: 'absolute', top: '10%', left: '10%', fontSize: '3rem', opacity: 0.2, animationDelay: '0s' }} className="float-animation">🐾</div>
+            <div style={{ position: 'absolute', top: '20%', right: '15%', fontSize: '4rem', opacity: 0.15, animationDelay: '1s' }} className="float-animation">🦴</div>
+            <div style={{ position: 'absolute', bottom: '15%', left: '20%', fontSize: '2.5rem', opacity: 0.2, animationDelay: '2s' }} className="float-animation">🎾</div>
+            <div style={{ position: 'absolute', bottom: '20%', right: '10%', fontSize: '3rem', opacity: 0.1, animationDelay: '3s' }} className="float-animation">🐕</div>
+            <div style={{ position: 'absolute', top: '15%', left: '80%', fontSize: '2rem', opacity: 0.2, animationDelay: '1.5s' }} className="float-animation">🐈</div>
+
+            <Card style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 10, backdropFilter: 'blur(10px)', background: 'rgba(255, 255, 255, 0.8)' }}>
                 <div style={{ textAlign: 'center' }}>
                     <PawPrint size={48} weight="fill" color="var(--color-accent)" style={{ marginBottom: '1rem' }} />
                     <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Welcome Back</h2>
