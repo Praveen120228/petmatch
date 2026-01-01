@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Button from './Button';
-import { PawPrint, User, Chats, List, X, Storefront, ShieldCheck } from '@phosphor-icons/react';
+import { PawPrint, User, Chats, List, X, Storefront, ShieldCheck, Globe } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -112,6 +112,9 @@ const Navbar = () => {
                             <Link to="/match" style={linkStyle('/match')}>
                                 Find Pets
                             </Link>
+                            <Link to="/explore" style={linkStyle('/explore')}>
+                                <Globe size={20} /> Community
+                            </Link>
                             <Link to="/shops" style={linkStyle('/shops')}>
                                 <Storefront size={20} /> Shops
                             </Link>
@@ -166,6 +169,9 @@ const Navbar = () => {
                         <>
                             <Link to="/match" style={linkStyle('/match')} onClick={() => setMobileMenuOpen(false)}>
                                 <PawPrint size={24} /> <span style={{ fontSize: '1.25rem' }}>Find Pets</span>
+                            </Link>
+                            <Link to="/explore" style={linkStyle('/explore')} onClick={() => setMobileMenuOpen(false)}>
+                                <Globe size={24} /> <span style={{ fontSize: '1.25rem' }}>Community</span>
                             </Link>
                             <Link to="/shops" style={linkStyle('/shops')} onClick={() => setMobileMenuOpen(false)}>
                                 <Storefront size={24} /> <span style={{ fontSize: '1.25rem' }}>Shops</span>
