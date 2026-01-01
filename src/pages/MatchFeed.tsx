@@ -790,8 +790,8 @@ const MatchFeed = () => {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', // Wider minimum for better presence
-                        gap: '2rem', // More breathing room
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(225px, 1fr))', // Reduced width by ~19% (280 -> 225)
+                        gap: '1.5rem', // Reduced gap slightly to balance density
                         paddingBottom: '4rem'
                     }}>
                         {(isLoading || isInitializing) && (
