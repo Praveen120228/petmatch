@@ -9,6 +9,7 @@ import SearchableSelect from '../components/SearchableSelect';
 import { storageService } from '../lib/storageService';
 import { PET_TYPES } from '../data/breeds';
 import { BREEDS_BY_TYPE } from '../lib/petBreeds'; // Keep for breeds list
+import { celebratePetAdd } from '../utils/delight';
 
 const AddPet = () => {
     const navigate = useNavigate();
@@ -173,7 +174,11 @@ const AddPet = () => {
                 image: primaryImage
             });
 
-            navigate('/profile');
+            celebratePetAdd(petForm.type); // Delight based on type!
+
+            setTimeout(() => {
+                navigate('/profile');
+            }, 1200);
         } catch (err) {
             console.error("Failed to create pet", err);
             alert("Failed to add pet. Please try again.");

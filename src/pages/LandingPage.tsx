@@ -5,6 +5,7 @@ import Button from '../components/Button';
 
 import { PawPrint, Heart, Chats, ShieldCheck, Star } from '@phosphor-icons/react';
 import SEO from '../components/SEO';
+import { celebrateSuccess } from '../utils/delight';
 
 const LandingPage = () => {
     const { isAuthenticated } = useAuth();
@@ -50,12 +51,24 @@ const LandingPage = () => {
                 background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 70%)'
             }} className="fade-in">
 
-                {/* Background Decoration (Floating Elements) */}
-                <div style={{ position: 'absolute', top: '10%', left: '10%', fontSize: '3rem', opacity: 0.2, animationDelay: '0s' }} className="float-animation">🐾</div>
-                <div style={{ position: 'absolute', top: '20%', right: '15%', fontSize: '4rem', opacity: 0.15, animationDelay: '1s' }} className="float-animation">🦴</div>
-                <div style={{ position: 'absolute', bottom: '15%', left: '20%', fontSize: '2.5rem', opacity: 0.2, animationDelay: '2s' }} className="float-animation">🎾</div>
-                <div style={{ position: 'absolute', bottom: '20%', right: '10%', fontSize: '3rem', opacity: 0.1, animationDelay: '3s' }} className="float-animation">🐕</div>
-                <div style={{ position: 'absolute', top: '15%', left: '80%', fontSize: '2rem', opacity: 0.2, animationDelay: '1.5s' }} className="float-animation">🐈</div>
+                {/* Moving Paws Background - Overlaying (Z-Index 0 for Landing, behind text but front of bg) */}
+                {/* Actually user said "overlay them on to the cards" for auth. For Landing, text is hero. 
+                    Let's keep them at z-index 0 so they don't block text selection, but visible. 
+                    Or maybe z-index 10 if we want them to float over some text? 
+                    Let's stick to z-Index 0 for background feel, but use the new classes. */}
+
+                <div className="paw-print paw-left" style={{ left: '5%', animationDelay: '0s', fontSize: 'clamp(1.5rem, 4vw, 3rem)', opacity: 0.1 }}>🐾</div>
+                <div className="paw-print paw-right" style={{ left: '85%', animationDelay: '5s', fontSize: 'clamp(1.2rem, 3vw, 2rem)', opacity: 0.1 }}>🐾</div>
+                <div className="paw-print paw-left" style={{ left: '15%', animationDelay: '2s', fontSize: 'clamp(2rem, 5vw, 4rem)', opacity: 0.08 }}>🐾</div>
+                <div className="paw-print" style={{ left: '50%', animationDelay: '8s', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', opacity: 0.05 }}>🐾</div>
+                <div className="paw-print paw-right" style={{ left: '90%', animationDelay: '4s', fontSize: 'clamp(1.8rem, 4.5vw, 3.5rem)', opacity: 0.1 }}>🐾</div>
+                <div className="paw-print paw-left" style={{ left: '8%', animationDelay: '12s', fontSize: 'clamp(1.2rem, 3vw, 2rem)', opacity: 0.1 }}>🐾</div>
+
+                {/* Floating Elements (Drift) */}
+                <div style={{ position: 'absolute', top: '10%', right: '10%', fontSize: 'clamp(2rem, 6vw, 4rem)', opacity: 0.2, animationDelay: '1s', zIndex: 0 }} className="animate-drift-slow float-item">🦴</div>
+                <div style={{ position: 'absolute', bottom: '10%', left: '10%', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', opacity: 0.2, animationDelay: '2s', zIndex: 0 }} className="animate-drift-reverse float-item">🎾</div>
+                <div style={{ position: 'absolute', top: '25%', left: '5%', fontSize: 'clamp(1.8rem, 5vw, 3rem)', opacity: 0.15, zIndex: 0 }} className="animate-drift float-item">🐕</div>
+                <div style={{ position: 'absolute', bottom: '25%', right: '5%', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', opacity: 0.15, animationDelay: '3s', zIndex: 0 }} className="animate-drift-slow float-item">🐈</div>
 
                 {/* Badge */}
                 <div style={{
@@ -101,7 +114,13 @@ const LandingPage = () => {
                 {/* CTA Buttons */}
                 <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <Link to="/signup">
-                        <Button size="lg" variant="primary" icon={<PawPrint weight="fill" />} style={{ padding: '1.125rem 2.5rem', fontSize: '1.125rem', boxShadow: 'var(--shadow-colored)' }}>
+                        <Button
+                            size="lg"
+                            variant="primary"
+                            icon={<PawPrint weight="fill" />}
+                            style={{ padding: '1.125rem 2.5rem', fontSize: '1.125rem', boxShadow: 'var(--shadow-colored)' }}
+                            onClick={() => celebrateSuccess()}
+                        >
                             Get Started
                         </Button>
                     </Link>
@@ -176,6 +195,14 @@ const LandingPage = () => {
                 </div>
                 <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} Specyf. All rights reserved.</p>
             </footer>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    .paw-left { left: 5% !important; }
+                    .paw-right { left: 88% !important; }
+                    .float-item { opacity: 0.3 !important; }
+                }
+            `}</style>
         </div>
     );
 };

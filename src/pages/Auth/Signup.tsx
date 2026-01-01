@@ -5,6 +5,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { PawPrint } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
+import { celebrateAccountCreation } from '../../utils/delight';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -27,10 +28,15 @@ const Signup = () => {
         const { success, error, confirmationRequired } = await signup(name, email, password, 'user');
 
         if (success) {
+            celebrateAccountCreation(); // Trigger delight!
             if (confirmationRequired) {
                 alert('Please check your email to confirm your account before logging in.');
                 navigate('/login');
             } else {
+                // Short delay to let them see the explosion? No, let it explode on the new page or during transition?
+                // Actually, if we navigate immediately it might cut off. 
+                // But typically confetti canvas is on body or fixed. 
+                // Let's navigate immediately for snappy feel, confetti often persists if configured right or just explodes.
                 navigate('/onboarding');
             }
         } else {

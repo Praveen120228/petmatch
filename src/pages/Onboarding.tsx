@@ -7,6 +7,7 @@ import { User, MapPin, Camera, Crop } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../lib/userService';
 import ImageCropper from '../components/ImageCropper';
+import { celebrateOnboarding } from '../utils/delight';
 
 const Onboarding = () => {
     const navigate = useNavigate();
@@ -135,8 +136,12 @@ const Onboarding = () => {
                 avatar_url: image || undefined
             });
 
+            celebrateOnboarding(); // Delight!
+
             // Redirect to Profile (where they can add pets)
-            navigate('/profile');
+            setTimeout(() => {
+                navigate('/profile');
+            }, 1000); // Small delay to see fireworks?
         } catch (error) {
             console.error("Error updating profile:", error);
             alert("Failed to complete setup. Please try again.");
