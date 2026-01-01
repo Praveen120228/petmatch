@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import { Plus, PencilSimple, Trash, Heart, ChatCircle, MapPin, Folder, CaretRight, CaretLeft, SignOut, Flag, WarningCircle, X, Crop, Camera, CaretDown, PawPrint } from '@phosphor-icons/react';
 import CreatePostModal from '../components/CreatePostModal';
+import PostDetailModal from '../components/PostDetailModal';
 import ImageCropper from '../components/ImageCropper';
 
 import { featureService } from '../lib/featureService';
@@ -199,6 +200,7 @@ const Profile = () => {
 
     // Post State
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any | null>(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -1250,8 +1252,9 @@ const Profile = () => {
                                                 background: 'var(--gray-900)',
                                                 height: '100%',
                                                 position: 'relative',
-                                                display: 'block'
-                                            }}>
+                                                display: 'block',
+                                                cursor: 'pointer' // Add cursor pointer
+                                            }} onClick={() => setSelectedPost(post)}> {/* Add onClick handler */}
                                                 <div style={{ display: 'block', width: '100%', height: '100%', position: 'relative' }}>
                                                     <div className="group" style={{ width: '100%', height: '100%' }}>
                                                         <img src={post.image_url} alt="Post" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} />
@@ -1809,6 +1812,23 @@ const Profile = () => {
                                 onSuccess={() => {
                                     postService.getUserPosts(profileUser.id).then(posts => setUserPosts(posts));
                                     setIsCreatePostOpen(false);
+                                }}
+                            />
+                        )}
+
+                        {/* Post Detail Modal */}
+                        {selectedPost && (
+                            <PostDetailModal
+                                post={selectedPost}
+                                isOpen={!!selectedPost}
+                                onClose={() => setSelectedPost(null)}
+                                onDelete={async (postId) => {
+                                    await postService.deletePost(postId);
+                                    setUserPosts(prev => prev.filter(p => p.id !== postId));
+                                    setSelectedPost(null);
+                                }}
+                                onLikeToggle={(postId, newStatus) => {
+                                    setUserPosts(prev => prev.map(p => p.id === postId ? { ...p, liked_by_me: newStatus, likes_count: p.likes_count + (newStatus ? 1 : -1) } : p));
                                 }}
                             />
                         )}

@@ -4,6 +4,7 @@ import { postService } from '../lib/postService';
 import type { Post } from '../lib/postService';
 
 import CreatePostModal from '../components/CreatePostModal';
+import PostDetailModal from '../components/PostDetailModal';
 import { useAuth } from '../context/AuthContext';
 
 const Explore = () => {
@@ -11,6 +12,7 @@ const Explore = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
     useEffect(() => {
         fetchFeed();
@@ -56,6 +58,7 @@ const Explore = () => {
                                     overflow: 'hidden'
                                 }}
                                 className="explore-item"
+                                onClick={() => setSelectedPost(post)}
                             >
                                 <img
                                     src={post.image_url}
@@ -141,6 +144,17 @@ const Explore = () => {
                     onSuccess={() => {
                         setIsCreateModalOpen(false);
                         fetchFeed();
+                    }}
+                />
+            )}
+
+            {selectedPost && (
+                <PostDetailModal
+                    post={selectedPost}
+                    isOpen={!!selectedPost}
+                    onClose={() => setSelectedPost(null)}
+                    onLikeToggle={(postId, newStatus) => {
+                        setPosts(prev => prev.map(p => p.id === postId ? { ...p, liked_by_me: newStatus, likes_count: p.likes_count + (newStatus ? 1 : -1) } : p));
                     }}
                 />
             )}

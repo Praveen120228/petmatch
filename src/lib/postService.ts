@@ -7,6 +7,7 @@ export interface Post {
     caption: string;
     tags?: string[];
     likes_count: number;
+    views_count?: number; // Added views_count
     created_at: string;
     profiles?: {
         name: string;
@@ -185,5 +186,10 @@ export const postService = {
             .delete()
             .eq('id', postId);
         if (error) throw error;
+    },
+
+    async incrementView(postId: string) {
+        const { error } = await supabase.rpc('increment_post_view', { post_id: postId });
+        if (error) console.error("Error incrementing view:", error);
     }
 };
