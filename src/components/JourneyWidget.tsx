@@ -133,27 +133,61 @@ const JourneyWidget = () => {
                             {tipData.tip}
                         </p>
 
-                        {tipData.action && (
-                            <Link
-                                to={tipData.action}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    padding: '10px',
-                                    background: 'var(--primary-600)',
-                                    color: 'white',
-                                    borderRadius: '8px',
-                                    textDecoration: 'none',
-                                    fontSize: '0.9rem',
-                                    fontWeight: 500,
-                                    transition: 'background 0.2s'
-                                }}
-                            >
-                                Take Action <ArrowRight size={16} weight="bold" />
-                            </Link>
-                        )}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {tipData.action && (
+                                <Link
+                                    to={tipData.action}
+                                    style={{
+                                        flex: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        padding: '10px',
+                                        background: 'var(--primary-600)',
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        fontSize: '0.9rem',
+                                        fontWeight: 500,
+                                        transition: 'background 0.2s'
+                                    }}
+                                >
+                                    Take Action <ArrowRight size={16} weight="bold" />
+                                </Link>
+                            )}
+                            {(tipData.title === 'Playtime!' || tipData.title === 'Meet & Greet' || tipData.title === 'Welcome Home') && (
+                                <button
+                                    onClick={async () => {
+                                        if (!user) return;
+                                        // Find current slug from title (hacky but works for now without fuller refactor)
+                                        let slug = '';
+                                        if (tipData.title === 'Playtime!') slug = 'playdate-scheduled';
+                                        if (tipData.title === 'Meet & Greet') slug = 'meet-scheduled';
+                                        if (tipData.title === 'Welcome Home') slug = 'bonding-start';
+
+                                        if (slug) {
+                                            await journeyService.completeMilestone(user.id, slug);
+                                            fetchData(); // Refresh UI
+                                        }
+                                    }}
+                                    style={{
+                                        flex: 1,
+                                        padding: '10px',
+                                        background: 'white',
+                                        border: '1px solid var(--primary-600)',
+                                        color: 'var(--primary-600)',
+                                        borderRadius: '8px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: 500,
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    We Did It!
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Progress Bar */}

@@ -133,11 +133,29 @@ export const journeyService = {
                             tip: "Not sure what to say? Try asking about the pet's favorite toy. It's a great conversation starter!",
                             action: "/match"
                         };
+                    case 'intro-chat':
+                        return {
+                            title: "Dig Deeper",
+                            tip: "Ask about their daily routine, energy levels, and how they handle being alone. It's crucial for compatibility!",
+                            action: "/messages"
+                        };
                     case 'meet-scheduled':
                         return {
                             title: "Take the Leap",
                             tip: "You've been chatting for a while. Propose a meet-up at a local park to see the chemistry in person.",
                             action: "/messages"
+                        };
+                    case 'playdate-scheduled':
+                        return {
+                            title: "Playtime!",
+                            tip: "Bring a favorite toy or treat to the meet-up. Watch how they interact with you and other dogs.",
+                            action: "/match"
+                        };
+                    case 'bonding-start':
+                        return {
+                            title: "Welcome Home",
+                            tip: "The first 3 days are decompressed time. Keep things quiet and let them explore their new space at their own pace.",
+                            action: "/profile"
                         };
                     default:
                         return {

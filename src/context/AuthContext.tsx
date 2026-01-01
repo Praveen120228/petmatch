@@ -114,6 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: data.name,
                     email: data.email,
                     image: data.avatar_url,
+                    username: data.username,
                     role: data.role as 'user' | 'shop_owner' | 'admin'
                 });
 
@@ -123,6 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: data.name,
                     email: data.email,
                     image: data.avatar_url,
+                    username: data.username,
                     role: data.role
                 }));
 
