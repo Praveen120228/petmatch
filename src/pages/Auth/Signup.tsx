@@ -49,19 +49,19 @@ const Signup = () => {
             overflow: 'hidden',
             background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 70%)'
         }} className="fade-in">
-            {/* Moving Paws Background */}
-            <div className="paw-print" style={{ left: '10%', animationDelay: '0s', fontSize: '3rem' }}>🐾</div>
-            <div className="paw-print" style={{ left: '30%', animationDelay: '5s', fontSize: '2rem' }}>🐾</div>
-            <div className="paw-print" style={{ left: '70%', animationDelay: '2s', fontSize: '4rem' }}>🐾</div>
-            <div className="paw-print" style={{ left: '50%', animationDelay: '8s', fontSize: '2.5rem' }}>🐾</div>
-            <div className="paw-print" style={{ left: '90%', animationDelay: '4s', fontSize: '3.5rem' }}>🐾</div>
-            <div className="paw-print" style={{ left: '20%', animationDelay: '12s', fontSize: '2rem' }}>🐾</div>
+            {/* Moving Paws Background - Overlaying (Z-Index 20) */}
+            <div className="paw-print paw-left" style={{ left: '5%', animationDelay: '0s', fontSize: 'clamp(1.5rem, 4vw, 3rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
+            <div className="paw-print paw-right" style={{ left: '85%', animationDelay: '5s', fontSize: 'clamp(1.2rem, 3vw, 2rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
+            <div className="paw-print paw-left" style={{ left: '15%', animationDelay: '2s', fontSize: 'clamp(2rem, 5vw, 4rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
+            <div className="paw-print" style={{ left: '50%', animationDelay: '8s', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', opacity: 0.05, zIndex: 20, pointerEvents: 'none' }}>🐾</div>
+            <div className="paw-print paw-right" style={{ left: '90%', animationDelay: '4s', fontSize: 'clamp(1.8rem, 4.5vw, 3.5rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
+            <div className="paw-print paw-left" style={{ left: '8%', animationDelay: '12s', fontSize: 'clamp(1.2rem, 3vw, 2rem)', zIndex: 20, pointerEvents: 'none' }}>🐾</div>
 
-            {/* Floating Elements (Drift) */}
-            <div style={{ position: 'absolute', top: '15%', right: '15%', fontSize: '4rem', opacity: 0.1, animationDelay: '1s' }} className="animate-drift-slow">🦴</div>
-            <div style={{ position: 'absolute', bottom: '15%', left: '25%', fontSize: '2.5rem', opacity: 0.15, animationDelay: '2s' }} className="animate-drift-reverse">🎾</div>
-            <div style={{ position: 'absolute', top: '40%', left: '5%', fontSize: '3rem', opacity: 0.1 }} className="animate-drift">🐕</div>
-            <div style={{ position: 'absolute', top: '60%', right: '5%', fontSize: '2.5rem', opacity: 0.1, animationDelay: '3s' }} className="animate-drift-slow">🐈</div>
+            {/* Floating Elements (Drift) - Foreground Overlay */}
+            <div style={{ position: 'absolute', top: '15%', right: '15%', fontSize: 'clamp(2rem, 6vw, 4rem)', opacity: 0.4, animationDelay: '1s', zIndex: 20, pointerEvents: 'none' }} className="animate-drift-slow float-item">🦴</div>
+            <div style={{ position: 'absolute', bottom: '15%', left: '25%', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', opacity: 0.4, animationDelay: '2s', zIndex: 20, pointerEvents: 'none' }} className="animate-drift-reverse float-item">🎾</div>
+            <div style={{ position: 'absolute', top: '40%', left: '5%', fontSize: 'clamp(1.8rem, 5vw, 3rem)', opacity: 0.3, zIndex: 20, pointerEvents: 'none' }} className="animate-drift float-item">🐕</div>
+            <div style={{ position: 'absolute', top: '60%', right: '5%', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', opacity: 0.3, animationDelay: '3s', zIndex: 20, pointerEvents: 'none' }} className="animate-drift-slow float-item">🐈</div>
 
             <Card style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 10, backdropFilter: 'blur(10px)', background: 'rgba(255, 255, 255, 0.85)' }}>
                 <div style={{ textAlign: 'center' }}>
@@ -109,6 +109,16 @@ const Signup = () => {
                     Already have an account? <Link to="/login" style={{ color: 'var(--color-accent)', fontWeight: 600 }}>Log In</Link>
                 </div>
             </Card>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    /* On mobile, push elements to the edges */
+                    .paw-left { left: 5% !important; }
+                    .paw-right { left: 88% !important; }
+                    /* Hide center elements if they interfere, or keep them subtle */
+                    .float-item { opacity: 0.5 !important; }
+                }
+            `}</style>
         </div>
     );
 };
