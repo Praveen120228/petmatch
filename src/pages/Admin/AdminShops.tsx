@@ -164,7 +164,7 @@ const AdminShops = () => {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #334155', paddingBottom: '1px' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #334155', paddingBottom: '1px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
                 {tabs.map(tab => (
                     <button
                         key={tab.id}

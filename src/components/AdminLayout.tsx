@@ -14,7 +14,8 @@ import {
     Flag,
     MagnifyingGlass,
     Bell,
-    Check
+    Check,
+    House
 } from '@phosphor-icons/react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
@@ -163,7 +164,27 @@ const AdminLayout = () => {
                     </div>
                 </nav>
 
-                <div style={{ padding: '1.5rem' }}>
+                <div style={{ padding: '1.5rem', borderTop: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <Link
+                        to="/"
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            color: '#94a3b8',
+                            fontSize: '0.9rem',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#f8fafc'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+                    >
+                        <House size={20} /> Back to Home
+                    </Link>
+
                     <button
                         onClick={logout}
                         style={{
@@ -455,7 +476,25 @@ const AdminLayout = () => {
                                     </Link>
                                 ))}
                             </nav>
-                            <div style={{ marginTop: '2rem' }}>
+                            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <Link
+                                    to="/"
+                                    onClick={() => setSidebarOpen(false)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        padding: '0.75rem',
+                                        borderRadius: '8px',
+                                        border: '1px solid #334155',
+                                        color: '#94a3b8',
+                                        textDecoration: 'none',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    <House size={18} /> Back to Home
+                                </Link>
                                 <Button variant="outline" fullWidth onClick={logout} style={{ borderColor: '#334155', color: '#94a3b8' }}>Sign Out</Button>
                             </div>
                         </div>
