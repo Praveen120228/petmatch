@@ -38,7 +38,7 @@ const Explore = () => {
     return (
         <div style={{ minHeight: '100vh', background: 'var(--gray-50)', paddingBottom: '80px' }}>
 
-            <div style={{ maxWidth: '100%', margin: '0 auto', paddingBottom: '20px' }}>
+            <div style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '20px' }}>
                 {/* Header & Search */}
                 <div style={{ padding: '16px' }}>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 12px 0', color: 'var(--gray-900)' }}>Explore</h1>
