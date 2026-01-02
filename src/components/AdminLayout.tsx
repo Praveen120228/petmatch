@@ -115,7 +115,7 @@ const AdminLayout = () => {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: '#0f172a', color: '#f8fafc' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', width: '100%', background: '#0f172a', color: '#f8fafc', overflowX: 'hidden' }}>
             {/* Sidebar (Desktop) */}
             <aside style={{
                 width: '260px',
@@ -416,7 +416,7 @@ const AdminLayout = () => {
                     .desktop-header { display: flex !important; }
                 }
                 @media (max-width: 1023px) {
-                    .admin-content { padding-top: 5rem !important; }
+                    .admin-content { padding: 1rem !important; padding-top: 5rem !important; }
                     .mobile-header { display: flex !important; }
                     .desktop-header { display: none !important; }
                     .admin-wrapper { margin-left: 0 !important; }
