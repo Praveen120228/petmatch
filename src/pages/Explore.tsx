@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Heart } from '@phosphor-icons/react';
+import { Plus, Heart, MagnifyingGlass } from '@phosphor-icons/react';
 import { postService } from '../lib/postService';
 import type { Post } from '../lib/postService';
 
@@ -13,6 +13,12 @@ const Explore = () => {
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredPosts = posts.filter(post =>
+        (post.caption?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (post.profiles?.username?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    );
 
     useEffect(() => {
         fetchFeed();
@@ -33,8 +39,47 @@ const Explore = () => {
         <div style={{ minHeight: '100vh', background: 'var(--gray-50)', paddingBottom: '80px' }}>
 
             <div style={{ maxWidth: '100%', margin: '0 auto', paddingBottom: '20px' }}>
-                {/* Header - Hidden or simplified for pure explore feel? Keeping title for now but minimal padding */}
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '16px', color: 'var(--gray-900)' }}>Explore</h1>
+                {/* Header & Search */}
+                <div style={{ padding: '16px' }}>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 12px 0', color: 'var(--gray-900)' }}>Explore</h1>
+
+                    {/* Search Bar */}
+                    <div style={{
+                        position: 'relative',
+                        maxWidth: '100%',
+                        marginBottom: '8px'
+                    }}>
+                        <MagnifyingGlass
+                            size={20}
+                            weight="bold"
+                            style={{
+                                position: 'absolute',
+                                left: '12px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                color: 'var(--gray-500)'
+                            }}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Search people or captions..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 40px',
+                                borderRadius: '12px',
+                                border: '1px solid var(--gray-200)',
+                                background: 'white',
+                                fontSize: '1rem',
+                                outline: 'none',
+                                transition: 'all 0.2s'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--primary-500)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--gray-200)'}
+                        />
+                    </div>
+                </div>
 
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--gray-500)' }}>
@@ -47,7 +92,7 @@ const Explore = () => {
                         gap: '2px',
                         padding: '0 2px' // minimal outside padding
                     }}>
-                        {posts.map(post => (
+                        {filteredPosts.map(post => (
                             <div
                                 key={post.id}
                                 style={{
@@ -105,9 +150,9 @@ const Explore = () => {
                             </div>
                         ))}
 
-                        {posts.length === 0 && (
+                        {filteredPosts.length === 0 && (
                             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: 'var(--gray-500)' }}>
-                                <p>No posts yet. Be the first to share!</p>
+                                {posts.length === 0 ? <p>No posts yet. Be the first to share!</p> : <p>No matches found.</p>}
                             </div>
                         )}
                     </div>
@@ -150,8 +195,8 @@ const Explore = () => {
 
             {selectedPost && (
                 <PostDetailModal
-                    posts={posts}
-                    initialIndex={posts.findIndex(p => p.id === selectedPost.id)}
+                    posts={filteredPosts}
+                    initialIndex={filteredPosts.findIndex(p => p.id === selectedPost.id)}
                     isOpen={!!selectedPost}
                     onClose={() => setSelectedPost(null)}
                     onLikeToggle={(postId, newStatus) => {
