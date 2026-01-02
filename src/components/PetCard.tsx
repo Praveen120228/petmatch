@@ -63,6 +63,8 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                         <img
                             src={pet.image || pet.images?.[0] || 'https://placehold.co/600x800/f3f4f6/9ca3af?text=No+Image'}
                             alt={pet.name}
+                            loading="lazy"
+                            decoding="async"
                             onLoad={() => setImageLoaded(true)}
                             style={{
                                 width: '100%',
