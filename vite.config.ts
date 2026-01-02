@@ -13,7 +13,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@phosphor-icons/react', 'framer-motion'],
+          'vendor-ui': ['@phosphor-icons/react'],
           'vendor-utils': ['@supabase/supabase-js', 'date-fns', 'uuid'],
         },
       },
