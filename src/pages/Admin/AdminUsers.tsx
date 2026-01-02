@@ -190,7 +190,7 @@ const AdminUsers = () => {
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                     {/* Wrap list in a nice border container */}
-                    <div style={{ border: '1px solid #334155', borderRadius: '12px', overflowX: 'auto', background: '#1e293b' }}>
+                    <div style={{ border: '1px solid #334155', borderRadius: '12px', overflowX: 'auto', background: '#1e293b', maxWidth: '100%', width: '100%', WebkitOverflowScrolling: 'touch' }}>
 
                         {/* Table Header Row (Simulated) */}
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 100px', padding: '1rem 1.5rem', background: '#0f172a', borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: '800px' }}>
