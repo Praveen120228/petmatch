@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'; // Added useCallback
-import { X, Heart, User, Eye, Trash, CaretDown, CaretUp } from '@phosphor-icons/react';
+import { X, Heart, User, Eye, Trash } from '@phosphor-icons/react';
 import { postService } from '../lib/postService';
 import type { Post } from '../lib/postService';
 import { useAuth } from '../context/AuthContext';
