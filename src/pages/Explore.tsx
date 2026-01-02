@@ -41,7 +41,7 @@ const Explore = () => {
             <div style={{ maxWidth: '100%', paddingBottom: '20px' }}>
                 {/* Header & Search */}
                 <div style={{ padding: '16px' }}>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 12px 0', color: 'var(--gray-900)' }}>Explore</h1>
+
 
                     {/* Search Bar */}
                     <div style={{
