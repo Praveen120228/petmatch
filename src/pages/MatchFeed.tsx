@@ -381,7 +381,7 @@ const MatchFeed = () => {
                 top: NAVBAR_HEIGHT,
                 zIndex: 30
             }}>
-                <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '1rem', alignItems: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%' }}>
 
                     {/* Toggle Sidebar Button */}
                     <Button
@@ -437,7 +437,7 @@ const MatchFeed = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1, position: 'relative' }}>
+            <div style={{ display: 'flex', width: '100%', flex: 1, position: 'relative' }}>
 
                 {/* Filters - Sidebar on Desktop, Full Overlay on Mobile */}
                 <aside style={{
