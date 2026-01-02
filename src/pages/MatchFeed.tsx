@@ -11,7 +11,7 @@ import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
-import JourneyWidget from '../components/JourneyWidget';
+
 
 const useWindowSize = () => {
     const [windowSize, setWindowSize] = useState({
@@ -856,7 +856,7 @@ const MatchFeed = () => {
                     </div>
                 </main >
             </div >
-            <JourneyWidget />
+
         </div >
     );
 };
