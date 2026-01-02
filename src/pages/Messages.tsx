@@ -9,8 +9,7 @@ const Messages = () => {
     return (
         <div className="fade-in" style={{
             height: 'calc(100vh - 64px)', // Deduct navbar height
-            maxWidth: '1400px',
-            margin: '0 auto',
+            width: '100%',
             position: 'relative',
             overflow: 'hidden'
         }}>
