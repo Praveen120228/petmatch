@@ -10,8 +10,11 @@ interface CreatePostModalProps {
     onSuccess: () => void;
 }
 
+import { useEscapeKey } from '../hooks/useEscapeKey';
+
 const CreatePostModal = ({ onClose, onSuccess }: CreatePostModalProps) => {
     const { user } = useAuth();
+    useEscapeKey(onClose);
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [caption, setCaption] = useState('');

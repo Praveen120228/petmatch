@@ -13,8 +13,11 @@ interface PostDetailModalProps {
     onDelete?: (postId: string) => void;
 }
 
+import { useEscapeKey } from '../hooks/useEscapeKey';
+
 const PostDetailModal = ({ posts, initialIndex, isOpen, onClose, onLikeToggle, onDelete }: PostDetailModalProps) => {
     const { user } = useAuth();
+    useEscapeKey(isOpen ? onClose : () => { });
     const [currentIndex, setCurrentIndex] = useState(initialIndex);
     const containerRef = useRef<HTMLDivElement>(null);
     const [viewedPosts, setViewedPosts] = useState<Set<string>>(new Set());

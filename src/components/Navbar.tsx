@@ -4,10 +4,14 @@ import Button from './Button';
 import { PawPrint, User, Chats, List, X, Storefront, ShieldCheck, Globe } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 
+import { useEscapeKey } from '../hooks/useEscapeKey';
+
 const Navbar = () => {
     const location = useLocation();
     const { isAuthenticated, user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useEscapeKey(() => setMobileMenuOpen(false));
 
     const navStyle: React.CSSProperties = {
         display: 'flex',
@@ -182,6 +186,11 @@ const Navbar = () => {
                             <Link to="/profile" style={linkStyle('/profile')} onClick={() => setMobileMenuOpen(false)}>
                                 <User size={24} /> <span style={{ fontSize: '1.25rem' }}>Profile</span>
                             </Link>
+                            {user?.role === 'admin' && (
+                                <Link to="/admin" style={{ ...linkStyle('/admin'), color: 'var(--gray-800)' }} onClick={() => setMobileMenuOpen(false)}>
+                                    <ShieldCheck size={24} /> <span style={{ fontSize: '1.25rem' }}>Admin</span>
+                                </Link>
+                            )}
                         </>
                     ) : (
                         <>
