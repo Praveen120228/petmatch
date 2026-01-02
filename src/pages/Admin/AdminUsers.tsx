@@ -156,7 +156,7 @@ const AdminUsers = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div style={{ position: 'relative', width: '300px' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
                         <MagnifyingGlass
                             size={20}
                             color="#94a3b8"

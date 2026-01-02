@@ -134,7 +134,7 @@ const AdminShops = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>Manage Shops</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div style={{ position: 'relative', width: '250px' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '250px' }}>
                         <MagnifyingGlass
                             size={20}
                             color="#94a3b8"

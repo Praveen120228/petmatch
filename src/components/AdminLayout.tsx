@@ -223,7 +223,7 @@ const AdminLayout = () => {
             </div>
 
             {/* Main Wrapper */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', marginLeft: '0' }} className="admin-wrapper">
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', marginLeft: '0', minWidth: 0 }} className="admin-wrapper">
 
                 {/* Top Header (Desktop) */}
                 <header className="desktop-header" style={{
@@ -239,7 +239,7 @@ const AdminLayout = () => {
                     zIndex: 30
                 }}>
                     {/* Search Bar */}
-                    <div style={{ position: 'relative', width: '320px' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
                         <MagnifyingGlass
                             size={18}
                             color="#64748b"
