@@ -97,6 +97,7 @@ const Button: React.FC<ButtonProps> = ({
             {children}
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                button:active:not(:disabled) { transform: scale(0.96); }
             `}</style>
         </button>
     );

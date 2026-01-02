@@ -24,7 +24,10 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
             style={{
                 height: '340px', // Slightly taller for better proportion
                 width: '100%',
-                position: 'relative'
+                position: 'relative',
+                animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                opacity: 0,
+                animationFillMode: 'forwards'
             }}
         >
             <Card
