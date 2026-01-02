@@ -86,11 +86,11 @@ const Explore = () => {
                         Loading...
                     </div>
                 ) : (
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
+                    <div className="explore-grid" style={{
+                        // display: 'grid' handled by class
+                        // gridTemplateColumns handled by class
                         gap: '2px',
-                        padding: '0 2px' // minimal outside padding
+                        padding: '0 2px'
                     }}>
                         {filteredPosts.map(post => (
                             <div
@@ -139,9 +139,23 @@ const Explore = () => {
                                     </div>
                                 </div>
 
-                                {/* Inline Style for hover effect since we can't easily add global CSS right here without a style block */}
+                                {/* Styles */}
                                 <style>
                                     {`
+                                        .explore-grid {
+                                            display: grid;
+                                            grid-template-columns: repeat(3, 1fr);
+                                        }
+                                        @media (min-width: 768px) {
+                                            .explore-grid { grid-template-columns: repeat(4, 1fr); }
+                                        }
+                                        @media (min-width: 1024px) {
+                                            .explore-grid { grid-template-columns: repeat(5, 1fr); }
+                                        }
+                                        @media (min-width: 1400px) {
+                                            .explore-grid { grid-template-columns: repeat(6, 1fr); }
+                                        }
+
                                         .explore-item:hover .overlay {
                                             opacity: 1 !important;
                                         }
@@ -183,28 +197,32 @@ const Explore = () => {
                 <Plus size={24} weight="bold" />
             </button>
 
-            {isCreateModalOpen && (
-                <CreatePostModal
-                    onClose={() => setIsCreateModalOpen(false)}
-                    onSuccess={() => {
-                        setIsCreateModalOpen(false);
-                        fetchFeed();
-                    }}
-                />
-            )}
+            {
+                isCreateModalOpen && (
+                    <CreatePostModal
+                        onClose={() => setIsCreateModalOpen(false)}
+                        onSuccess={() => {
+                            setIsCreateModalOpen(false);
+                            fetchFeed();
+                        }}
+                    />
+                )
+            }
 
-            {selectedPost && (
-                <PostDetailModal
-                    posts={filteredPosts}
-                    initialIndex={filteredPosts.findIndex(p => p.id === selectedPost.id)}
-                    isOpen={!!selectedPost}
-                    onClose={() => setSelectedPost(null)}
-                    onLikeToggle={(postId, newStatus) => {
-                        setPosts(prev => prev.map(p => p.id === postId ? { ...p, liked_by_me: newStatus, likes_count: p.likes_count + (newStatus ? 1 : -1) } : p));
-                    }}
-                />
-            )}
-        </div>
+            {
+                selectedPost && (
+                    <PostDetailModal
+                        posts={filteredPosts}
+                        initialIndex={filteredPosts.findIndex(p => p.id === selectedPost.id)}
+                        isOpen={!!selectedPost}
+                        onClose={() => setSelectedPost(null)}
+                        onLikeToggle={(postId, newStatus) => {
+                            setPosts(prev => prev.map(p => p.id === postId ? { ...p, liked_by_me: newStatus, likes_count: p.likes_count + (newStatus ? 1 : -1) } : p));
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 };
 
