@@ -35,7 +35,7 @@ const Support = () => {
                 <div style={{ textAlign: 'center', marginTop: '4rem', padding: '3rem', background: 'white', borderRadius: '1rem' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Still need help?</h2>
                     <p style={{ color: 'var(--gray-600)', marginBottom: '2rem' }}>Our team is available Monday through Friday, 9am - 5pm EST.</p>
-                    <Button variant="primary" size="lg" onClick={() => window.location.href = 'mailto:support@specyf.online'}>
+                    <Button variant="primary" size="lg" onClick={() => window.location.href = 'mailto:support@specyf.in'}>
                         Contact Support
                     </Button>
                 </div>
