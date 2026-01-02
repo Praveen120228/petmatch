@@ -152,7 +152,7 @@ const AdminPets = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc' }}>Moderate Pets</h1>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div style={{ position: 'relative', width: '250px' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '250px' }}>
                         <MagnifyingGlass
                             size={20}
                             color="#94a3b8"
@@ -218,7 +218,7 @@ const AdminPets = () => {
                 <div style={{ color: '#94a3b8' }}>Loading pets...</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.5rem' }}>
                         {pets.length === 0 && (
                             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: '#94a3b8', background: '#1e293b', borderRadius: '12px', border: '1px solid #334155' }}>
                                 <PawPrint size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
