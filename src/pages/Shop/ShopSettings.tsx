@@ -284,122 +284,156 @@ const ShopSettings = () => {
 
     if (loading) return <div style={{ padding: '2rem' }}>Loading settings...</div>;
 
+    const tabItems = [
+        { id: 'basic', label: 'Basic Info', icon: <Storefront size={20} weight={activeTab === 'basic' ? "fill" : "regular"} /> },
+        { id: 'location', label: 'Location', icon: <MapPin size={20} weight={activeTab === 'location' ? "fill" : "regular"} /> },
+        { id: 'visuals', label: 'Visuals', icon: <Camera size={20} weight={activeTab === 'visuals' ? "fill" : "regular"} /> },
+        { id: 'services', label: 'Services', icon: <Tag size={20} weight={activeTab === 'services' ? "fill" : "regular"} /> },
+    ];
+
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1e293b' }}>Shop Settings</h1>
-                <Button variant="primary" onClick={handleSave} loading={saving}>
-                    <FloppyDisk weight="bold" style={{ marginRight: '0.5rem' }} /> Save Changes
+        <div className="fade-in" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', minHeight: '100vh', color: '#1e293b' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.03em', background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>
+                        Shop Settings
+                    </h1>
+                    <p style={{ color: '#64748b', marginTop: '0.5rem', fontSize: '1.1rem' }}>Manage your shop profile, location, and services</p>
+                </div>
+                <Button variant="primary" onClick={handleSave} loading={saving} style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.2)' }}>
+                    <FloppyDisk weight="bold" size={20} style={{ marginRight: '0.5rem' }} />
+                    Save Changes
                 </Button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '2rem', alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '3rem', alignItems: 'start' }}>
                 {/* Sidebar Navigation */}
-                <div style={{ background: 'white', borderRadius: '12px', padding: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    {['basic', 'location', 'visuals', 'services'].map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab as any)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.75rem 1rem',
-                                border: 'none', background: activeTab === tab ? '#eff6ff' : 'transparent',
-                                color: activeTab === tab ? 'var(--primary-600)' : '#64748b',
-                                fontWeight: activeTab === tab ? 600 : 500, borderRadius: '8px', cursor: 'pointer', marginBottom: '0.5rem',
-                                textAlign: 'left'
-                            }}
-                        >
-                            {tab === 'basic' && <Tag size={20} />}
-                            {tab === 'location' && <MapPin size={20} />}
-                            {tab === 'visuals' && <Camera size={20} />}
-                            {tab === 'services' && <Storefront size={20} />}
-                            <span style={{ textTransform: 'capitalize' }}>{tab}</span>
-                        </button>
-                    ))}
+                <div style={{ position: 'sticky', top: '100px' }}>
+                    <div style={{ background: 'white', borderRadius: '24px', padding: '1.5rem', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.08)', border: '1px solid rgba(255,255,255,0.5)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {tabItems.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id as any)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '1rem',
+                                        width: '100%', padding: '1rem 1.25rem',
+                                        border: 'none',
+                                        background: activeTab === tab.id ? 'linear-gradient(to right, #eff6ff, white)' : 'transparent',
+                                        color: activeTab === tab.id ? '#3b82f6' : '#64748b',
+                                        fontWeight: activeTab === tab.id ? 700 : 600,
+                                        borderRadius: '16px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    {activeTab === tab.id && <div style={{ position: 'absolute', left: 0, top: '15%', bottom: '15%', width: '4px', background: '#3b82f6', borderRadius: '0 4px 4px 0' }} />}
+                                    {tab.icon}
+                                    <span style={{ fontSize: '1rem' }}>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Content Area */}
-                <div style={{ background: 'white', borderRadius: '12px', padding: '2rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <div style={{ background: 'white', borderRadius: '24px', padding: '3rem', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.08)', minHeight: '600px', position: 'relative' }}>
 
                     {/* Basic Info Tab */}
                     {activeTab === 'basic' && (
-                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>Basic Information</h2>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Storefront weight="duotone" color="#3b82f6" /> Basic Information
+                            </h2>
 
-                            {/* Email - READ ONLY */}
-                            <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: '#64748b' }}>Owner Email (Cannot be changed)</label>
-                                <input value={user?.email} disabled style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f1f5f9', color: '#94a3b8', cursor: 'not-allowed' }} />
-                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>Contact support to change email.</p>
-                            </div>
+                            <div style={{ display: 'grid', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                                        Shop Name
+                                    </label>
+                                    <input
+                                        value={basicInfo.name}
+                                        onChange={e => setBasicInfo({ ...basicInfo, name: e.target.value })}
+                                        style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, transition: 'all 0.2s' }}
+                                        onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.background = 'white'; }}
+                                        onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
+                                    />
+                                </div>
 
-                            <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Shop Name</label>
-                                <input value={basicInfo.name} onChange={e => setBasicInfo({ ...basicInfo, name: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-                            </div>
+                                <div>
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                                        Business Type
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <select
+                                            value={basicInfo.type}
+                                            onChange={e => setBasicInfo({ ...basicInfo, type: e.target.value })}
+                                            style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, appearance: 'none', cursor: 'pointer' }}
+                                        >
+                                            <option value="Grooming">Grooming Salon</option>
+                                            <option value="Vet">Veterinary Clinic</option>
+                                            <option value="Training">Training Center</option>
+                                            <option value="Boarding">Boarding & Daycare</option>
+                                        </select>
+                                        <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>▼</div>
+                                    </div>
+                                </div>
 
-                            <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Business Type</label>
-                                <select value={basicInfo.type} onChange={e => setBasicInfo({ ...basicInfo, type: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>
-                                    <option value="Grooming">Grooming Salon</option>
-                                    <option value="Vet">Veterinary Clinic</option>
-                                    <option value="Training">Training Center</option>
-                                    <option value="Boarding">Boarding & Daycare</option>
-                                </select>
-                            </div>
+                                <div>
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                                        Description
+                                    </label>
+                                    <textarea
+                                        rows={6}
+                                        value={basicInfo.description}
+                                        onChange={e => setBasicInfo({ ...basicInfo, description: e.target.value })}
+                                        style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', lineHeight: '1.6', resize: 'vertical' }}
+                                        onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.background = 'white'; }}
+                                        onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
+                                    />
+                                </div>
 
-                            <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Description</label>
-                                <textarea rows={4} value={basicInfo.description} onChange={e => setBasicInfo({ ...basicInfo, description: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                <div style={{ background: 'rgba(239, 68, 68, 0.05)', borderRadius: '12px', padding: '1.5rem', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#ef4444', marginBottom: '0.5rem' }}>
+                                        Registered Email (Read Only)
+                                    </label>
+                                    <p style={{ fontSize: '1rem', fontWeight: 500, color: '#1e293b' }}>{user?.email}</p>
+                                    <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.5rem' }}>Contact support to update your business email.</p>
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {/* Location Tab */}
                     {activeTab === 'location' && (
-                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>Location Settings</h2>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <MapPin weight="duotone" color="#3b82f6" /> Location Settings
+                            </h2>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>City</label>
-                                    <input value={locInfo.city} onChange={e => setLocInfo({ ...locInfo, city: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>City</label>
+                                    <input value={locInfo.city} onChange={e => setLocInfo({ ...locInfo, city: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc' }} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>State</label>
-                                    <input value={locInfo.state} onChange={e => setLocInfo({ ...locInfo, state: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>State</label>
+                                    <input value={locInfo.state} onChange={e => setLocInfo({ ...locInfo, state: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc' }} />
                                 </div>
                             </div>
+
                             <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Country</label>
-                                <input value={locInfo.country} onChange={e => setLocInfo({ ...locInfo, country: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>Country</label>
+                                <input value={locInfo.country} onChange={e => setLocInfo({ ...locInfo, country: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc' }} />
                             </div>
 
-                            {/* Map */}
-                            <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Map Location</label>
-                                <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                    <input
-                                        placeholder="Search new address..."
-                                        value={searchQuery}
-                                        onChange={e => setSearchQuery(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && handleAddressSearch()}
-                                        style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                                    />
-                                    <Button size="sm" variant="outline" onClick={handleAddressSearch} loading={searching}>Search</Button>
-                                </div>
-                                <div style={{ height: '300px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', position: 'relative' }}>
-                                    <MapContainer
-                                        center={locInfo.coords || [20.5937, 78.9629]}
-                                        zoom={locInfo.coords ? 18 : 4}
-                                        style={{ height: '100%', width: '100%' }}
-                                    >
-                                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
-                                        <LocationMarker position={locInfo.coords} setPosition={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
-                                        <MapController coords={locInfo.coords} />
-                                        <MapUpdater />
-                                    </MapContainer>
-                                </div>
-                                <div style={{ marginTop: '0.5rem', textAlign: 'right' }}>
+                            <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <label style={{ fontWeight: 700, color: '#334155' }}>Map Position</label>
                                     <Button size="sm" variant="ghost" onClick={(e) => {
                                         e.preventDefault();
                                         navigator.geolocation.getCurrentPosition(
@@ -411,8 +445,32 @@ const ShopSettings = () => {
                                             { enableHighAccuracy: true }
                                         );
                                     }}>
-                                        <MapPin /> Use My Current Location
+                                        <MapPin weight="bold" /> Use My Location
                                     </Button>
+                                </div>
+
+                                <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                    <input
+                                        placeholder="Search address to pin..."
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleAddressSearch()}
+                                        style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                                    />
+                                    <Button size="sm" variant="primary" onClick={handleAddressSearch} loading={searching}>Find</Button>
+                                </div>
+
+                                <div style={{ height: '320px', borderRadius: '12px', overflow: 'hidden', border: '2px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                                    <MapContainer
+                                        center={locInfo.coords || [20.5937, 78.9629]}
+                                        zoom={locInfo.coords ? 18 : 4}
+                                        style={{ height: '100%', width: '100%' }}
+                                    >
+                                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
+                                        <LocationMarker position={locInfo.coords} setPosition={(pos) => setLocInfo(prev => ({ ...prev, coords: pos }))} />
+                                        <MapController coords={locInfo.coords} />
+                                        <MapUpdater />
+                                    </MapContainer>
                                 </div>
                             </div>
                         </div>
@@ -420,35 +478,59 @@ const ShopSettings = () => {
 
                     {/* Visuals Tab */}
                     {activeTab === 'visuals' && (
-                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>Shop Visuals</h2>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Camera weight="duotone" color="#3b82f6" /> Shop Visuals
+                            </h2>
 
-                            <div>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '1rem' }}>Shop Logo</label>
-                                <div onClick={() => logoInputRef.current?.click()} style={{ width: '120px', height: '120px', borderRadius: '50%', border: '2px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: images.logo ? `url(${images.logo}) center/cover` : '#f8fafc' }}>
-                                    {!images.logo && <Camera size={32} color="#94a3b8" />}
+                            <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '2rem', alignItems: 'center' }}>
+                                <div onClick={() => logoInputRef.current?.click()} style={{ width: '150px', height: '150px', borderRadius: '50%', border: '4px solid white', boxShadow: '0 8px 20px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: images.logo ? `url(${images.logo}) center/cover` : '#f1f5f9', position: 'relative', overflow: 'hidden', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                    {!images.logo && <Camera size={40} color="#cbd5e1" weight="duotone" />}
+                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }} className="hover-overlay">
+                                        <Camera size={24} color="white" />
+                                    </div>
+                                    <style>{` .hover-overlay:hover { opacity: 1 !important; } `}</style>
                                 </div>
-                                <input type="file" ref={logoInputRef} onChange={handleLogoSelect} accept="image/*" style={{ display: 'none' }} />
-                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem' }}>Click to update logo</p>
+                                <div>
+                                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>Brand Logo</h3>
+                                    <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '300px', margin: '0.5rem 0 1rem 0' }}>This logo will appear in search results and on your shop profile.</p>
+                                    <Button size="sm" variant="outline" onClick={() => logoInputRef.current?.click()}>Upload New Logo</Button>
+                                    <input type="file" ref={logoInputRef} onChange={handleLogoSelect} accept="image/*" style={{ display: 'none' }} />
+                                </div>
                             </div>
 
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                    <label style={{ fontWeight: 600 }}>Gallery Photos</label>
-                                    <Button size="sm" variant="outline" onClick={() => galleryInputRef.current?.click()}><Plus /> Add Photos</Button>
+                            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>Gallery Photos</h3>
+                                        <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Showcase your facility and work</p>
+                                    </div>
+                                    <Button size="sm" variant="primary" onClick={() => galleryInputRef.current?.click()}>
+                                        <Plus weight="bold" /> Add Photos
+                                    </Button>
                                     <input type="file" ref={galleryInputRef} onChange={handleGallerySelect} multiple accept="image/*" style={{ display: 'none' }} />
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem' }}>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1.5rem' }}>
                                     {images.gallery.map((img, idx) => (
-                                        <div key={idx} style={{ aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', position: 'relative', background: '#f1f5f9' }}>
+                                        <div key={idx} style={{ aspectRatio: '1', borderRadius: '16px', overflow: 'hidden', position: 'relative', background: '#f8fafc', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', transition: 'transform 0.2s' }}>
                                             <img src={img.url} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            <button onClick={() => deleteGalleryImage(idx, img.id)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '4px', cursor: 'pointer' }}>
-                                                <Trash size={14} />
+                                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%)' }} />
+                                            <button
+                                                onClick={() => deleteGalleryImage(idx, img.id)}
+                                                style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.9)', color: '#ef4444', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', transition: 'transform 0.2s' }}
+                                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                            >
+                                                <Trash size={16} weight="bold" />
                                             </button>
                                         </div>
                                     ))}
                                     {images.gallery.length === 0 && (
-                                        <p style={{ gridColumn: '1/-1', padding: '2rem', textAlign: 'center', border: '2px dashed #e2e8f0', borderRadius: '8px', color: '#94a3b8' }}>No gallery images</p>
+                                        <div style={{ gridColumn: '1/-1', height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #cbd5e1', borderRadius: '16px', color: '#94a3b8', gap: '1rem' }}>
+                                            <Camera size={48} weight="thin" />
+                                            <p>No photos yet. Add some to attract customers!</p>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -457,33 +539,59 @@ const ShopSettings = () => {
 
                     {/* Services Tab */}
                     {activeTab === 'services' && (
-                        <div className="fade-in">
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.5rem' }}>Manage Services</h2>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Tag weight="duotone" color="#3b82f6" /> Manage Services
+                            </h2>
 
-                            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                    <input placeholder="Service Name" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
-                                    <input type="number" placeholder="Price ($)" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
-                                    <input type="number" placeholder="Duration (min)" value={newService.duration} onChange={e => setNewService({ ...newService, duration: Number(e.target.value) })} style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                            <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: '#334155' }}>Add New Service</h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '1rem', alignItems: 'center' }}>
+                                    <input placeholder="Service Name (e.g., Full Grooming)" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} style={{ padding: '0.875rem', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontWeight: 600 }}>$</span>
+                                        <input type="number" placeholder="Price" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 25px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <input type="number" placeholder="Duration" value={newService.duration} onChange={e => setNewService({ ...newService, duration: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 10px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
+                                        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.8rem' }}>min</span>
+                                    </div>
+                                    <Button variant="primary" onClick={addService} disabled={!newService.name} style={{ height: '46px', width: '46px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>
+                                        <Plus weight="bold" size={20} />
+                                    </Button>
                                 </div>
-                                <Button fullWidth variant="outline" onClick={addService} disabled={!newService.name}>+ Add Service</Button>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {services.map((svc, i) => (
-                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                                        <div>
-                                            <div style={{ fontWeight: 700 }}>{svc.name}</div>
-                                            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>{svc.duration} mins • ${svc.price}</div>
+                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', background: 'white', border: '1px solid #f1f5f9', borderRadius: '16px', boxShadow: '0 4px 6px -2px rgba(0,0,0,0.03)', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+                                                <Storefront weight="duotone" size={20} />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '1.05rem' }}>{svc.name}</div>
+                                                <div style={{ fontSize: '0.9rem', color: '#64748b', display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+                                                    <span>{svc.duration} mins</span>
+                                                    <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }} />
+                                                    <span>${svc.price}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <button onClick={() => deleteService(i, svc.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}><Trash size={18} /></button>
+                                        <button onClick={() => deleteService(i, svc.id)} style={{ color: '#ef4444', background: 'rgba(254, 226, 226, 0.5)', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '8px', transition: 'background 0.2s' }}>
+                                            <Trash size={18} weight="bold" />
+                                        </button>
                                     </div>
                                 ))}
-                                {services.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8' }}>No services found.</p>}
+                                {services.length === 0 && (
+                                    <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
+                                        <Tag size={40} weight="thin" />
+                                        <p style={{ marginTop: '1rem' }}>No services added yet.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
-
                 </div>
             </div>
         </div>
