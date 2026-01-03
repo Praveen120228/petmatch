@@ -29,7 +29,7 @@ const AdminUsers = () => {
             let query = supabase
                 .from('profiles')
                 .select('*', { count: 'exact' })
-                .order('updated_at', { ascending: false })
+                .order('created_at', { ascending: false })
                 .range(from, to);
 
             if (search) {
@@ -193,10 +193,11 @@ const AdminUsers = () => {
                     <div style={{ border: '1px solid #334155', borderRadius: '12px', overflowX: 'auto', background: '#1e293b', maxWidth: '100%', width: '100%', WebkitOverflowScrolling: 'touch' }}>
 
                         {/* Table Header Row (Simulated) */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 100px', padding: '1rem 1.5rem', background: '#0f172a', borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: '800px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 0.8fr 1fr 0.8fr 100px', padding: '1rem 1.5rem', background: '#0f172a', borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: '900px' }}>
                             <div>User</div>
                             <div>Email</div>
                             <div>Role</div>
+                            <div>Joined</div>
                             <div>Status</div>
                             <div style={{ textAlign: 'right' }}>Actions</div>
                         </div>
@@ -216,10 +217,10 @@ const AdminUsers = () => {
                                     background: '#1e293b',
                                     borderBottom: isLast ? 'none' : '1px solid #334155',
                                     display: 'grid',
-                                    gridTemplateColumns: '2fr 1.5fr 1fr 1fr 100px',
+                                    gridTemplateColumns: '2fr 1.5fr 0.8fr 1fr 0.8fr 100px',
                                     alignItems: 'center',
                                     gap: '1rem',
-                                    minWidth: '800px'
+                                    minWidth: '900px'
                                 }}>
                                     {/* User Column */}
                                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -256,6 +257,13 @@ const AdminUsers = () => {
                                         }}>
                                             {u.role}
                                         </span>
+                                    </div>
+
+                                    {/* Joined Column */}
+                                    <div>
+                                        <p style={{ color: '#cbd5e1', fontSize: '0.9rem' }}>
+                                            {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                                        </p>
                                     </div>
 
                                     {/* Status Column */}
