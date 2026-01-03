@@ -29,7 +29,7 @@ const AdminUsers = () => {
             let query = supabase
                 .from('profiles')
                 .select('*', { count: 'exact' })
-                .order('created_at', { ascending: false })
+                .order('updated_at', { ascending: false })
                 .range(from, to);
 
             if (search) {
@@ -262,7 +262,7 @@ const AdminUsers = () => {
                                     {/* Joined Column */}
                                     <div>
                                         <p style={{ color: '#cbd5e1', fontSize: '0.9rem' }}>
-                                            {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                                            {u.created_at ? new Date(u.created_at).toLocaleDateString() : (u.updated_at ? `Updated: ${new Date(u.updated_at).toLocaleDateString()}` : 'N/A')}
                                         </p>
                                     </div>
 
