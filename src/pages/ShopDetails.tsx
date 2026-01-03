@@ -221,12 +221,42 @@ const ShopDetails = () => {
                 <div>
                     {/* Header Info */}
                     <div style={{ marginBottom: '2rem' }}>
-                        <div style={{ position: 'relative', height: '300px', borderRadius: '16px', overflow: 'hidden', background: heroImage ? `url(${heroImage}) center/cover` : '#f1f5f9', marginBottom: '1.5rem' }}>
-                            {/* Gallery Thumbs */}
-                            {gallery.length > 0 && (
-                                <div style={{ position: 'absolute', bottom: '12px', right: '12px', display: 'flex', gap: '6px', padding: '6px', background: 'rgba(255,255,255,0.9)', borderRadius: '10px' }}>
-                                    {[shop, ...gallery].slice(0, 4).map((img: any, i) => (
-                                        <div key={i} onClick={() => setHeroImage(img.image_url)} style={{ width: '40px', height: '40px', borderRadius: '6px', background: `url(${img.image_url || img}) center/cover`, cursor: 'pointer', border: heroImage === (img.image_url || img) ? '2px solid var(--primary-600)' : 'none' }} />
+                        {/* Hero Image Section */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <div style={{ position: 'relative', height: '300px', borderRadius: '16px', overflow: 'hidden', background: '#f1f5f9', marginBottom: '1rem' }}>
+                                {/* Skeleton / Placeholder */}
+                                <div className="skeleton" style={{ position: 'absolute', inset: 0, opacity: heroImage ? 0 : 1, transition: 'opacity 0.3s' }} />
+
+                                {heroImage && (
+                                    <img
+                                        src={heroImage}
+                                        alt={shop.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                    />
+                                )}
+                            </div>
+
+                            {/* Gallery Thumbnails - Scrollable Row */}
+                            {(gallery.length > 0 || shop.image_url) && (
+                                <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
+                                    {[shop.image_url, ...gallery.map(g => g.image_url)].filter(Boolean).map((imgUrl, i) => (
+                                        <div
+                                            key={i}
+                                            onClick={() => setHeroImage(imgUrl)}
+                                            style={{
+                                                minWidth: '80px',
+                                                height: '80px',
+                                                borderRadius: '12px',
+                                                overflow: 'hidden',
+                                                cursor: 'pointer',
+                                                border: heroImage === imgUrl ? '2px solid var(--primary-600)' : '2px solid transparent', // Fixed border for active state
+                                                opacity: heroImage === imgUrl ? 1 : 0.7,
+                                                transition: 'all 0.2s',
+                                                flexShrink: 0
+                                            }}
+                                        >
+                                            <img src={imgUrl} alt={`Gallery ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </div>
                                     ))}
                                 </div>
                             )}
