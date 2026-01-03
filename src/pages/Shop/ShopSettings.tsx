@@ -549,7 +549,7 @@ const ShopSettings = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '1rem', alignItems: 'center' }}>
                                     <input placeholder="Service Name (e.g., Full Grooming)" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} style={{ padding: '0.875rem', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
                                     <div style={{ position: 'relative' }}>
-                                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontWeight: 600 }}>$</span>
+                                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontWeight: 600 }}>₹</span>
                                         <input type="number" placeholder="Price" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 25px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
                                     </div>
                                     <div style={{ position: 'relative' }}>
@@ -574,7 +574,7 @@ const ShopSettings = () => {
                                                 <div style={{ fontSize: '0.9rem', color: '#64748b', display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
                                                     <span>{svc.duration} mins</span>
                                                     <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }} />
-                                                    <span>${svc.price}</span>
+                                                    <span>₹{svc.price}</span>
                                                 </div>
                                             </div>
                                         </div>
