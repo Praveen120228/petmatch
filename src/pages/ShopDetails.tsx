@@ -215,7 +215,7 @@ const ShopDetails = () => {
             </button>
 
             {/* Layout Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 1fr', gap: '2rem' }}>
+            <div className="shop-details-grid" style={{ display: 'grid', gap: '2rem' }}>
 
                 {/* Left Column: Details & Booking Flow */}
                 <div>
@@ -419,9 +419,12 @@ const ShopDetails = () => {
             </div>
 
             <style>{`
+                .shop-details-grid {
+                    grid-template-columns: 2fr 1fr;
+                }
                 @media (max-width: 768px) {
-                    div[style*="grid-template-columns: minmax(0, 2fr) 1fr"] {
-                        grid-template-columns: 1fr !important;
+                    .shop-details-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
             `}</style>

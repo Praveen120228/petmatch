@@ -437,9 +437,29 @@ const ShopSettings = () => {
                                     <Button size="sm" variant="ghost" onClick={(e) => {
                                         e.preventDefault();
                                         navigator.geolocation.getCurrentPosition(
-                                            pos => {
+                                            async pos => {
                                                 const { latitude, longitude } = pos.coords;
                                                 setLocInfo(prev => ({ ...prev, coords: { lat: latitude, lng: longitude } }));
+
+                                                try {
+                                                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                                                    const data = await res.json();
+                                                    if (data && data.address) {
+                                                        const city = data.address.city || data.address.town || data.address.village || '';
+                                                        const state = data.address.state || '';
+                                                        const country = data.address.country || '';
+
+                                                        setLocInfo(prev => ({
+                                                            ...prev,
+                                                            city,
+                                                            state,
+                                                            country,
+                                                            coords: { lat: latitude, lng: longitude }
+                                                        }));
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Reverse geocoding failed", err);
+                                                }
                                             },
                                             () => { alert('Could not get location.'); },
                                             { enableHighAccuracy: true }
