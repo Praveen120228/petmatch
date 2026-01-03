@@ -215,11 +215,15 @@ const AdminLayout = () => {
                 position: 'fixed', top: 0, left: 0, right: 0, height: '64px', background: '#0f172a', borderBottom: '1px solid #1e293b', color: 'white', zIndex: 40,
                 display: 'none', alignItems: 'center', padding: '0 1rem', justifyContent: 'space-between'
             }} className="mobile-header">
+                <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'white', padding: 0 }}><List size={26} /></button>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <ShieldCheck size={24} weight="duotone" color="#2dd4bf" />
                     <span style={{ fontSize: '1.125rem', fontWeight: 700 }}>Admin</span>
                 </div>
-                <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'white' }}><List size={24} /></button>
+
+                {/* Spacer to center the logo roughly if needed, or just keep it simple. Empty div for balance if strictly center is desired, but 'space-between' puts logo on right now. User just asked move button to left. */}
+                <div style={{ width: '26px' }}></div>
             </div>
 
             {/* Main Wrapper */}
