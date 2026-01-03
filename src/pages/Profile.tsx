@@ -8,6 +8,7 @@ import { Plus, PencilSimple, Trash, Heart, ChatCircle, MapPin, Folder, CaretRigh
 import CreatePostModal from '../components/CreatePostModal';
 import PostDetailModal from '../components/PostDetailModal';
 import ImageCropper from '../components/ImageCropper';
+import FeedbackModal from '../components/FeedbackModal'; // Import FeedbackModal
 
 import { featureService } from '../lib/featureService';
 import type { Collection } from '../lib/featureService';
@@ -69,6 +70,8 @@ const Profile = () => {
     const [reportReason, setReportReason] = useState('spam');
     const [reportDescription, setReportDescription] = useState('');
     const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false); // Feedback State
 
     const [cropTarget, setCropTarget] = useState<'user' | 'pet'>('user');
     const [traitInput, setTraitInput] = useState(''); // State for new trait input
@@ -637,6 +640,10 @@ const Profile = () => {
                                     <Button variant="ghost" size="sm" onClick={logout} style={{ color: '#ef4444' }}>
                                         <SignOut size={18} weight="bold" /> Logout
                                     </Button>
+                                    {/* Feedback Button */}
+                                    <Button variant="ghost" size="sm" onClick={() => setIsFeedbackOpen(true)} title="Send Feedback">
+                                        <ChatCircle size={18} weight="bold" /> Feedback
+                                    </Button>
                                 </>
                             )
                         }
@@ -704,6 +711,9 @@ const Profile = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* Feedback Modal */}
+                    <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
 
                     {/* Edit Profile Modal */}
                     {
