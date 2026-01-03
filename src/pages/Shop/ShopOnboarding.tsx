@@ -359,12 +359,39 @@ const ShopOnboarding = () => {
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                                     <Button size="sm" variant="outline" onClick={(e) => {
                                         e.preventDefault();
+                                        setLoading(true); // Re-use loading state or add a specific one if prefered, but for now simple feedback
                                         navigator.geolocation.getCurrentPosition(
-                                            pos => {
+                                            async pos => {
                                                 const { latitude, longitude } = pos.coords;
                                                 setLocInfo(prev => ({ ...prev, coords: { lat: latitude, lng: longitude } }));
+
+                                                try {
+                                                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                                                    const data = await res.json();
+                                                    if (data && data.address) {
+                                                        const city = data.address.city || data.address.town || data.address.village || '';
+                                                        const state = data.address.state || '';
+                                                        const country = data.address.country || '';
+
+                                                        setLocInfo(prev => ({
+                                                            ...prev,
+                                                            city,
+                                                            state,
+                                                            country,
+                                                            coords: { lat: latitude, lng: longitude }
+                                                        }));
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Reverse geocoding failed", err);
+                                                    // Silently fail or alert user? Alerting might be annoying if just the auto-fill fails but coords work.
+                                                } finally {
+                                                    setLoading(false);
+                                                }
                                             },
-                                            () => { alert('Could not get location. Ensure GPS is enabled.'); },
+                                            () => {
+                                                alert('Could not get location. Ensure GPS is enabled.');
+                                                setLoading(false);
+                                            },
                                             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                                         );
                                     }}>
