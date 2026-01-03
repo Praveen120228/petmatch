@@ -1183,6 +1183,20 @@ const Profile = () => {
                                                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
                                                 </Link>
 
+                                                {/* Likes Badge */}
+                                                <div style={{
+                                                    position: 'absolute', top: '12px', left: '12px',
+                                                    background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)',
+                                                    padding: '6px 12px', borderRadius: '20px',
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10
+                                                }}>
+                                                    <Heart weight="fill" size={14} color="#ec4899" />
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
+                                                        {pet.likes || 0}
+                                                    </span>
+                                                </div>
+
                                                 {/* Owner Actions: Edit / Delete */}
                                                 {!isPublic && pet.id && (
                                                     <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px', zIndex: 10 }}>
