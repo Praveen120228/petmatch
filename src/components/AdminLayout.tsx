@@ -20,6 +20,7 @@ import {
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import Button from './Button';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 const AdminLayout = () => {
     const { user, isAuthenticated, logout, loading } = useAuth();
@@ -80,7 +81,14 @@ const AdminLayout = () => {
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Close menus on ESC
+    useEscapeKey(() => {
+        setSidebarOpen(false);
+        setShowNotifications(false);
+    });
 
     const markAsRead = async (id: string) => {
         // Optimistic update
