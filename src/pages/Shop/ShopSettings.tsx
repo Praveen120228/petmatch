@@ -320,8 +320,8 @@ const ShopSettings = () => {
                                         display: 'flex', alignItems: 'center', gap: '1rem',
                                         width: '100%', padding: '1rem 1.25rem',
                                         border: 'none',
-                                        background: activeTab === tab.id ? 'linear-gradient(to right, #eff6ff, white)' : 'transparent',
-                                        color: activeTab === tab.id ? '#3b82f6' : '#64748b',
+                                        background: activeTab === tab.id ? 'linear-gradient(to right, #f3e8ff, white)' : 'transparent',
+                                        color: activeTab === tab.id ? '#9333ea' : '#64748b',
                                         fontWeight: activeTab === tab.id ? 700 : 600,
                                         borderRadius: '16px',
                                         cursor: 'pointer',
@@ -331,7 +331,7 @@ const ShopSettings = () => {
                                         overflow: 'hidden'
                                     }}
                                 >
-                                    {activeTab === tab.id && <div style={{ position: 'absolute', left: 0, top: '15%', bottom: '15%', width: '4px', background: '#3b82f6', borderRadius: '0 4px 4px 0' }} />}
+                                    {activeTab === tab.id && <div style={{ position: 'absolute', left: 0, top: '15%', bottom: '15%', width: '4px', background: '#9333ea', borderRadius: '0 4px 4px 0' }} />}
                                     {tab.icon}
                                     <span style={{ fontSize: '1rem' }}>{tab.label}</span>
                                 </button>
@@ -347,7 +347,7 @@ const ShopSettings = () => {
                     {activeTab === 'basic' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <Storefront weight="duotone" color="#3b82f6" /> Basic Information
+                                <Storefront weight="duotone" color="#9333ea" /> Basic Information
                             </h2>
 
                             <div style={{ display: 'grid', gap: '2rem' }}>
@@ -359,7 +359,7 @@ const ShopSettings = () => {
                                         value={basicInfo.name}
                                         onChange={e => setBasicInfo({ ...basicInfo, name: e.target.value })}
                                         style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, transition: 'all 0.2s' }}
-                                        onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.background = 'white'; }}
+                                        onFocus={e => { e.target.style.borderColor = '#9333ea'; e.target.style.background = 'white'; }}
                                         onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
                                     />
                                 </div>
@@ -392,7 +392,7 @@ const ShopSettings = () => {
                                         value={basicInfo.description}
                                         onChange={e => setBasicInfo({ ...basicInfo, description: e.target.value })}
                                         style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', lineHeight: '1.6', resize: 'vertical' }}
-                                        onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.background = 'white'; }}
+                                        onFocus={e => { e.target.style.borderColor = '#9333ea'; e.target.style.background = 'white'; }}
                                         onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
                                     />
                                 </div>
@@ -412,7 +412,7 @@ const ShopSettings = () => {
                     {activeTab === 'location' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <MapPin weight="duotone" color="#3b82f6" /> Location Settings
+                                <MapPin weight="duotone" color="#9333ea" /> Location Settings
                             </h2>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -480,7 +480,7 @@ const ShopSettings = () => {
                     {activeTab === 'visuals' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <Camera weight="duotone" color="#3b82f6" /> Shop Visuals
+                                <Camera weight="duotone" color="#9333ea" /> Shop Visuals
                             </h2>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '2rem', alignItems: 'center' }}>
@@ -541,7 +541,7 @@ const ShopSettings = () => {
                     {activeTab === 'services' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <Tag weight="duotone" color="#3b82f6" /> Manage Services
+                                <Tag weight="duotone" color="#9333ea" /> Manage Services
                             </h2>
 
                             <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
@@ -566,7 +566,7 @@ const ShopSettings = () => {
                                 {services.map((svc, i) => (
                                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', background: 'white', border: '1px solid #f1f5f9', borderRadius: '16px', boxShadow: '0 4px 6px -2px rgba(0,0,0,0.03)', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9333ea' }}>
                                                 <Storefront weight="duotone" size={20} />
                                             </div>
                                             <div>
