@@ -15,7 +15,8 @@ import {
     MagnifyingGlass,
     Bell,
     Check,
-    House
+    House,
+    ChatCircle // Import Icon
 } from '@phosphor-icons/react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
@@ -117,6 +118,7 @@ const AdminLayout = () => {
         { path: '/admin/bookings', icon: <CalendarCheck size={20} />, label: 'Bookings' },
         { path: '/admin/pets', icon: <PawPrint size={20} />, label: 'Pets' },
         { path: '/admin/reports', icon: <Flag size={20} />, label: 'Reports' },
+        { path: '/admin/feedback', icon: <ChatCircle size={20} />, label: 'Feedback' }, // Add Feedback Link
         { path: '/admin/analytics', icon: <ChartLineUp size={20} />, label: 'Analytics' },
     ];
 

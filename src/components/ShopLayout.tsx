@@ -15,6 +15,7 @@ import {
     Gear
 } from '@phosphor-icons/react';
 import Button from './Button';
+import FeedbackModal from './FeedbackModal'; // Import FeedbackModal
 
 const ShopLayout = () => {
     const { user, isAuthenticated, logout, loading } = useAuth();
@@ -22,6 +23,7 @@ const ShopLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [shopStatus, setShopStatus] = useState<string | null>(null);
     const [statusLoading, setStatusLoading] = useState(true);
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false); // Feedback State
 
     const fetchShopStatus = async () => {
         if (!user) return;
@@ -158,6 +160,24 @@ const ShopLayout = () => {
                         </div>
                     </div>
                     <button
+                        onClick={() => setIsFeedbackOpen(true)}
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem',
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            marginBottom: '0.5rem'
+                        }}
+                    >
+                        <Storefront size={18} /> Feedback
+                    </button>
+                    <button
                         onClick={logout}
                         style={{
                             width: '100%',
@@ -220,6 +240,7 @@ const ShopLayout = () => {
                                 <span style={{ fontWeight: 700 }}>Menu</span>
                                 <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none' }}><X size={24} /></button>
                             </div>
+
                             <nav>
                                 {navItems.map(item => (
                                     <Link
@@ -241,13 +262,15 @@ const ShopLayout = () => {
                                     </Link>
                                 ))}
                             </nav>
-                            <div style={{ marginTop: '2rem' }}>
+                            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <Button variant="ghost" fullWidth onClick={() => setIsFeedbackOpen(true)}>Feedback</Button>
                                 <Button variant="outline" fullWidth onClick={logout}>Sign Out</Button>
                             </div>
                         </div>
                     </div>
                 )
             }
+            <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
         </div >
     );
 };
