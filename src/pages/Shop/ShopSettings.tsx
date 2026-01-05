@@ -55,7 +55,7 @@ const ShopSettings = () => {
     // Data States
     const [basicInfo, setBasicInfo] = useState({
         name: '',
-        type: 'Grooming',
+        type: [] as string[],
         description: '',
         status: 'pending' // Display only
     });
@@ -102,7 +102,7 @@ const ShopSettings = () => {
                 setShopId(shop.id);
                 setBasicInfo({
                     name: shop.name,
-                    type: shop.shop_type || 'Grooming',
+                    type: Array.isArray(shop.shop_type) ? shop.shop_type : (shop.shop_type ? [shop.shop_type] : []),
                     description: shop.description || '',
                     status: shop.status
                 });
@@ -364,23 +364,39 @@ const ShopSettings = () => {
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>
-                                        Business Type
-                                    </label>
-                                    <div style={{ position: 'relative' }}>
-                                        <select
-                                            value={basicInfo.type}
-                                            onChange={e => setBasicInfo({ ...basicInfo, type: e.target.value })}
-                                            style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, appearance: 'none', cursor: 'pointer', color: '#1e293b' }}
-                                        >
-                                            <option value="Grooming">Grooming Salon</option>
-                                            <option value="Vet">Veterinary Clinic</option>
-                                            <option value="Training">Training Center</option>
-                                            <option value="Boarding">Boarding & Daycare</option>
-                                        </select>
-                                        <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>▼</div>
-                                    </div>
+                                <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                                    Business Types
+                                </label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {['Grooming', 'Vet', 'Training', 'Boarding', 'Pet Sitter', 'Walker'].map(type => {
+                                        const isSelected = (basicInfo.type as any).includes(type);
+                                        return (
+                                            <button
+                                                key={type}
+                                                onClick={() => {
+                                                    const currentTypes = Array.isArray(basicInfo.type) ? basicInfo.type : [];
+                                                    const newTypes = isSelected
+                                                        ? currentTypes.filter((t: string) => t !== type)
+                                                        : [...currentTypes, type];
+                                                    setBasicInfo({ ...basicInfo, type: newTypes as any });
+                                                }}
+                                                style={{
+                                                    padding: '0.5rem 1rem',
+                                                    borderRadius: '9999px',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: 600,
+                                                    border: isSelected ? 'none' : '1px solid #e2e8f0',
+                                                    background: isSelected ? 'var(--primary-600)' : 'white',
+                                                    color: isSelected ? 'white' : '#64748b',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                    boxShadow: isSelected ? '0 4px 6px -1px rgba(147, 51, 234, 0.3)' : 'none'
+                                                }}
+                                            >
+                                                {type}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 <div>
