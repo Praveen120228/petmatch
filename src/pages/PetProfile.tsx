@@ -586,9 +586,7 @@ const PetProfile = () => {
                                 <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleShare}>
                                     <ShareNetwork size={20} weight="bold" />
                                 </Button>
-                                <Button variant="outline" style={{ padding: '0.75rem' }} onClick={handleShare}>
-                                    <ShareNetwork size={20} weight="bold" />
-                                </Button>
+
                                 <Button
                                     variant="ghost"
                                     style={{ padding: '0.75rem', color: '#ef4444' }}
