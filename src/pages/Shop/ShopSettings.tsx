@@ -358,7 +358,7 @@ const ShopSettings = () => {
                                     <input
                                         value={basicInfo.name}
                                         onChange={e => setBasicInfo({ ...basicInfo, name: e.target.value })}
-                                        style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, transition: 'all 0.2s' }}
+                                        style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, transition: 'all 0.2s', color: '#1e293b' }}
                                         onFocus={e => { e.target.style.borderColor = '#9333ea'; e.target.style.background = 'white'; }}
                                         onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
                                     />
@@ -372,7 +372,7 @@ const ShopSettings = () => {
                                         <select
                                             value={basicInfo.type}
                                             onChange={e => setBasicInfo({ ...basicInfo, type: e.target.value })}
-                                            style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, appearance: 'none', cursor: 'pointer' }}
+                                            style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', fontWeight: 500, appearance: 'none', cursor: 'pointer', color: '#1e293b' }}
                                         >
                                             <option value="Grooming">Grooming Salon</option>
                                             <option value="Vet">Veterinary Clinic</option>
@@ -391,7 +391,7 @@ const ShopSettings = () => {
                                         rows={6}
                                         value={basicInfo.description}
                                         onChange={e => setBasicInfo({ ...basicInfo, description: e.target.value })}
-                                        style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', lineHeight: '1.6', resize: 'vertical' }}
+                                        style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', fontSize: '1rem', lineHeight: '1.6', resize: 'vertical', color: '#1e293b' }}
                                         onFocus={e => { e.target.style.borderColor = '#9333ea'; e.target.style.background = 'white'; }}
                                         onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
                                     />
@@ -418,17 +418,17 @@ const ShopSettings = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                 <div>
                                     <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>City</label>
-                                    <input value={locInfo.city} onChange={e => setLocInfo({ ...locInfo, city: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc' }} />
+                                    <input value={locInfo.city} onChange={e => setLocInfo({ ...locInfo, city: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>State</label>
-                                    <input value={locInfo.state} onChange={e => setLocInfo({ ...locInfo, state: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc' }} />
+                                    <input value={locInfo.state} onChange={e => setLocInfo({ ...locInfo, state: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }} />
                                 </div>
                             </div>
 
                             <div>
                                 <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>Country</label>
-                                <input value={locInfo.country} onChange={e => setLocInfo({ ...locInfo, country: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc' }} />
+                                <input value={locInfo.country} onChange={e => setLocInfo({ ...locInfo, country: e.target.value })} style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }} />
                             </div>
 
                             <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
@@ -475,7 +475,7 @@ const ShopSettings = () => {
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleAddressSearch()}
-                                        style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                                        style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', color: '#1e293b' }}
                                     />
                                     <Button size="sm" variant="primary" onClick={handleAddressSearch} loading={searching}>Find</Button>
                                 </div>
@@ -567,13 +567,13 @@ const ShopSettings = () => {
                             <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
                                 <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: '#334155' }}>Add New Service</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '1rem', alignItems: 'center' }}>
-                                    <input placeholder="Service Name (e.g., Full Grooming)" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} style={{ padding: '0.875rem', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
+                                    <input placeholder="Service Name (e.g., Full Grooming)" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} style={{ padding: '0.875rem', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%', color: '#1e293b' }} />
                                     <div style={{ position: 'relative' }}>
                                         <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontWeight: 600 }}>₹</span>
-                                        <input type="number" placeholder="Price" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 25px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
+                                        <input type="number" placeholder="Price" value={newService.price} onChange={e => setNewService({ ...newService, price: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 25px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%', color: '#1e293b' }} />
                                     </div>
                                     <div style={{ position: 'relative' }}>
-                                        <input type="number" placeholder="Duration" value={newService.duration} onChange={e => setNewService({ ...newService, duration: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 10px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%' }} />
+                                        <input type="number" placeholder="Duration" value={newService.duration} onChange={e => setNewService({ ...newService, duration: Number(e.target.value) })} style={{ padding: '0.875rem 0.875rem 0.875rem 10px', borderRadius: '10px', border: '1px solid #cbd5e1', width: '100%', color: '#1e293b' }} />
                                         <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.8rem' }}>min</span>
                                     </div>
                                     <Button variant="primary" onClick={addService} disabled={!newService.name} style={{ height: '46px', width: '46px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>
