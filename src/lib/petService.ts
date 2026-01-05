@@ -191,7 +191,8 @@ export const petService = {
                 traits: pet.traits,
                 owner_id: pet.owner_id,
                 distance: '1m',
-                likes: 0
+                likes: 0,
+                status: 'available'
             })
             .select()
             .single();

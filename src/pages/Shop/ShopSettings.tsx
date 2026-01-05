@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/Button';
-import { Storefront, MapPin, Tag, Camera, Plus, Trash, FloppyDisk } from '@phosphor-icons/react';
+import { Storefront, MapPin, Tag, Camera, Plus, Trash, FloppyDisk, PencilSimple } from '@phosphor-icons/react';
 import { storageService } from '../../lib/storageService';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -78,6 +78,7 @@ const ShopSettings = () => {
     // Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [searching, setSearching] = useState(false);
+    const [isEditingTypes, setIsEditingTypes] = useState(false);
 
     const logoInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -364,10 +365,24 @@ const ShopSettings = () => {
                                     />
                                 </div>
 
-                                <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem' }}>
-                                    Business Types
-                                </label>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                                    <label style={{ display: 'block', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8' }}>
+                                        Business Types
+                                    </label>
+                                    {!isEditingTypes && (
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm("Changing your business type significantly affects how you appear in search results. Are you sure you want to proceed?")) {
+                                                    setIsEditingTypes(true);
+                                                }
+                                            }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: '#64748b', background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.25rem' }}
+                                        >
+                                            <PencilSimple size={14} weight="bold" /> Edit
+                                        </button>
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', opacity: isEditingTypes ? 1 : 0.6, pointerEvents: isEditingTypes ? 'auto' : 'none', filter: isEditingTypes ? 'none' : 'grayscale(0.5)', transition: 'all 0.3s' }}>
                                     {['Grooming', 'Vet', 'Training', 'Boarding', 'Pet Sitter', 'Walker'].map(type => {
                                         const isSelected = (basicInfo.type as any).includes(type);
                                         return (
