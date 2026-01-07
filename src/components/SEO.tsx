@@ -1,8 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 
+// ... interface
 interface SEOProps {
     title: string;
     description?: string;
+    keywords?: string;
     name?: string;
     type?: string;
     image?: string;
@@ -10,16 +12,18 @@ interface SEOProps {
     structuredData?: object;
 }
 
-const SEO = ({ title, description, name, type = 'website', image, canonicalUrl, structuredData }: SEOProps) => {
+const SEO = ({ title, description, keywords, name, type = 'website', image, canonicalUrl, structuredData }: SEOProps) => {
     return (
         <Helmet>
             {/* Standard metadata tags */}
             <title>{title} | Specyf</title>
             {description && <meta name="description" content={description} />}
+            {keywords && <meta name="keywords" content={keywords} />}
             {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
             {/* Open Graph / Facebook */}
             <meta property="og:type" content={type} />
+// ...
             <meta property="og:title" content={`${title} | Specyf`} />
             {description && <meta property="og:description" content={description} />}
             {image && <meta property="og:image" content={image} />}

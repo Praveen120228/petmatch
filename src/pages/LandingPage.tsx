@@ -40,19 +40,36 @@ const LandingPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
             <SEO
                 title="Find Your Perfect Pet Match"
-                description="Specyf connects pets with loving homes. Discover dogs, cats, and other pets for adoption or playdates near you."
+                description="Specyf is the premier pet matrimony and playdate platform. Connect your pet with a perfect match for dates, breeding, or friendship."
+                keywords="pet match, pet matrimony, pet date, pet dating, find pet partner, dog mating, cat mating, pet breeding"
                 canonicalUrl="https://specyf.in/"
                 structuredData={{
                     "@context": "https://schema.org",
-                    "@type": "WebSite",
-                    "name": "Specyf",
-                    "url": "https://specyf.in/",
-                    "potentialAction": {
-                        "@type": "SearchAction",
-                        "target": "https://specyf.in/search?q={search_term_string}",
-                        "query-input": "required name=search_term_string"
-                    },
-                    "description": "Specyf is a pet adoption and matching platform connecting pets with loving homes."
+                    "@graph": [
+                        {
+                            "@type": "WebSite",
+                            "name": "Specyf - Pet Match & Matrimony",
+                            "url": "https://specyf.in/",
+                            "potentialAction": {
+                                "@type": "SearchAction",
+                                "target": "https://specyf.in/search?q={search_term_string}",
+                                "query-input": "required name=search_term_string"
+                            },
+                            "description": "Specyf is the leading platform for pet matching, matrimony, and adoption."
+                        },
+                        {
+                            "@type": "Organization",
+                            "name": "Specyf",
+                            "url": "https://specyf.in/",
+                            "logo": "https://specyf.in/logo.svg",
+                            "sameAs": [
+                                "https://www.instagram.com/specyf",
+                                "https://www.facebook.com/specyf",
+                                "https://twitter.com/specyf"
+                            ],
+                            "description": "Specyf is a pet adoption and matching platform connecting pets with loving homes."
+                        }
+                    ]
                 }}
             />
 
