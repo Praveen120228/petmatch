@@ -74,7 +74,7 @@ const AdminFeedback = () => {
     return (
         <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1e293b' }}>Feedback & Suggestions</h1>
+                <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc' }}>Feedback & Suggestions</h1>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {['all', 'pending', 'reviewed'].map(f => (
                         <button
@@ -83,9 +83,9 @@ const AdminFeedback = () => {
                             style={{
                                 padding: '0.5rem 1rem',
                                 borderRadius: '8px',
-                                border: filter === f ? '2px solid var(--primary-600)' : '1px solid #cbd5e1',
-                                background: filter === f ? 'var(--primary-50)' : 'white',
-                                color: filter === f ? 'var(--primary-700)' : '#64748b',
+                                border: filter === f ? '1px solid #2dd4bf' : '1px solid #334155',
+                                background: filter === f ? 'rgba(45, 212, 191, 0.1)' : '#1e293b',
+                                color: filter === f ? '#2dd4bf' : '#94a3b8',
                                 fontWeight: 600,
                                 textTransform: 'capitalize',
                                 cursor: 'pointer'
@@ -102,9 +102,9 @@ const AdminFeedback = () => {
             ) : (
                 <>
                     {/* Desktop Table View */}
-                    <div className="desktop-view" style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                    <div className="desktop-view" style={{ background: '#1e293b', borderRadius: '16px', border: '1px solid #334155', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                            <thead style={{ background: '#0f172a', borderBottom: '1px solid #334155' }}>
                                 <tr>
                                     <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User / Role</th>
                                     <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rating</th>
@@ -123,11 +123,11 @@ const AdminFeedback = () => {
                                     </tr>
                                 ) : (
                                     filteredFeedback.map((item) => (
-                                        <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', opacity: item.status === 'reviewed' ? 0.7 : 1 }}>
+                                        <tr key={item.id} style={{ borderBottom: '1px solid #334155', opacity: item.status === 'reviewed' ? 0.7 : 1 }}>
                                             <td style={{ padding: '1rem' }}>
-                                                <div style={{ fontWeight: 600, color: '#1e293b' }}>{item.profiles?.name || 'Unknown'}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{item.profiles?.role || 'user'}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{item.profiles?.email}</div>
+                                                <div style={{ fontWeight: 600, color: 'white' }}>{item.profiles?.name || 'Unknown'}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{item.profiles?.role || 'user'}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{item.profiles?.email}</div>
                                             </td>
                                             <td style={{ padding: '1rem' }}>
                                                 <div style={{ display: 'flex', gap: '2px' }}>
@@ -144,7 +144,7 @@ const AdminFeedback = () => {
                                             <td style={{ padding: '1rem' }}>
                                                 <span style={{
                                                     padding: '0.25rem 0.5rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600,
-                                                    background: '#f1f5f9', color: '#475569', textTransform: 'capitalize'
+                                                    background: '#334155', color: '#cbd5e1', textTransform: 'capitalize'
                                                 }}>
                                                     {item.category}
                                                 </span>
@@ -183,28 +183,28 @@ const AdminFeedback = () => {
                             </div>
                         ) : (
                             filteredFeedback.map((item) => (
-                                <div key={item.id} style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', opacity: item.status === 'reviewed' ? 0.7 : 1 }}>
+                                <div key={item.id} style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '16px', border: '1px solid #334155', opacity: item.status === 'reviewed' ? 0.7 : 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                                         <div>
-                                            <div style={{ fontWeight: 700, color: '#1e293b' }}>{item.profiles?.name || 'Unknown'}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{item.profiles?.role || 'user'}</div>
+                                            <div style={{ fontWeight: 700, color: 'white' }}>{item.profiles?.name || 'Unknown'}</div>
+                                            <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{item.profiles?.role || 'user'}</div>
                                         </div>
                                         <div style={{ display: 'flex', gap: '2px' }}>
                                             {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={14} weight={i < item.rating ? "fill" : "regular"} color={i < item.rating ? "#fbbf24" : "#cbd5e1"} />
+                                                <Star key={i} size={14} weight={i < item.rating ? "fill" : "regular"} color={i < item.rating ? "#fbbf24" : "#475569"} />
                                             ))}
                                         </div>
                                     </div>
 
                                     <div style={{ marginBottom: '1rem' }}>
-                                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, background: '#f1f5f9', color: '#475569', textTransform: 'capitalize' }}>
+                                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, background: '#334155', color: '#cbd5e1', textTransform: 'capitalize' }}>
                                             {item.category}
                                         </span>
                                     </div>
 
-                                    <p style={{ color: '#334155', marginBottom: '1rem', lineHeight: '1.5' }}>{item.description}</p>
+                                    <p style={{ color: '#cbd5e1', marginBottom: '1rem', lineHeight: '1.5' }}>{item.description}</p>
 
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #334155', paddingTop: '1rem' }}>
                                         <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{new Date(item.created_at).toLocaleDateString()}</span>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <Button variant="ghost" size="sm" onClick={() => {

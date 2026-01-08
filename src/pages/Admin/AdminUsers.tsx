@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, User, Prohibit, Trash, MagnifyingGlass, DotsThree } from '@phosphor-icons/react';
+import { Check, User, Prohibit, Trash, MagnifyingGlass, DotsThree, CaretUp, CaretDown } from '@phosphor-icons/react';
 import Button from '../../components/Button';
 import PaginationControls from '../../components/PaginationControls';
 
@@ -13,6 +13,7 @@ const AdminUsers = () => {
     const [search, setSearch] = useState('');
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [filterRole, setFilterRole] = useState<FilterRole>('all');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     // Pagination State
     const [page, setPage] = useState(1);
@@ -26,18 +27,35 @@ const AdminUsers = () => {
             const from = (page - 1) * PAGE_SIZE;
             const to = from + PAGE_SIZE - 1;
 
-            let query = supabase
-                .from('profiles')
-                .select('*', { count: 'exact' })
-                .order('updated_at', { ascending: false })
-                .range(from, to);
+            let query;
+
+            if (filterRole === 'shop_owner') {
+                // Fetch from new shop_owners table
+                query = supabase
+                    .from('shop_owners')
+                    .select('*', { count: 'exact' })
+                    .order('created_at', { ascending: sortOrder === 'asc' })
+                    .range(from, to);
+            } else {
+                // Fetch from profiles
+                query = supabase
+                    .from('profiles')
+                    .select('*', { count: 'exact' })
+                    .order('created_at', { ascending: sortOrder === 'asc' })
+                    .range(from, to);
+
+                // Exclude shop owners from default views unless 'all' is explicitly mixed (users usually implies end-users)
+                // If filter is 'all', show regular users and admins only? 
+                // Creating a separate table implies separation. Let's exclude shop_owner from 'all'.
+                if (filterRole === 'all') {
+                    query = query.neq('role', 'shop_owner');
+                } else {
+                    query = query.eq('role', filterRole);
+                }
+            }
 
             if (search) {
                 query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
-            }
-
-            if (filterRole !== 'all') {
-                query = query.eq('role', filterRole);
             }
 
             const { data, error, count } = await query;
@@ -57,7 +75,7 @@ const AdminUsers = () => {
             fetchUsers();
         }, 300);
         return () => clearTimeout(timeoutId);
-    }, [search, page, filterRole]);
+    }, [search, page, filterRole, sortOrder]);
 
     // Reset page when filters change
     useEffect(() => {
@@ -197,7 +215,14 @@ const AdminUsers = () => {
                             <div>User</div>
                             <div>Email</div>
                             <div>Role</div>
-                            <div>Joined</div>
+                            <div
+                                onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', userSelect: 'none' }}
+                                title="Click to sort by date"
+                            >
+                                Joined
+                                {sortOrder === 'asc' ? <CaretUp size={14} weight="bold" /> : <CaretDown size={14} weight="bold" />}
+                            </div>
                             <div>Status</div>
                             <div style={{ textAlign: 'right' }}>Actions</div>
                         </div>
