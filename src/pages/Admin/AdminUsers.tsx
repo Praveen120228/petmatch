@@ -27,31 +27,14 @@ const AdminUsers = () => {
             const from = (page - 1) * PAGE_SIZE;
             const to = from + PAGE_SIZE - 1;
 
-            let query;
+            let query = supabase
+                .from('profiles')
+                .select('*', { count: 'exact' })
+                .order('created_at', { ascending: sortOrder === 'asc' })
+                .range(from, to);
 
-            if (filterRole === 'shop_owner') {
-                // Fetch from new shop_owners table
-                query = supabase
-                    .from('shop_owners')
-                    .select('*', { count: 'exact' })
-                    .order('created_at', { ascending: sortOrder === 'asc' })
-                    .range(from, to);
-            } else {
-                // Fetch from profiles
-                query = supabase
-                    .from('profiles')
-                    .select('*', { count: 'exact' })
-                    .order('created_at', { ascending: sortOrder === 'asc' })
-                    .range(from, to);
-
-                // Exclude shop owners from default views unless 'all' is explicitly mixed (users usually implies end-users)
-                // If filter is 'all', show regular users and admins only? 
-                // Creating a separate table implies separation. Let's exclude shop_owner from 'all'.
-                if (filterRole === 'all') {
-                    query = query.neq('role', 'shop_owner');
-                } else {
-                    query = query.eq('role', filterRole);
-                }
+            if (filterRole !== 'all') {
+                query = query.eq('role', filterRole);
             }
 
             if (search) {
