@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Suspense, lazy } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';

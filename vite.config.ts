@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // Use relative base path for maximum compatibility
+  base: '/', // Use absolute path for BrowserRouter compatibility
   build: {
     target: 'es2020',
     outDir: 'dist',
