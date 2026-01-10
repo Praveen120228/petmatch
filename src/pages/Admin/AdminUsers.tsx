@@ -30,7 +30,7 @@ const AdminUsers = () => {
             let query = supabase
                 .from('profiles')
                 .select('*', { count: 'exact' })
-                .order('created_at', { ascending: sortOrder === 'asc' })
+                .order('updated_at', { ascending: sortOrder === 'asc' })
                 .range(from, to);
 
             if (filterRole !== 'all') {
