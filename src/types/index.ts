@@ -1,5 +1,6 @@
 export interface Pet {
     id: number;
+    public_id?: string; // UUID for public URLs
     name: string;
     breed: string;
     age: string;

@@ -61,13 +61,17 @@ const AdminPets = () => {
             // We use a wildcard match or specific path construction. 
             // Ideally we store resource_id in analytics, but for now we parse path.
 
-            const path = `/pet/${petId}`;
+
+            // Actually, let's update call site to pass public_id
+            // For now, let's assume the argument passed IS the identifier used in URL. 
+            // In AdminPets, we will change the call to pass public_id.
+            const queryPath = `/pet/${petId}`;
 
             const { count, error } = await supabase
                 .from('analytics_events')
                 .select('*', { count: 'exact', head: true })
                 .eq('event_type', 'page_view')
-                .contains('payload', { path: path }); // JSONB containment for path
+                .contains('payload', { path: queryPath }); // JSONB containment for path
 
             if (error) {
                 // Fallback if containment fails (legacy data structure?)
@@ -97,7 +101,7 @@ const AdminPets = () => {
 
     useEffect(() => {
         if (selectedPet) {
-            fetchPetAnalytics(selectedPet.id);
+            fetchPetAnalytics(selectedPet.public_id || selectedPet.id);
         }
     }, [selectedPet]);
 

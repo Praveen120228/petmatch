@@ -45,7 +45,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hovere
                     display: 'block'
                 }}
             >
-                <Link to={`/pet/${pet.id}`} style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
+                <Link to={`/pet/${pet.public_id || pet.id}`} style={{ display: 'block', height: '100%', textDecoration: 'none' }}>
                     <div style={{ position: 'relative', height: '100%' }}>
 
                         {/* Image Loader / Skeleton Background */}

@@ -47,11 +47,17 @@ const PetProfile = () => {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            const petId = Number(id);
+            // 1. Fetch Pet by Public ID (UUID)
+            // The 'id' param from URL is now expected to be a UUID string (public_id)
+            const p = await petService.getPetByPublicId(id || '');
 
-            // 1. Fetch Pet
-            const p = await petService.getPet(petId);
+            if (!p) {
+                setLoading(false);
+                return;
+            }
+
             setPet(p);
+            const petId = p.id; // Internal ID for logic
 
             // 2. Fetch User Relations (if logged in)
             if (user) {
@@ -81,13 +87,17 @@ const PetProfile = () => {
             setLoading(false);
         };
         loadData();
+    }, [id, user]);
 
-        // Subscribe to updates for this pet
+    // Real-time subscription separately
+    useEffect(() => {
+        if (!pet?.id) return;
+
         const channel = supabase
-            .channel(`pet_${id}`)
+            .channel(`pet_${pet.id}`)
             .on(
                 'postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'pets', filter: `id=eq.${id}` },
+                { event: 'UPDATE', schema: 'public', table: 'pets', filter: `id=eq.${pet.id}` },
                 (payload) => {
                     setPet((current: any) => ({ ...current, ...payload.new }));
                 }
@@ -97,7 +107,7 @@ const PetProfile = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [id, user]);
+    }, [pet?.id]);
 
     if (loading) return <div style={{ padding: '4rem', textAlign: 'center' }}>Loading...</div>;
 
@@ -456,7 +466,7 @@ const PetProfile = () => {
                             <div>
                                 <h2 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{pet.name}</h2>
                                 {datingInfo?.partner ? (
-                                    <Link to={`/pet/${datingInfo.partner.id}`} style={{
+                                    <Link to={`/pet/${datingInfo.partner.public_id || datingInfo.partner.id}`} style={{
                                         display: 'inline-flex', alignItems: 'center', gap: '6px',
                                         marginTop: '0.75rem', background: '#fff1f2', color: '#e11d48',
                                         padding: '4px 12px 4px 6px', borderRadius: '20px', fontSize: '0.9rem', fontWeight: 800,

@@ -5,7 +5,7 @@ export const petService = {
     async getAllPets(currentUserId: string): Promise<Pet[]> {
         const { data, error } = await supabase
             .from('pets')
-            .select('*, partner_pet_id')
+            .select('*, public_id, partner_pet_id')
             .neq('owner_id', currentUserId);
 
         if (error) {
@@ -38,7 +38,7 @@ export const petService = {
         let query = supabase
             .from('pets')
             .select(`
-                id, name, image, breed, age, gender, type, distance, owner_id, partner_pet_id,
+                id, public_id, name, image, breed, age, gender, type, distance, owner_id, partner_pet_id,
                 owner_profile:profiles!owner_id(location, country, state, latitude, longitude, show_location, username, avatar_url)
             `, { count: 'exact' })
             .neq('owner_id', currentUserId)
@@ -155,6 +155,20 @@ export const petService = {
                 owner_profile:profiles!owner_id(name, location, latitude, longitude, show_location, avatar_url, username)
             `)
             .eq('id', id)
+            .single();
+
+        if (error) return null;
+        return data as Pet;
+    },
+
+    async getPetByPublicId(publicId: string): Promise<Pet | null> {
+        const { data, error } = await supabase
+            .from('pets')
+            .select(`
+                *,
+                owner_profile:profiles!owner_id(name, location, latitude, longitude, show_location, avatar_url, username)
+            `)
+            .eq('public_id', publicId)
             .single();
 
         if (error) return null;

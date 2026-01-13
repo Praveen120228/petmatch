@@ -1188,7 +1188,7 @@ const Profile = () => {
                                                 position: 'relative',
                                                 display: 'block'
                                             }}>
-                                                <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                                <Link to={`/pet/${pet.public_id || pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                                     <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
                                                 </Link>
@@ -1343,7 +1343,7 @@ const Profile = () => {
                                             position: 'relative',
                                             display: 'block'
                                         }}>
-                                            <Link to={`/pet/${pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                            <Link to={`/pet/${pet.public_id || pet.id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                                 <img src={pet.image} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
                                             </Link>
@@ -1582,7 +1582,7 @@ const Profile = () => {
 
                                                                 {/* Content */}
                                                                 <div style={{ position: 'absolute', bottom: '24px', left: '20px', right: '20px', zIndex: 10, pointerEvents: 'none' }}>
-                                                                    <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', pointerEvents: 'auto' }}>
+                                                                    <Link to={`/pet/${pet.public_id || pet.id}`} style={{ textDecoration: 'none', pointerEvents: 'auto' }}>
                                                                         <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                                                                             {pet.gender || 'Unknown'}
                                                                         </div>
