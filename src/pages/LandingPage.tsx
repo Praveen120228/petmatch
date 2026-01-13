@@ -226,10 +226,22 @@ const LandingPage = () => {
                     <PawPrint size={24} weight="fill" color="var(--primary)" />
                     <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gray-900)' }}>Specyf</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
-                    {['About', 'Safety', 'Guidelines', 'Support'].map(link => (
-                        <Link key={link} to={`/${link.toLowerCase()}`} style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>{link}</Link>
-                    ))}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                    <Link to="/about" style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>About</Link>
+                    <Link to="/safety" style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>Safety</Link>
+                    <Link to="/guidelines" style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>Guidelines</Link>
+                    <Link to="/support" style={{ color: 'var(--gray-600)', textDecoration: 'none' }}>Help</Link>
+                    <Link to="/support-us" style={{
+                        color: 'var(--primary-600)',
+                        textDecoration: 'none',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        <Heart weight="fill" size={16} />
+                        Support Us
+                    </Link>
                 </div>
                 <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>&copy; {new Date().getFullYear()} Specyf. All rights reserved.</p>
             </footer>

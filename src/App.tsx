@@ -23,6 +23,7 @@ const About = lazy(() => import('./pages/About'));
 const Safety = lazy(() => import('./pages/Safety'));
 const Guidelines = lazy(() => import('./pages/Guidelines'));
 const Support = lazy(() => import('./pages/Support'));
+const SupportUs = lazy(() => import('./pages/SupportUs'));
 
 // Protected Pages
 const Onboarding = lazy(() => import('./pages/Onboarding'));
@@ -124,6 +125,7 @@ function App() {
                       <Route path="/safety" element={<Safety />} />
                       <Route path="/guidelines" element={<Guidelines />} />
                       <Route path="/support" element={<Support />} />
+                      <Route path="/support-us" element={<SupportUs />} />
 
                       {/* Protected User Routes */}
                       <Route element={<ProtectedRoute />}>
