@@ -139,11 +139,13 @@ const Onboarding = () => {
             await updateUser({
                 username: username,
                 name: name,
-                image: image || undefined
+                image: image || undefined,
+                phone_number: phoneNumber,
+                location: location
             });
 
             // Navigate immediately
-            navigate('/profile');
+            navigate('/match');
 
         } catch (error) {
             console.error("Error updating profile:", error);

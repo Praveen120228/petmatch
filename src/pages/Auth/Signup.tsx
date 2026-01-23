@@ -142,9 +142,21 @@ const Signup = () => {
                     fullWidth
                     size="lg"
                     onClick={handleGoogleLogin}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.75rem',
+                        backgroundColor: '#fff',
+                        borderColor: '#e2e8f0',
+                        color: '#1e293b',
+                        padding: '0.75rem',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        transition: 'all 0.2s',
+                        fontWeight: 600
+                    }}
                 >
-                    <GoogleLogo size={20} weight="bold" />
+                    <GoogleLogo size={20} weight="bold" color="#DB4437" />
                     Sign up with Google
                 </Button>
 

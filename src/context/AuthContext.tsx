@@ -8,6 +8,8 @@ interface User {
     email: string;
     image?: string;
     username?: string;
+    phone_number?: string;
+    location?: string;
     role?: 'user' | 'shop_owner' | 'admin';
 }
 
@@ -116,6 +118,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     email: data.email,
                     image: data.avatar_url,
                     username: data.username,
+                    phone_number: data.phone_number,
+                    location: data.location,
                     role: data.role as 'user' | 'shop_owner' | 'admin'
                 });
 
@@ -126,6 +130,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     email: data.email,
                     image: data.avatar_url,
                     username: data.username,
+                    phone_number: data.phone_number,
+                    location: data.location,
                     role: data.role
                 }));
 
@@ -223,6 +229,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (data.name) updates.name = data.name;
         if (data.username) updates.username = data.username;
         if (data.image) updates.avatar_url = data.image;
+        if (data.phone_number) updates.phone_number = data.phone_number;
+        if (data.location) updates.location = data.location;
 
         const { error } = await supabase
             .from('profiles')

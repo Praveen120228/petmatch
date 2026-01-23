@@ -105,6 +105,11 @@ function App() {
               <ErrorBoundary>
                 <Suspense fallback={<LoadingFallback />}>
                   <Routes>
+                    {/* Isolated Protected Routes (No Navbar) */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/onboarding" element={<Onboarding />} />
+                    </Route>
+
                     {/* Main Website Layout */}
                     <Route element={<Layout><Outlet /></Layout>}>
                       {/* Public Routes */}
@@ -129,7 +134,6 @@ function App() {
 
                       {/* Protected User Routes */}
                       <Route element={<ProtectedRoute />}>
-                        <Route path="/onboarding" element={<Onboarding />} />
                         <Route path="/add-pet" element={<AddPet />} />
                         <Route path="/match" element={<MatchFeed />} />
                         <Route path="/explore" element={<Explore />} />
