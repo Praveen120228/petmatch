@@ -132,6 +132,12 @@ const Login = () => {
 
                 </form>
 
+                <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '0.5rem' }}>
+                    <Link to="/forgot-password" style={{ color: 'var(--primary-600)', fontSize: '0.875rem', fontWeight: 500 }}>
+                        Forgot Password?
+                    </Link>
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
                     <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }}></div>
                     <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>OR</span>

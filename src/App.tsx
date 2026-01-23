@@ -13,6 +13,8 @@ import { CircleNotch } from '@phosphor-icons/react';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Login = lazy(() => import('./pages/Auth/Login'));
 const Signup = lazy(() => import('./pages/Auth/Signup'));
+const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
+const UpdatePassword = lazy(() => import('./pages/Auth/UpdatePassword'));
 const ShopsList = lazy(() => import('./pages/ShopsList'));
 const ShopDetails = lazy(() => import('./pages/ShopDetails'));
 const ShopLanding = lazy(() => import('./pages/Shop/ShopLanding'));
@@ -116,7 +118,10 @@ function App() {
                       <Route path="/" element={<LandingPage />} />
                       <Route path="/shops" element={<ShopsList />} />
                       <Route path="/shops/:id" element={<ShopDetails />} />
+                      <Route path="/shops/:id" element={<ShopDetails />} />
                       <Route path="/login" element={<Login />} />
+                      <Route path="/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/update-password" element={<UpdatePassword />} />
 
                       {/* Public Business Landing */}
                       <Route path="/for-pet-businesses" element={<ShopLanding />} />

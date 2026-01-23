@@ -19,6 +19,8 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     signup: (name: string, email: string, password: string, role?: 'user' | 'shop_owner' | 'admin') => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
     loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+    resetPasswordForEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
+    updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
     updateUser: (data: Partial<User>) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
@@ -173,6 +175,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: true };
     };
 
+    const resetPasswordForEmail = async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/update-password`,
+        });
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+        return { success: true };
+    };
+
+    const updatePassword = async (password: string) => {
+        const { error } = await supabase.auth.updateUser({ password });
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+        return { success: true };
+    };
+
     const signup = async (name: string, email: string, password: string, role: 'user' | 'shop_owner' | 'admin' = 'user') => {
         const { data, error } = await supabase.auth.signUp({
             email,
@@ -254,7 +276,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginWithGoogle, signup, logout, updateUser, loading }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginWithGoogle, signup, logout, updateUser, resetPasswordForEmail, updatePassword, loading }}>
             {loading ? (
                 <div style={{
                     height: '100vh',
