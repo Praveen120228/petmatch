@@ -3,13 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { PawPrint } from '@phosphor-icons/react';
+import { PawPrint, GoogleLogo } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login, isAuthenticated } = useAuth();
+    const { login, loginWithGoogle, isAuthenticated } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -54,6 +54,19 @@ const Login = () => {
 
         } catch (err) {
             console.error('Login error:', err);
+            alert('An unexpected error occurred');
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        try {
+            const { success, error } = await loginWithGoogle();
+            if (!success) {
+                alert(error || 'Google Login failed');
+            }
+            // Successful OAuth redirect happens automatically, no need to navigate here
+        } catch (err) {
+            console.error('Google login error:', err);
             alert('An unexpected error occurred');
         }
     };
@@ -116,7 +129,26 @@ const Login = () => {
                     <Button type="submit" fullWidth size="lg" style={{ marginTop: '0.5rem' }}>
                         Log In
                     </Button>
+
                 </form>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }}></div>
+                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>OR</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }}></div>
+                </div>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    fullWidth
+                    size="lg"
+                    onClick={handleGoogleLogin}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                >
+                    <GoogleLogo size={20} weight="bold" />
+                    Sign in with Google
+                </Button>
 
                 <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
                     Don't have an account? <Link to="/signup" style={{ color: 'var(--color-accent)', fontWeight: 600 }}>Sign Up</Link>

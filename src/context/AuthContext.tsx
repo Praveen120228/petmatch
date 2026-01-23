@@ -16,6 +16,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     signup: (name: string, email: string, password: string, role?: 'user' | 'shop_owner' | 'admin') => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
+    loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
     updateUser: (data: Partial<User>) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
@@ -152,6 +153,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: true };
     };
 
+    const loginWithGoogle = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/match`
+            }
+        });
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+        return { success: true };
+    };
+
     const signup = async (name: string, email: string, password: string, role: 'user' | 'shop_owner' | 'admin' = 'user') => {
         const { data, error } = await supabase.auth.signUp({
             email,
@@ -231,7 +246,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, signup, logout, updateUser, loading }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginWithGoogle, signup, logout, updateUser, loading }}>
             {loading ? (
                 <div style={{
                     height: '100vh',

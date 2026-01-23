@@ -8,7 +8,6 @@ import { celebrateSuccess } from '../utils/delight';
 const SupportUs = () => {
     const navigate = useNavigate();
     const [amount, setAmount] = useState<number | string>(25);
-    const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
     const donationOptions = [
@@ -18,13 +17,42 @@ const SupportUs = () => {
         { value: 'custom', label: 'Custom', desc: 'Every bit helps' }
     ];
 
-    const handleSupport = async () => {
-        setIsProcessing(true);
-        // Simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setIsProcessing(false);
-        setIsSuccess(true);
-        celebrateSuccess();
+    const handleSupport = () => {
+        if (typeof (window as any).Razorpay === 'undefined') {
+            alert('Razorpay SDK failed to load. Please check your connection.');
+            return;
+        }
+
+        const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Use env var or placeholder
+            amount: Number(amount) * 100, // Amount in paise
+            currency: 'INR',
+            name: 'Specyf',
+            description: 'Support Pet Community Development',
+            image: '/logo.svg',
+            handler: function (response: any) {
+                console.log('Payment Success:', response.razorpay_payment_id);
+                setIsSuccess(true);
+                celebrateSuccess();
+            },
+            prefill: {
+                name: '',
+                email: '',
+                contact: ''
+            },
+            notes: {
+                address: 'Specyf Community Support'
+            },
+            theme: {
+                color: '#8b5cf6' // matches var(--primary-500)
+            }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', function (response: any) {
+            alert('Payment Failed: ' + response.error.description);
+        });
+        rzp.open();
     };
 
     if (isSuccess) {
@@ -231,8 +259,7 @@ const SupportUs = () => {
                             fullWidth
                             icon={<Coins weight="fill" />}
                             onClick={handleSupport}
-                            loading={isProcessing}
-                            disabled={!amount || isProcessing}
+                            disabled={!amount}
                             style={{ borderRadius: '16px', height: '60px', fontSize: '1.1rem', fontWeight: 800 }}
                         >
                             Wire Funds to Specyf
