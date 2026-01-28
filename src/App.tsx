@@ -55,7 +55,8 @@ const AdminBookings = lazy(() => import('./pages/Admin/AdminBookings'));
 const AdminPets = lazy(() => import('./pages/Admin/AdminPets'));
 const AdminReports = lazy(() => import('./pages/Admin/AdminReports'));
 const AdminAnalytics = lazy(() => import('./pages/Admin/AdminAnalytics'));
-const AdminFeedback = lazy(() => import('./pages/Admin/AdminFeedback')); // Add AdminFeedback Import
+const AdminFeedback = lazy(() => import('./pages/Admin/AdminFeedback'));
+const VectorBackfill = lazy(() => import('./pages/Admin/VectorBackfill'));
 const ShopSignup = lazy(() => import('./pages/Shop/Auth/ShopSignup'));
 
 // Loading Fallback
@@ -174,7 +175,8 @@ function App() {
                       <Route path="reports" element={<AdminReports />} />
                       <Route path="reports" element={<AdminReports />} />
                       <Route path="analytics" element={<AdminAnalytics />} />
-                      <Route path="feedback" element={<AdminFeedback />} /> {/* Add Route */}
+                      <Route path="feedback" element={<AdminFeedback />} />
+                      <Route path="vectors" element={<VectorBackfill />} />
                     </Route>
 
                     {/* Shop Auth Routes */}

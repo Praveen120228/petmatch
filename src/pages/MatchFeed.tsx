@@ -11,6 +11,7 @@ import { petService } from '../lib/petService';
 import { userService } from '../lib/userService';
 import { PET_TYPES, BREEDS } from '../data/breeds';
 import PetCardSkeleton from '../components/PetCardSkeleton';
+import { recommendationService, type InteractionType } from '../lib/recommendationService';
 
 
 const useWindowSize = () => {
@@ -356,6 +357,12 @@ const MatchFeed = () => {
             showToast("Failed to update like", "error");
         }
     };
+    const handleInteraction = async (type: string, petId: number, meta?: any) => {
+        if (!user) return;
+        // Don't await this, let it happen in background
+        recommendationService.trackInteraction(user.id, petId, type as InteractionType, meta);
+    };
+
 
 
 
@@ -811,6 +818,7 @@ const MatchFeed = () => {
                                         onLike={(e) => handleLike(e, pet)}
                                         hoveredId={hoveredId}
                                         setHoveredId={setHoveredId}
+                                        onInteraction={(type, meta) => handleInteraction(type, pet.id, meta)}
                                     />
                                 ))}
                                 {isFetchingNextPage && (

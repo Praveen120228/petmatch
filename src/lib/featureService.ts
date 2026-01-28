@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { recommendationService } from './recommendationService';
 
 export interface Collection {
     id: number;
@@ -44,6 +45,20 @@ export const featureService = {
                 .from('likes')
                 .insert({ user_id: userId, pet_id: petId });
             if (error) throw error;
+
+            // Track Interaction for Algorithm
+            // We use import() dynamically if needed to avoid circles, but we removed the circle.
+            // However, to be extra safe since they are in same folder, let's keep it simple.
+            // Actually, I need to add the import at top.
+            // But since I can't edit top + middle easily with one replace_file_content unless I do multi.
+            // I'll assume I can add the import. Wait, I should use multi_replace for that.
+            // Or just use the tracking logic directly here or via a decoupled way.
+            // I'll just insert to interactions table directly here to avoid circular dep risks or needing to edit imports far away.
+            // Actually, best practice is to use the service.
+
+            // To avoid complex edits, I will use multi_replace to add import and update function.
+            await recommendationService.trackInteraction(userId, petId, 'like');
+
             return true;
         }
     },

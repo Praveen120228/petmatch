@@ -1,142 +1,98 @@
 import { supabase } from './supabase';
-import { featureService } from './featureService';
-import { getDistance } from '../utils/distance';
+import { embeddingService } from './embeddingService';
 
-interface Pet {
-    id: number;
-    owner_id: string;
-    name: string;
-    breed: string | null;
-    age: string | null;
-    gender: string | null;
-    image: string | null;
-    images: string[] | null;
-    bio: string | null;
-    traits: string[] | null;
-    distance: string | null; // This is the stored string, not calculated numeric distance
-    latitude?: number;
-    longitude?: number;
-    owner_profile?: {
-        latitude?: number;
-        longitude?: number;
-    };
-}
-
-interface UserPreferences {
-    likedBreeds: Record<string, number>;
-    likedTraits: Record<string, number>;
-}
+export type InteractionType = 'like' | 'save' | 'swipe_right' | 'swipe_left' | 'apply' | 'share' | 'view' | 'dwell';
 
 export const recommendationService = {
-    async getRecommendations(userId: string, userLocation: { lat: number; lng: number } | null, limit: number = 5): Promise<Pet[]> {
-        // 1. Fetch User History (Likes)
-        const likedPetIds = await featureService.getLikes(userId);
+    // Call the server-side scoring algorithm
+    async getRecommendations(
+        userId: string,
+        limit: number = 20,
+        offset: number = 0,
+        filters: any = {}
+    ) {
+        // Phase 2: Calculate Semantic Taste Vector
+        // 1. Fetch text descriptions of pets the user liked
+        // Note: For MVP we do this client side on load. In prod, this should be a background job.
+        let queryEmbedding = null;
+        try {
+            const { data: likedPets } = await supabase
+                .from('interactions')
+                .select('pet:pet_id(bio, breed, traits)')
+                .eq('user_id', userId)
+                .in('interaction_type', ['like', 'save', 'apply'])
+                .limit(5); // Take last 5 likes to form a quick taste profile
 
-        if (likedPetIds.length === 0) {
-            // New user or no history: Return random popular pets or recent ones
-            // For now, just return recent pets excluding own
-            const { data: randomPets } = await supabase
-                .from('pets')
-                .select('*, owner_profile:owner_id(latitude, longitude)')
-                .neq('owner_id', userId)
-                .eq('status', 'available')
-                .limit(limit);
-            return randomPets || [];
+            if (likedPets && likedPets.length > 0) {
+                // creating a "Taste String" to embed
+                const tasteText = likedPets
+                    .map((item: any) => `${item.pet.breed} ${item.pet.traits?.join(' ')} ${item.pet.bio}`)
+                    .join(' . ');
+
+                if (tasteText.length > 10) {
+                    queryEmbedding = await embeddingService.generateEmbedding(tasteText);
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to generate taste vector:", e);
         }
 
-        // 2. Fetch Liked Pets details to build preferences
-        const { data: likedPets } = await supabase
-            .from('pets')
-            .select('breed, traits')
-            .in('id', likedPetIds);
-
-        if (!likedPets) return [];
-
-        const preferences: UserPreferences = {
-            likedBreeds: {},
-            likedTraits: {}
-        };
-
-        likedPets.forEach(pet => {
-            if (pet.breed) {
-                preferences.likedBreeds[pet.breed] = (preferences.likedBreeds[pet.breed] || 0) + 1;
-            }
-            if (pet.traits && Array.isArray(pet.traits)) {
-                pet.traits.forEach((trait: string) => {
-                    preferences.likedTraits[trait] = (preferences.likedTraits[trait] || 0) + 1;
-                });
-            }
+        const { data, error } = await supabase.rpc('get_match_recommendations', {
+            p_user_id: userId,
+            p_limit: limit,
+            p_offset: offset,
+            p_filters: filters,
+            p_query_embedding: queryEmbedding // Pass vector to RPC
         });
 
-        // 3. Fetch Candidates (Exclude liked and own pets)
-        // Note: In a real large-scale app, we wouldn't fetch *all* candidates. 
-        // We'd filter by breed first or use a specialized search engine.
-        // For this scale, fetching ~100 potential matches to rank is fine.
-        const { data: candidates } = await supabase
-            .from('pets')
-            .select('*, owner_profile:owner_id(latitude, longitude)')
-            .neq('owner_id', userId)
-            .eq('status', 'available')
-            .not('id', 'in', `(${likedPetIds.join(',')})`)
-            .limit(50); // Pool of candidates to rank
+        if (error) {
+            console.error('Error fetching recommendations:', error);
+            return [];
+        }
 
-        if (!candidates) return [];
-
-        // 4. Score Candidates
-        const scoredPets = candidates.map(pet => {
-            const score = this.calculateScore(pet, preferences, userLocation);
-            return { ...pet, score };
-        });
-
-        // 5. Rank and Return
-        scoredPets.sort((a, b) => b.score - a.score);
-
-        return scoredPets.slice(0, limit);
+        return data || [];
     },
 
-    calculateScore(pet: Pet, preferences: UserPreferences, userLocation: { lat: number; lng: number } | null): number {
-        let score = 0;
+    // Log user signals for the algorithm to learn
+    async trackInteraction(
+        userId: string,
+        petId: number,
+        type: InteractionType,
+        meta: any = {}
+    ) {
+        // Define weights locally or let DB handle defaults. 
+        // We'll pass explicit weights for clarity here.
+        const weights: Record<InteractionType, number> = {
+            apply: 10,
+            save: 5,
+            share: 4,
+            like: 3,
+            swipe_right: 2,
+            dwell: 1,
+            view: 1,
+            swipe_left: -1
+        };
 
-        // Breed Match (+5 per historic like of this breed)
-        // We can cap this or use log scale if needed, but linear is fine for now
-        if (pet.breed && preferences.likedBreeds[pet.breed]) {
-            score += 5 * preferences.likedBreeds[pet.breed];
-        }
+        const duration = meta.duration || 0;
 
-        // Trait Match (+1 per matching trait instance)
-        if (pet.traits && Array.isArray(pet.traits)) {
-            pet.traits.forEach(trait => {
-                if (preferences.likedTraits[trait]) {
-                    score += 1 * preferences.likedTraits[trait];
-                }
+        // For 'dwell', we might want to cap weight or specific logic
+        let weight = weights[type] || 0;
+        if (type === 'dwell' && duration > 30) weight = 2; // Boost for long dwell
+
+        const { error } = await supabase
+            .from('interactions')
+            .insert({
+                user_id: userId,
+                pet_id: petId,
+                interaction_type: type,
+                weight: weight,
+                duration: duration,
+                meta: meta
             });
+
+        if (error) {
+            // Non-blocking error logging
+            console.warn('Failed to track interaction:', error.message);
         }
-
-        // Proximity Boost (+3 if < 10km)
-        if (userLocation && pet.owner_profile?.latitude && pet.owner_profile?.longitude) {
-            const distStr = getDistance(
-                userLocation.lat,
-                userLocation.lng,
-                pet.owner_profile.latitude,
-                pet.owner_profile.longitude
-            );
-
-            if (distStr) {
-                // getDistance returns string like "5 km" or "< 1 km"
-                // Parse it roughly
-                let distVal = 100; // Default high
-                if (distStr.includes('<')) {
-                    distVal = 0.5;
-                } else {
-                    distVal = parseFloat(distStr);
-                }
-
-                if (distVal <= 10) {
-                    score += 3;
-                }
-            }
-        }
-
-        return score;
     }
 };

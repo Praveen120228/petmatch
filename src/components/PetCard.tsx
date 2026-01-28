@@ -11,14 +11,59 @@ interface PetCardProps {
     onLike: (e: React.MouseEvent) => void;
     hoveredId: string | null;
     setHoveredId: (id: string | null) => void;
+    onInteraction?: (type: string, meta?: any) => void;
 }
 
-const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hoveredId, setHoveredId }) => {
+const PetCard: React.FC<PetCardProps> = ({ pet, userLoc, isLiked, onLike, hoveredId, setHoveredId, onInteraction }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const isHovered = hoveredId === pet.id;
+    const cardRef = React.useRef<HTMLDivElement>(null);
+    const dwellTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+    const hasViewedRef = React.useRef(false);
+
+    // Track View & Dwell
+    React.useEffect(() => {
+        if (!cardRef.current) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Track View (Once per session)
+                        if (!hasViewedRef.current && onInteraction) {
+                            onInteraction('view');
+                            hasViewedRef.current = true;
+                        }
+
+                        // Start Dwell Timer
+                        if (!dwellTimerRef.current && onInteraction) {
+                            dwellTimerRef.current = setTimeout(() => {
+                                onInteraction('dwell', { duration: 3 }); // Log 3s dwell
+                            }, 3000);
+                        }
+                    } else {
+                        // Clear Dwell Timer if scrolled away
+                        if (dwellTimerRef.current) {
+                            clearTimeout(dwellTimerRef.current);
+                            dwellTimerRef.current = null;
+                        }
+                    }
+                });
+            },
+            { threshold: 0.6 } // 60% visibility required
+        );
+
+        observer.observe(cardRef.current);
+
+        return () => {
+            observer.disconnect();
+            if (dwellTimerRef.current) clearTimeout(dwellTimerRef.current);
+        };
+    }, [pet.id]); // Re-run if pet changes (e.g. valid recycling)
 
     return (
         <div
+            ref={cardRef}
             onMouseEnter={() => setHoveredId(pet.id)}
             onMouseLeave={() => setHoveredId(null)}
             style={{
